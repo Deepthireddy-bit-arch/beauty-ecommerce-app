@@ -914,7 +914,7 @@ const Newsletter = () => {
       <div style={{maxWidth:560,margin:"0 auto",textAlign:"center",position:"relative",zIndex:1}}>
         <div style={{fontSize:48,marginBottom:14}}>💌</div>
         <h2 className="display-serif" style={{fontSize:"clamp(1.8rem,3vw,2.5rem)",color:"var(--text-dark)",marginBottom:12}}>
-          Get Beauty <span className="gradient-text">Secrets & Deals</span>
+          Get Beauty products <span className="gradient-text">Secrets & Deals</span>
         </h2>
         <p style={{color:"var(--text-muted)",marginBottom:32,fontSize:15,lineHeight:1.75}}>Subscribe for exclusive offers, new arrivals, and expert beauty tips delivered weekly.</p>
         {!sent ? (
