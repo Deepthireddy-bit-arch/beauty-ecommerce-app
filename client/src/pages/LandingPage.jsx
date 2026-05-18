@@ -4,6 +4,10 @@ import { Link } from "react-router-dom";
 import { addToCart, removeFromCart } from "../redux/slices/cartSlice";
 import { toggleWishlist } from "../redux/slices/wishlistSlice";
 import { hideToast, setCategory, showToast, toggleCart } from "../redux/slices/uiSlice";
+import hero1 from '../assets/hero1.png';
+import hero2 from '../assets/hero2.png';
+import hero3 from '../assets/hero1.png';
+import beautyVideo from "../assets/beauty-video.mp4";
 
 /* ─────────────────────────────────────────────
    GLOBAL CSS
@@ -211,37 +215,39 @@ const BRAND_DISCOUNTS = ["Up to 60% off","Up to 40% off","Up to 70% off","Min 40
 // Hero carousel slides — emoji placeholders for where real photos/videos would go
 const HERO_SLIDES = [
   {
-    tag:"New Arrivals 2025",
-    title:"Unveil Your",
-    highlight:"Inner Radiance",
-    sub:"Premium beauty curated for every skin tone and type. 200+ brands, endless glow.",
-    cta:"Explore Collection",
-    bg:"linear-gradient(135deg, #f0e9ff 0%, #e4d5ff 60%, #c9b3f5 100%)",
-    accent:"#7c3aed",
-    visual:"💄",
-    visualBg:"linear-gradient(135deg,#7c3aed22,#d946a833)",
+    type: "image",
+    media: hero1,
+    title: "Glow Naturally",
+    subtitle:
+      "Discover luxury skincare and beauty essentials crafted for radiant confidence.",
+    button: "Shop Now",
   },
+
   {
-    tag:"Skincare Edit",
-    title:"Luxury Skincare",
-    highlight:"For Every Skin",
-    sub:"Science-backed formulas with natural botanicals. Your daily ritual, elevated.",
-    cta:"Shop Skincare",
-    bg:"linear-gradient(135deg, #faf9fc 0%, #f0e9ff 60%, #e4d5ff 100%)",
-    accent:"#4c1d95",
-    visual:"✨",
-    visualBg:"linear-gradient(135deg,#4c1d9522,#7c3aed44)",
+    type: "video",
+    media: beautyVideo,
+    title: "Beauty Redefined",
+    subtitle:
+      "Experience premium beauty products designed for every skin tone and style.",
+    button: "Explore Collection",
   },
+
   {
-    tag:"Makeup Drop",
-    title:"Bold Colors,",
-    highlight:"Bold You",
-    sub:"Makeup that celebrates your unique beauty story. Express, don't conform.",
-    cta:"Shop Makeup",
-    bg:"linear-gradient(135deg, #fff0fa 0%, #f0e9ff 60%, #e4d5ff 100%)",
-    accent:"#d946a8",
-    visual:"🌸",
-    visualBg:"linear-gradient(135deg,#d946a822,#7c3aed33)",
+    type: "image",
+    media: hero2,
+    title: "Luxury Makeup Collection",
+    subtitle:
+      "Elevate your everyday look with our bestselling makeup products.",
+    button: "Discover More",
+  },
+
+  {
+    type: "image",
+    media: hero3,
+    title: "Skincare That Loves You Back",
+    subtitle:
+      "Hydrate, nourish, and glow with dermatologist-approved skincare.",
+    button: "View Products",
   },
 ];
 
@@ -265,6 +271,48 @@ const FEATURES = [
   {icon:"🔒",title:"Secure Payment", desc:"100% secure checkout with PCI-DSS compliance.",                  bg:"#f0e9ff"},
   {icon:"💯",title:"100% Authentic", desc:"All products sourced directly from authorised distributors.",     bg:"#fff8e6"},
 ];
+const IMAGE_CARDS = [
+  {
+    id: 1,
+    image:
+      "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200&auto=format&fit=crop",
+    title: "Luxury Lipsticks",
+    offer: "Up To 40% Off",
+    sub: "Matte • Glossy • Nude Shades",
+    btn: "Shop Now",
+  },
+
+  {
+    id: 2,
+    image:
+      "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1200&auto=format&fit=crop",
+    title: "Makeup Essentials",
+    offer: "Flat 50% Off",
+    sub: "Trending Beauty Collection",
+    btn: "Explore",
+  },
+
+  {
+    id: 3,
+    image:
+      "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=1200&auto=format&fit=crop",
+    title: "Skincare Sale",
+    offer: "Buy 1 Get 1",
+    sub: "Glow Boosting Products",
+    btn: "Shop Sale",
+  },
+
+  {
+    id: 4,
+    image:
+      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=1200&auto=format&fit=crop",
+    title: "Premium Beauty",
+    offer: "Up To 60% Off",
+    sub: "Exclusive Brand Offers",
+    btn: "Grab Deal",
+  },
+];
+
 
 /* ─────────────────────────────────────────────
    HELPERS
@@ -388,149 +436,242 @@ const Navbar = () => {
    HERO CAROUSEL (auto-play, supports photos/videos)
 ───────────────────────────────────────────── */
 const HeroCarousel = () => {
-  const [idx, setIdx] = useState(0);
-  const [animating, setAnimating] = useState(false);
-  const timerRef = useRef(null);
+  const [current, setCurrent] = useState(0);
 
-  const goTo = (i) => {
-    if (animating || i === idx) return;
-    setAnimating(true);
-    setIdx(i);
-    setTimeout(() => setAnimating(false), 700);
-  };
-
+  // AUTO SLIDE
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setIdx(p => (p + 1) % HERO_SLIDES.length);
-    }, 5500);
-    return () => clearInterval(timerRef.current);
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  const s = HERO_SLIDES[idx];
+  const nextSlide = () => {
+    setCurrent((prev) => (prev + 1) % HERO_SLIDES.length);
+  };
+
+  const prevSlide = () => {
+    setCurrent(
+      (prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length
+    );
+  };
+
+  const slide = HERO_SLIDES[current];
 
   return (
-    <section style={{
-      marginTop:68, /* navbar height */
-      minHeight:"92vh",
-      background: s.bg,
-      transition:"background 1.2s ease",
-      position:"relative",
-      overflow:"hidden",
-      display:"flex",
-      alignItems:"center",
-    }}>
-      {/* Decorative blobs */}
-      <div style={{position:"absolute",width:600,height:600,borderRadius:"50%",background:"rgba(124,58,237,0.07)",top:"-15%",right:"-8%",filter:"blur(100px)",pointerEvents:"none"}}/>
-      <div style={{position:"absolute",width:300,height:300,borderRadius:"50%",background:"rgba(217,70,168,0.06)",bottom:"5%",left:"5%",filter:"blur(80px)",pointerEvents:"none"}}/>
+    <section
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100vh",
+        overflow: "hidden",
+      }}
+    >
+      {/* BACKGROUND MEDIA */}
+      {slide.type === "video" ? (
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          src={slide.media}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+      ) : (
+        <img
+          src={slide.media}
+          alt="Beauty Banner"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+      )}
 
-      {/* Slide content */}
-      <div style={{maxWidth:1280,margin:"0 auto",padding:"60px 40px",width:"100%",display:"grid",gridTemplateColumns:"1fr 1fr",gap:60,alignItems:"center"}}>
-        {/* Left: copy */}
-        <div key={idx} style={{animation:"fade-up 0.7s ease forwards"}}>
-          <div className="tag-pill" style={{marginBottom:24}}>✦ {s.tag}</div>
-          <h1 style={{
-            fontSize:"clamp(3rem,6vw,5.5rem)",
-            lineHeight:1.05,
-            marginBottom:22,
-            color:"var(--text-dark)",
-            fontWeight:700,
-          }}>
-            {s.title}<br/>
-            <span className="gradient-text">{s.highlight}</span>
-          </h1>
-          <p style={{fontSize:17,color:"var(--text-mid)",marginBottom:38,lineHeight:1.75,maxWidth:480,fontWeight:400}}>{s.sub}</p>
-          <div style={{display:"flex",gap:14,flexWrap:"wrap",marginBottom:52}}>
-            <button className="btn-primary-purple">🛍 {s.cta}</button>
-            <button className="btn-outline-purple">Watch Story ▶</button>
-          </div>
-          {/* Stats */}
-          <div style={{display:"flex",gap:40,flexWrap:"wrap"}}>
-            {[["50K+","Happy Customers"],["200+","Premium Brands"],["4.9★","Avg Rating"]].map(([n,l]) => (
-              <div key={l}>
-                <div style={{fontSize:24,fontWeight:700,color:"var(--purple-deep)",fontFamily:"Cormorant Garamond"}}>{n}</div>
-                <div style={{fontSize:12,color:"var(--text-muted)",fontWeight:500,marginTop:2}}>{l}</div>
-              </div>
-            ))}
-          </div>
+      {/* DARK OVERLAY */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.2))",
+        }}
+      />
+
+
+       <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "8%",
+          transform: "translateY(-50%)",
+          zIndex: 10,
+          color: "white",
+          maxWidth: "600px",
+        }}
+      >
+        <p
+          style={{
+            fontSize: "14px",
+            letterSpacing: "3px",
+            textTransform: "uppercase",
+            marginBottom: "18px",
+            color: "#f8d7da",
+          }}
+        >
+          Premium Beauty Collection
+        </p>
+
+        <h1
+          style={{
+            fontSize: "clamp(3rem, 6vw, 5.5rem)",
+            fontWeight: "700",
+            lineHeight: "1.1",
+            marginBottom: "24px",
+          }}
+        >
+          {slide.title}
+        </h1>
+
+        <p
+          style={{
+            fontSize: "18px",
+            lineHeight: "1.8",
+            marginBottom: "35px",
+            color: "rgba(255,255,255,0.9)",
+          }}
+        >
+          {slide.subtitle}
+        </p>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            flexWrap: "wrap",
+          }}
+        >
+          <button
+            style={{
+              padding: "15px 32px",
+              borderRadius: "40px",
+              border: "none",
+              background: "#ffffff",
+              color: "#111",
+              fontSize: "15px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "0.3s",
+            }}
+          >
+            {slide.button}
+          </button>
+
+          <button
+            style={{
+              padding: "15px 32px",
+              borderRadius: "40px",
+              border: "1px solid rgba(255,255,255,0.5)",
+              background: "transparent",
+              color: "white",
+              fontSize: "15px",
+              fontWeight: "600",
+              cursor: "pointer",
+              backdropFilter: "blur(10px)",
+            }}
+          >
+            Watch Story
+          </button>
         </div>
+      </div> 
 
-        {/* Right: Visual (replace div with <img> or <video> for real media) */}
-        <div style={{display:"flex",justifyContent:"center",alignItems:"center",position:"relative"}}>
-          {/* Main visual placeholder — swap with <img src="..." /> or <video autoPlay muted loop /> */}
-          <div key={`v-${idx}`} style={{
-            width:380,height:420,borderRadius:32,
-            background: s.visualBg,
-            border:"1.5px solid rgba(124,58,237,0.2)",
-            display:"flex",alignItems:"center",justifyContent:"center",
-            fontSize:120,
-            animation:"carousel-slide 0.7s ease forwards",
-            boxShadow:"0 32px 80px rgba(124,58,237,0.15), 0 8px 24px rgba(0,0,0,0.06)",
-            position:"relative",overflow:"hidden",
-          }}>
-            {/* Overlay gradient for image/video */}
-            <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,transparent 60%,rgba(124,58,237,0.08) 100%)"}}/>
-            {/* Emoji placeholder (replace with actual img/video) */}
-            <span className="float" style={{position:"relative",zIndex:1}}>{s.visual}</span>
-            {/* Photo upload hint overlay */}
-            <div style={{position:"absolute",bottom:16,left:16,right:16,background:"rgba(255,255,255,0.9)",backdropFilter:"blur(8px)",borderRadius:12,padding:"10px 14px",border:"1px solid var(--purple-soft)"}}>
-              <div style={{fontSize:11,color:"var(--text-muted)",fontWeight:500}}>📷 Replace with real photo/video</div>
-            </div>
-          </div>
+    
+      <button
+        onClick={prevSlide}
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "20px",
+          transform: "translateY(-50%)",
+          width: "50px",
+          height: "50px",
+          borderRadius: "50%",
+          border: "none",
+          background: "rgba(255,255,255,0.2)",
+          color: "white",
+          fontSize: "24px",
+          cursor: "pointer",
+          zIndex: 20,
+          backdropFilter: "blur(10px)",
+        }}
+      >
+        ‹
+      </button>
 
-          {/* Floating badges */}
-          {[
-            {emoji:"⭐",label:"4.9 Rating",top:"8%",right:"-2%"},
-            {emoji:"🚚",label:"Free Ship",bottom:"22%",right:"-4%"},
-            {emoji:"💯",label:"Authentic",bottom:"10%",left:"-2%"},
-          ].map(b => (
-            <div key={b.label} style={{
-              position:"absolute",top:b.top,right:b.right,bottom:b.bottom,left:b.left,
-              background:"white",
-              border:"1px solid var(--purple-soft)",
-              borderRadius:12,padding:"9px 14px",
-              display:"flex",alignItems:"center",gap:7,fontSize:12,fontWeight:600,
-              boxShadow:"0 8px 24px rgba(124,58,237,0.1)",
-              color:"var(--text-dark)",
-              animation:"float 3.5s ease-in-out infinite",
-            }}>
-              <span>{b.emoji}</span>
-              <span style={{color:"var(--purple-deep)"}}>{b.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <button
+        onClick={nextSlide}
+        style={{
+          position: "absolute",
+          top: "50%",
+          right: "20px",
+          transform: "translateY(-50%)",
+          width: "50px",
+          height: "50px",
+          borderRadius: "50%",
+          border: "none",
+          background: "rgba(255,255,255,0.2)",
+          color: "white",
+          fontSize: "24px",
+          cursor: "pointer",
+          zIndex: 20,
+          backdropFilter: "blur(10px)",
+        }}
+      >
+        ›
+      </button> 
 
-      {/* Slide indicators */}
-      <div style={{position:"absolute",bottom:32,left:"50%",transform:"translateX(-50%)",display:"flex",gap:8,alignItems:"center"}}>
-        {HERO_SLIDES.map((_, i) => (
-          <button key={i} onClick={() => goTo(i)} style={{
-            width: i === idx ? 32 : 8, height:8,
-            borderRadius:4,border:"none",cursor:"pointer",
-            background: i === idx ? "var(--purple-deep)" : "rgba(124,58,237,0.25)",
-            transition:"all .3s ease",
-          }}/>
+  
+      <div
+        style={{
+          position: "absolute",
+          bottom: "35px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: "10px",
+          zIndex: 20,
+        }}
+      >
+        {HERO_SLIDES.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrent(index)}
+            style={{
+              width: current === index ? "30px" : "10px",
+              height: "10px",
+              borderRadius: "20px",
+              border: "none",
+              background:
+                current === index
+                  ? "white"
+                  : "rgba(255,255,255,0.5)",
+              transition: "0.4s",
+              cursor: "pointer",
+            }}
+          />
         ))}
       </div>
-
-      {/* Nav arrows */}
-      {[{dir:"prev",label:"‹",pos:{left:24}},{dir:"next",label:"›",pos:{right:24}}].map(({dir,label,pos}) => (
-        <button key={dir} onClick={() => goTo(dir === "next" ? (idx+1)%HERO_SLIDES.length : (idx-1+HERO_SLIDES.length)%HERO_SLIDES.length)}
-          style={{
-            position:"absolute",top:"50%",transform:"translateY(-50%)",...pos,
-            width:44,height:44,borderRadius:"50%",
-            background:"white",border:"1px solid var(--purple-soft)",
-            color:"var(--purple-deep)",fontSize:22,cursor:"pointer",
-            display:"flex",alignItems:"center",justifyContent:"center",
-            boxShadow:"0 4px 16px rgba(124,58,237,0.12)",
-            transition:"all .2s",fontWeight:300,
-          }}
-          onMouseEnter={e=>{e.currentTarget.style.background="var(--purple-deep)";e.currentTarget.style.color="white";}}
-          onMouseLeave={e=>{e.currentTarget.style.background="white";e.currentTarget.style.color="var(--purple-deep)";}}
-        >{label}</button>
-      ))}
     </section>
   );
 };
+
+
 
 /* ─────────────────────────────────────────────
    BRAND STRIP
@@ -559,61 +700,331 @@ const BRAND_CARDS = [
 
 const TopBrandsCarousel = () => {
   const [offset, setOffset] = useState(0);
+
   const visible = 4;
   const max = BRAND_CARDS.length - visible;
 
+  // AUTO SLIDE
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setOffset((prev) => (prev >= max ? 0 : prev + 1));
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [max]);
+
   return (
-    <section style={{padding:"72px 0",background:"var(--white)"}}>
-      <div style={{maxWidth:1280,margin:"0 auto",padding:"0 40px"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:36}}>
+    <section
+      style={{
+        width: "100%",
+        padding: "100px 0",
+        background:
+          "linear-gradient(to bottom, #fff 0%, #fff7fb 100%)",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* BACKGROUND BLUR */}
+      <div
+        style={{
+          position: "absolute",
+          width: 600,
+          height: 600,
+          borderRadius: "50%",
+          background: "rgba(236,72,153,0.08)",
+          top: -150,
+          right: -150,
+          filter: "blur(120px)",
+        }}
+      />
+
+      {/* FULL WIDTH CONTAINER */}
+      <div
+        style={{
+          width: "100%",
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
+        {/* HEADER */}
+        <div
+          style={{
+            padding: "0 60px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 55,
+            flexWrap: "wrap",
+            gap: 20,
+          }}
+        >
           <div>
-            <div className="tag-pill" style={{marginBottom:12}}>✦ Exclusive Deals</div>
-            <h2 className="display-serif" style={{fontSize:"clamp(1.8rem,3vw,2.6rem)",color:"var(--text-dark)"}}>
-              Top Brands <span className="gradient-text">On Offer</span>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 18px",
+                borderRadius: 50,
+                background: "#fff0f6",
+                color: "#db2777",
+                fontSize: 13,
+                fontWeight: 700,
+                marginBottom: 18,
+              }}
+            >
+              ✦ Luxury Beauty Brands
+            </div>
+
+            <h2
+              style={{
+                fontSize: "clamp(2.2rem, 5vw, 4rem)",
+                fontWeight: 700,
+                lineHeight: 1.15,
+                color: "#111827",
+              }}
+            >
+              Top Brands{" "}
+              <span
+                style={{
+                  background:
+                    "linear-gradient(to right, #ec4899, #8b5cf6)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                On Offer
+              </span>
             </h2>
           </div>
-          <div style={{display:"flex",gap:8}}>
-            <button onClick={() => setOffset(Math.max(0, offset - 1))} style={{width:40,height:40,borderRadius:"50%",border:"1.5px solid var(--purple-soft)",background:"white",color:"var(--purple-deep)",fontSize:18,cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",justifyContent:"center"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="var(--purple-deep)";e.currentTarget.style.color="white";e.currentTarget.style.borderColor="var(--purple-deep)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="white";e.currentTarget.style.color="var(--purple-deep)";e.currentTarget.style.borderColor="var(--purple-soft)";}}>‹</button>
-            <button onClick={() => setOffset(Math.min(max, offset + 1))} style={{width:40,height:40,borderRadius:"50%",border:"1.5px solid var(--purple-soft)",background:"white",color:"var(--purple-deep)",fontSize:18,cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",justifyContent:"center"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="var(--purple-deep)";e.currentTarget.style.color="white";e.currentTarget.style.borderColor="var(--purple-deep)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="white";e.currentTarget.style.color="var(--purple-deep)";e.currentTarget.style.borderColor="var(--purple-soft)";}}>›</button>
+
+          {/* ARROWS */}
+          <div style={{ display: "flex", gap: 14 }}>
+            <button
+              onClick={() => setOffset(Math.max(0, offset - 1))}
+              style={arrowBtn}
+            >
+              ‹
+            </button>
+
+            <button
+              onClick={() => setOffset(Math.min(max, offset + 1))}
+              style={arrowBtn}
+            >
+              ›
+            </button>
           </div>
         </div>
 
-        <div style={{overflow:"hidden"}}>
-          <div style={{display:"flex",gap:18,transition:"transform .5s cubic-bezier(.4,0,.2,1)",transform:`translateX(calc(-${offset * (100/visible)}% - ${offset * 18 / visible}px))`}}>
+        {/* CAROUSEL */}
+        <div
+          style={{
+            overflow: "hidden",
+            paddingLeft: 60,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              gap: 28,
+              transition: "transform .6s ease",
+              transform: `translateX(calc(-${
+                offset * (100 / visible)
+              }% - ${offset * 28}px))`,
+            }}
+          >
             {BRAND_CARDS.map((b, i) => (
-              <div key={i} style={{
-                flex:`0 0 calc(${100/visible}% - ${(visible-1)*18/visible}px)`,
-                background:b.bg,
-                borderRadius:20,
-                overflow:"hidden",
-                border:"1.5px solid rgba(124,58,237,0.12)",
-                cursor:"pointer",
-                transition:"all .35s",
-              }}
-                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-6px)";e.currentTarget.style.boxShadow="0 16px 40px rgba(124,58,237,0.14)";e.currentTarget.style.borderColor="rgba(124,58,237,0.3)";}}
-                onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";e.currentTarget.style.borderColor="rgba(124,58,237,0.12)";}}>
-                {/* Image area (replace with <img>) */}
-                <div style={{height:160,display:"flex",alignItems:"center",justifyContent:"center",fontSize:64,background:`linear-gradient(135deg,${b.bg},white)`}}>
-                  {b.emoji}
+              <div
+                key={i}
+                style={{
+                  flex: `0 0 calc(${100 / visible}% - ${
+                    ((visible - 1) * 28) / visible
+                  }px)`,
+
+                  borderRadius: 34,
+                  overflow: "hidden",
+                  background: "white",
+                  border: "1px solid rgba(236,72,153,0.1)",
+                  transition: "0.4s ease",
+                  cursor: "pointer",
+                  position: "relative",
+                  boxShadow: "0 15px 40px rgba(0,0,0,0.05)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform =
+                    "translateY(-12px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 25px 60px rgba(236,72,153,0.16)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "none";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 40px rgba(0,0,0,0.05)";
+                }}
+              >
+                {/* TOP IMAGE */}
+                <div
+                  style={{
+                    height: 260,
+                    background: `linear-gradient(135deg, ${b.bg}, #fff)`,
+
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* OFFER BADGE */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: 20,
+                      left: 20,
+                      background:
+                        "linear-gradient(to right, #111827, #374151)",
+                      color: "white",
+                      padding: "8px 16px",
+                      borderRadius: 40,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      letterSpacing: 1,
+                    }}
+                  >
+                    HOT DEAL
+                  </div>
+
+                  {/* PRODUCT */}
+                  <div
+                    style={{
+                      fontSize: 110,
+                      filter:
+                        "drop-shadow(0 15px 25px rgba(0,0,0,0.18))",
+                    }}
+                  >
+                    {b.emoji}
+                  </div>
+
+                  {/* FLOATING GLOW */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      width: 180,
+                      height: 180,
+                      borderRadius: "50%",
+                      background: "rgba(255,255,255,0.18)",
+                      filter: "blur(40px)",
+                    }}
+                  />
                 </div>
-                <div style={{padding:"14px 16px 18px",background:"white",borderTop:`2px solid ${b.accent}18`}}>
-                  <div style={{fontWeight:800,fontSize:15,color:b.accent,marginBottom:4,fontFamily:"Cormorant Garamond",letterSpacing:0.5}}>{b.name}</div>
-                  <div style={{fontWeight:700,fontSize:13,color:"var(--text-dark)",marginBottom:b.extra ? 3 : 0}}>{b.discount}</div>
-                  {b.extra && <div style={{fontSize:11,color:"var(--text-muted)"}}>{b.extra}</div>}
+
+                {/* CONTENT */}
+                <div style={{ padding: 28 }}>
+                  <h3
+                    style={{
+                      fontSize: 26,
+                      marginBottom: 12,
+                      color: "#111827",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {b.name}
+                  </h3>
+
+                  <p
+                    style={{
+                      fontSize: 15,
+                      color: "#6b7280",
+                      marginBottom: 22,
+                      lineHeight: 1.8,
+                    }}
+                  >
+                    Premium beauty collections crafted for radiant
+                    beauty and luxury skincare experiences.
+                  </p>
+
+                  {/* PRICE + BUTTON */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div>
+                      <div
+                        style={{
+                          color: "#db2777",
+                          fontSize: 24,
+                          fontWeight: 800,
+                        }}
+                      >
+                        {b.discount}
+                      </div>
+
+                      {b.extra && (
+                        <div
+                          style={{
+                            fontSize: 13,
+                            color: "#9ca3af",
+                            marginTop: 4,
+                          }}
+                        >
+                          {b.extra}
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      style={{
+                        padding: "14px 24px",
+                        borderRadius: 50,
+                        border: "none",
+                        background:
+                          "linear-gradient(to right, #ec4899, #8b5cf6)",
+                        color: "white",
+                        fontSize: 14,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        boxShadow:
+                          "0 12px 25px rgba(236,72,153,0.22)",
+                      }}
+                    >
+                      Shop
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Dots */}
-        <div style={{display:"flex",gap:6,justifyContent:"center",marginTop:24}}>
-          {Array.from({length: max + 1}).map((_, i) => (
-            <button key={i} onClick={() => setOffset(i)} style={{width: i === offset ? 24 : 7,height:7,borderRadius:4,border:"none",cursor:"pointer",background: i === offset ? "var(--purple-deep)" : "var(--purple-soft)",transition:"all .3s"}}/>
+        {/* DOTS */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 10,
+            marginTop: 40,
+          }}
+        >
+          {Array.from({ length: max + 1 }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setOffset(i)}
+              style={{
+                width: i === offset ? 34 : 10,
+                height: 10,
+                borderRadius: 40,
+                border: "none",
+                background:
+                  i === offset
+                    ? "linear-gradient(to right, #ec4899, #8b5cf6)"
+                    : "#fbcfe8",
+                cursor: "pointer",
+                transition: "0.4s",
+              }}
+            />
           ))}
         </div>
       </div>
@@ -621,30 +1032,228 @@ const TopBrandsCarousel = () => {
   );
 };
 
+
+const arrowBtn = {
+  width: 48,
+  height: 48,
+  borderRadius: "50%",
+  border: "1px solid rgba(236,72,153,0.2)",
+  background: "white",
+  color: "#db2777",
+  fontSize: 22,
+  cursor: "pointer",
+  transition: "0.3s",
+  boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
+};
+
 /* ─────────────────────────────────────────────
    FEATURES
 ───────────────────────────────────────────── */
-const FeaturesSection = () => (
-  <section style={{padding:"64px 0",background:"var(--purple-light)"}}>
-    <div style={{maxWidth:1280,margin:"0 auto",padding:"0 40px"}}>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:20}}>
-        {FEATURES.map(f => (
-          <div key={f.title} style={{
-            background:"white",borderRadius:18,padding:"28px 22px",textAlign:"center",
-            border:"1px solid var(--purple-soft)",
-            transition:"all .3s",cursor:"default",
+const FeaturesSection = () => {
+  return (
+    <section
+      style={{
+        padding: "100px 0",
+        background:
+          "linear-gradient(to bottom, #fff7fb 0%, #ffffff 100%)",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* BACKGROUND BLURS */}
+      <div
+        style={{
+          position: "absolute",
+          width: 400,
+          height: 400,
+          borderRadius: "50%",
+          background: "rgba(236,72,153,0.08)",
+          top: -100,
+          left: -100,
+          filter: "blur(100px)",
+        }}
+      />
+
+      <div
+        style={{
+         
+          padding: "0 40px",
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
+        {/* SECTION HEADER */}
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: 70,
           }}
-            onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-5px)";e.currentTarget.style.boxShadow="0 12px 32px rgba(124,58,237,0.12)";}}
-            onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";}}>
-            <div style={{fontSize:36,marginBottom:14}}>{f.icon}</div>
-            <h4 style={{fontSize:15,fontWeight:700,marginBottom:8,color:"var(--text-dark)",fontFamily:"Cormorant Garamond",letterSpacing:0.3}}>{f.title}</h4>
-            <p style={{fontSize:12,color:"var(--text-muted)",lineHeight:1.7}}>{f.desc}</p>
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 20px",
+              borderRadius: 50,
+              background: "#fff0f6",
+              color: "#db2777",
+              fontSize: 13,
+              fontWeight: 700,
+              marginBottom: 24,
+            }}
+          >
+            ✦ WHY SHOP WITH US
           </div>
-        ))}
+
+          <h2
+            style={{
+              fontSize: "clamp(2.2rem, 5vw, 4rem)",
+              fontWeight: 700,
+              lineHeight: 1.2,
+              marginBottom: 18,
+              color: "#111827",
+            }}
+          >
+            Beauty That Feels{" "}
+            <span
+              style={{
+                background:
+                  "linear-gradient(to right, #ec4899, #8b5cf6)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Luxurious
+            </span>
+          </h2>
+
+          <p
+            style={{
+              maxWidth: 700,
+              margin: "0 auto",
+              color: "#6b7280",
+              fontSize: 16,
+              lineHeight: 1.8,
+            }}
+          >
+            Experience premium beauty shopping with authentic
+            products, luxury care, and trusted skincare collections.
+          </p>
+        </div>
+
+        {/* FEATURE CARDS */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+            gap: 28,
+          }}
+        >
+          {FEATURES.map((f, index) => (
+            <div
+              key={index}
+              style={{
+                background: "rgba(255,255,255,0.8)",
+                backdropFilter: "blur(20px)",
+                borderRadius: 30,
+                padding: "40px 28px",
+                position: "relative",
+                overflow: "hidden",
+                border: "1px solid rgba(236,72,153,0.12)",
+                transition: "0.4s ease",
+                cursor: "pointer",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.04)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform =
+                  "translateY(-12px)";
+                e.currentTarget.style.boxShadow =
+                  "0 25px 60px rgba(236,72,153,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "none";
+                e.currentTarget.style.boxShadow =
+                  "0 10px 30px rgba(0,0,0,0.04)";
+              }}
+            >
+              {/* TOP GLOW */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: -50,
+                  right: -50,
+                  width: 120,
+                  height: 120,
+                  borderRadius: "50%",
+                  background: "rgba(236,72,153,0.08)",
+                }}
+              />
+
+              {/* ICON */}
+              <div
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: "24px",
+                  background:
+                    "linear-gradient(135deg, #ec4899, #8b5cf6)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 34,
+                  marginBottom: 28,
+                  boxShadow:
+                    "0 15px 35px rgba(236,72,153,0.25)",
+                }}
+              >
+                {f.icon}
+              </div>
+
+              {/* TITLE */}
+              <h3
+                style={{
+                  fontSize: 24,
+                  fontWeight: 700,
+                  marginBottom: 14,
+                  color: "#111827",
+                }}
+              >
+                {f.title}
+              </h3>
+
+              {/* DESCRIPTION */}
+              <p
+                style={{
+                  color: "#6b7280",
+                  lineHeight: 1.8,
+                  fontSize: 15,
+                  marginBottom: 24,
+                }}
+              >
+                {f.desc}
+              </p>
+
+              {/* BOTTOM LINK */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  color: "#db2777",
+                  fontWeight: 700,
+                  fontSize: 14,
+                }}
+              >
+                Learn More →
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 /* ─────────────────────────────────────────────
    PRODUCTS
@@ -896,6 +1505,261 @@ const TestimonialsSection = () => {
     </section>
   );
 };
+const DealsCarousel = () => {
+  const [index, setIndex] = useState(0);
+
+  const nextSlide = () => {
+    setIndex((prev) =>
+      prev >= IMAGE_CARDS.length - 3 ? 0 : prev + 1
+    );
+  };
+
+  const prevSlide = () => {
+    setIndex((prev) =>
+      prev <= 0 ? IMAGE_CARDS.length - 3 : prev - 1
+    );
+  };
+
+  // AUTO SLIDE
+  useEffect(() => {
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <section
+      style={{
+        padding: "90px 0",
+        background: "#f5f5f5",
+        overflow: "hidden",
+      }}
+    >
+      {/* TITLE */}
+      <div
+        style={{
+          textAlign: "center",
+          marginBottom: 50,
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "clamp(2.5rem,6vw,5rem)",
+            fontWeight: 900,
+            textTransform: "uppercase",
+            lineHeight: 1,
+            background:
+              "linear-gradient(to bottom, #ec4899, #f472b6)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            letterSpacing: 2,
+          }}
+        >
+          Coolest Deals Ever.
+        </h2>
+      </div>
+
+      {/* MAIN */}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+        }}
+      >
+        {/* LEFT BUTTON */}
+        <button
+          onClick={prevSlide}
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: 20,
+            transform: "translateY(-50%)",
+            width: 58,
+            height: 58,
+            borderRadius: "50%",
+            border: "none",
+            background: "white",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+            fontSize: 32,
+            cursor: "pointer",
+            zIndex: 10,
+          }}
+        >
+          ‹
+        </button>
+
+        {/* RIGHT BUTTON */}
+        <button
+          onClick={nextSlide}
+          style={{
+            position: "absolute",
+            top: "50%",
+            right: 20,
+            transform: "translateY(-50%)",
+            width: 58,
+            height: 58,
+            borderRadius: "50%",
+            border: "none",
+            background: "white",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+            fontSize: 32,
+            cursor: "pointer",
+            zIndex: 10,
+          }}
+        >
+          ›
+        </button>
+
+        {/* SLIDER */}
+        <div
+          style={{
+            overflow: "hidden",
+            padding: "0 70px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              gap: 24,
+              transition: "transform .6s ease",
+              transform: `translateX(calc(-${
+                index * 33.33
+              }% - ${index * 16}px))`,
+            }}
+          >
+            {IMAGE_CARDS.map((card) => (
+              <div
+                key={card.id}
+                style={{
+                  minWidth: "32%",
+                  height: 420,
+                  borderRadius: 30,
+                  overflow: "hidden",
+                  position: "relative",
+                  flexShrink: 0,
+                  cursor: "pointer",
+                  boxShadow: "0 15px 40px rgba(0,0,0,0.12)",
+                }}
+              >
+                {/* IMAGE */}
+                <img
+                  src={card.image}
+                  alt=""
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    transition: "0.5s",
+                  }}
+                />
+
+                {/* OVERLAY */}
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background:
+                      "linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.1))",
+                  }}
+                />
+
+                {/* CONTENT */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 30,
+                    left: 30,
+                    right: 30,
+                    color: "white",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 600,
+                      marginBottom: 8,
+                    }}
+                  >
+                    {card.title}
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: 42,
+                      fontWeight: 800,
+                      lineHeight: 1.1,
+                      marginBottom: 10,
+                    }}
+                  >
+                    {card.offer}
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: 16,
+                      opacity: 0.9,
+                      marginBottom: 24,
+                    }}
+                  >
+                    {card.sub}
+                  </div>
+
+                  <button
+                    style={{
+                      padding: "15px 28px",
+                      borderRadius: 50,
+                      border: "none",
+                      background: "white",
+                      color: "#db2777",
+                      fontSize: 15,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {card.btn} →
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* DOTS */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 10,
+            marginTop: 35,
+          }}
+        >
+          {Array.from({
+            length: IMAGE_CARDS.length - 2,
+          }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIndex(i)}
+              style={{
+                width: i === index ? 32 : 10,
+                height: 10,
+                borderRadius: 20,
+                border: "none",
+                cursor: "pointer",
+                transition: "0.4s",
+                background:
+                  i === index
+                    ? "linear-gradient(to right, #ec4899, #8b5cf6)"
+                    : "#fbcfe8",
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 /* ─────────────────────────────────────────────
    NEWSLETTER (light purple)
@@ -923,7 +1787,7 @@ const Newsletter = () => {
               style={{flex:1,padding:"14px 22px",background:"transparent",border:"none",outline:"none",color:"var(--text-dark)",fontSize:14,fontFamily:"Outfit"}}/>
             <button onClick={handleSub} className="btn-primary-purple" style={{borderRadius:0,borderTopRightRadius:100,borderBottomRightRadius:100,padding:"14px 24px",fontSize:13,margin:0}}>
               Subscribe ✦
-            </button>
+            </button>1
           </div>
         ) : (
           <div style={{background:"white",border:"1.5px solid var(--purple-mid)",borderRadius:16,padding:"18px 28px",color:"var(--purple-deep)",fontWeight:600,fontSize:16}}>
@@ -945,7 +1809,7 @@ const CartDrawer = () => {
   const cartOpen = useSelector(s => s.ui.cartOpen);
 
   return (
-    <>
+    <> 
       {cartOpen && <div onClick={() => dispatch(toggleCart())} style={{position:"fixed",inset:0,background:"rgba(46,16,101,0.3)",zIndex:1001,backdropFilter:"blur(4px)"}}/>}
       <div style={{
         position:"fixed",top:0,right:0,bottom:0,width:380,zIndex:1002,
@@ -1051,10 +1915,11 @@ export default function LandingPage() {
       <style>{GLOBAL_CSS}</style>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"/>
 
-      <Navbar/>
-      <HeroCarousel/>
+      {/* <Navbar/>
+      <HeroCarousel/> 
       <BrandStrip/>
       <TopBrandsCarousel/>
+      <DealsCarousel/> 
       <div className="section-divider"/>
       <FeaturesSection/>
       <div className="section-divider"/>
@@ -1066,7 +1931,7 @@ export default function LandingPage() {
       <Newsletter/>
       <Footer/>
       <CartDrawer/>
-      <Toast/>
+      <Toast/> */}
     </>
   );
 }
