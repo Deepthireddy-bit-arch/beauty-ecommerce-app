@@ -5,20 +5,22 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./redux/store";
 
-import LoginPage    from "./pages/LoginPage";
+import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import LandingPage  from "./pages/LandingPage";
+import LandingPage from "./pages/LandingPage";
 import ProductsPage from "./pages/ProductsPage";
+import ProductDetailPage from "./pages/productdetails/Productdetailpage";
 
 function App() {
   return (
     <Provider store={store}>
       <BrowserRouter>
         <Routes>
-          <Route path="/"         element={<LandingPage />} />
-          <Route path="/login"    element={<LoginPage />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/products" element={<ProductsPage />} />
+          <Route path="/product/:id" element={<ProductDetailPage />} />
         </Routes>
       </BrowserRouter>
     </Provider>

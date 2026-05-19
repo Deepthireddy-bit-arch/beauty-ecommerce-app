@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
-import './ProductCard.css';
 import { useNavigate } from 'react-router-dom';
+import './ProductCard.css';
 
 const ProductCard = ({ product }) => {
   const [imgError, setImgError] = useState(false);
   const [wishlist, setWishlist] = useState(false);
   const navigate = useNavigate();
 
-  const handleQuickView = (id) => {
-    navigate(`/product/${id}`);
-  };
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
@@ -18,17 +15,13 @@ const ProductCard = ({ product }) => {
     <div className="col-sm-6 col-lg-4 col-xl-3 mb-4">
       <div className="product-card">
 
-        <div className="product-img-wrapper">
-          {product.isFeatured && (
-            <span className="badge-featured">✦ Featured</span>
-          )}
-          {discount && (
-            <span className="badge-discount">{discount}% off</span>
-          )}
+        <div className="product-img-wrapper" onClick={() => navigate(`/products/${product._id}`)} style={{ cursor: 'pointer' }}>
+          {product.isFeatured && <span className="badge-featured">✦ Featured</span>}
+          {discount && <span className="badge-discount">{discount}% off</span>}
 
           <button
             className={`wishlist-btn ${wishlist ? 'active' : ''}`}
-            onClick={() => setWishlist(!wishlist)}
+            onClick={(e) => { e.stopPropagation(); setWishlist(!wishlist); }}
             aria-label="Add to wishlist"
           >
             <svg width="18" height="18" viewBox="0 0 24 24"
@@ -40,22 +33,17 @@ const ProductCard = ({ product }) => {
           </button>
 
           <img
-            src={
-              !imgError && product.images?.[0]
-                ? product.images[0]
-                : `https://placehold.co/400x280/EEEDFE/534AB7?text=${encodeURIComponent(product.name)}`
-            }
+            src={!imgError && product.images?.[0]
+              ? product.images[0]
+              : `https://placehold.co/400x280/EEEDFE/534AB7?text=${encodeURIComponent(product.name)}`}
             alt={product.name}
             className="product-img"
             onError={() => setImgError(true)}
           />
 
           <div className="quick-overlay">
-            <button
-              className="quick-view-btn"
-              onClick={() => handleQuickView(product._id)}
-            >
-              Quick View
+            <button className="quick-view-btn" onClick={() => navigate(`/products/${product._id}`)}>
+              View Details
             </button>
           </div>
         </div>
@@ -69,7 +57,9 @@ const ProductCard = ({ product }) => {
           </div>
 
           <p className="brand-text">{product.brand}</p>
-          <h6 className="product-name">{product.name}</h6>
+          <h6 className="product-name" onClick={() => navigate(`/products/${product._id}`)} style={{ cursor: 'pointer' }}>
+            {product.name}
+          </h6>
           <p className="desc-text">{product.description}</p>
 
           <div className="card-divider" />
