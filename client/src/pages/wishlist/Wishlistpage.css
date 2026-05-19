@@ -1,0 +1,374 @@
+/* ═══════════════════════════════════════════
+   WISHLIST – White + Purple Theme
+   ═══════════════════════════════════════════ */
+
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:wght@400;500&display=swap");
+
+:root {
+  --purple-50:  #faf5ff;
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-700: #7c3aed;
+  --purple-800: #6d28d9;
+  --purple-900: #4c1d95;
+  --white:      #ffffff;
+  --gray-50:    #f9fafb;
+  --gray-100:   #f3f4f6;
+  --gray-300:   #d1d5db;
+  --gray-500:   #6b7280;
+  --gray-700:   #374151;
+  --shadow-sm:  0 1px 3px rgba(124, 58, 237, 0.08);
+  --shadow-md:  0 4px 16px rgba(124, 58, 237, 0.12);
+  --shadow-lg:  0 8px 32px rgba(124, 58, 237, 0.18);
+  --radius:     14px;
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  font-family: "DM Sans", sans-serif;
+}
+
+/* ── Page ── */
+.wishlist-page {
+  background: var(--gray-50);
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.wishlist-header {
+  background: linear-gradient(135deg, var(--purple-700) 0%, var(--purple-500) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.wishlist-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='28' fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'/%3E%3C/svg%3E")
+    repeat;
+  pointer-events: none;
+}
+
+.wishlist-title {
+  font-family: "Sora", sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.03em;
+}
+
+.wishlist-title .bi-heart-fill {
+  color: #fca5a5;
+  filter: drop-shadow(0 0 8px rgba(252, 165, 165, 0.5));
+}
+
+.wishlist-subtitle {
+  color: var(--purple-200);
+  font-size: 0.95rem;
+}
+
+.wishlist-count-badge {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* ── Header Buttons ── */
+.btn-add-all {
+  background: var(--white);
+  color: var(--purple-700);
+  border: none;
+  border-radius: 50px;
+  padding: 8px 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all var(--transition);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+}
+
+.btn-add-all:hover {
+  background: var(--purple-50);
+  color: var(--purple-800);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Filter Bar ── */
+.filter-bar {
+  background: var(--white);
+  border: 1px solid var(--purple-100);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-label {
+  color: var(--gray-500);
+  font-size: 0.88rem;
+}
+
+.sort-select {
+  border-color: var(--purple-200);
+  color: var(--purple-700);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  padding: 5px 10px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.sort-select:focus {
+  border-color: var(--purple-500);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.12);
+}
+
+/* ══════════════════════════════════
+   WISHLIST CARD
+══════════════════════════════════ */
+.wishlist-card {
+  border-radius: var(--radius) !important;
+  background: var(--white);
+  transition: transform var(--transition), box-shadow var(--transition);
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.wishlist-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Image wrapper */
+.card-img-wrapper {
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.card-img-wrapper img {
+  transition: transform 0.4s ease;
+}
+
+.wishlist-card:hover .card-img-wrapper img {
+  transform: scale(1.04);
+}
+
+/* Discount Badge */
+.badge-discount {
+  background: linear-gradient(135deg, var(--purple-600), var(--purple-400));
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+  z-index: 2;
+}
+
+/* Remove (heart) button */
+.btn-remove {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--purple-500);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+.btn-remove:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  transform: scale(1.1);
+}
+
+/* Product meta */
+.product-category {
+  color: var(--purple-500);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.product-name {
+  color: var(--gray-700);
+  font-size: 0.95rem;
+  font-family: "Sora", sans-serif;
+}
+
+/* Stars */
+.star-filled  { color: #f59e0b; }
+.star-empty   { color: var(--gray-300); }
+
+/* Price */
+.product-price {
+  color: var(--purple-700);
+  font-size: 1.1rem;
+  font-family: "Sora", sans-serif;
+}
+
+.product-original-price {
+  font-size: 0.85rem;
+}
+
+/* Stock badges */
+.stock-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+}
+
+.stock-badge.in-stock {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.stock-badge.out-of-stock {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Add to Cart button */
+.btn-add-cart {
+  background: linear-gradient(135deg, var(--purple-700), var(--purple-500));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all var(--transition);
+}
+
+.btn-add-cart:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--purple-800), var(--purple-600));
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+}
+
+.btn-add-cart:disabled {
+  background: var(--gray-300);
+  color: var(--gray-500);
+  cursor: not-allowed;
+}
+
+/* Trash remove button */
+.btn-remove-outline {
+  background: var(--purple-50);
+  color: var(--purple-600);
+  border: 1px solid var(--purple-200);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  transition: all var(--transition);
+}
+
+.btn-remove-outline:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+/* ── Alerts ── */
+.alert-purple-danger {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  border-radius: 12px;
+  font-size: 0.9rem;
+}
+
+.alert-purple-success {
+  background: var(--purple-50);
+  border: 1px solid var(--purple-200);
+  color: var(--purple-700);
+  border-radius: 12px;
+  font-size: 0.9rem;
+}
+
+/* ── Spinner ── */
+.spinner-purple .spinner-border {
+  color: var(--purple-600);
+  width: 2.5rem;
+  height: 2.5rem;
+  border-width: 3px;
+}
+
+.loading-text {
+  color: var(--purple-500);
+  font-size: 0.9rem;
+}
+
+/* ── Empty State ── */
+.empty-state {
+  padding: 60px 20px;
+}
+
+.empty-icon {
+  width: 90px;
+  height: 90px;
+  background: var(--purple-100);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+.empty-icon .bi-heart {
+  font-size: 2.4rem;
+  color: var(--purple-500);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(168,85,247,0.3); }
+  50%       { transform: scale(1.04); box-shadow: 0 0 0 12px rgba(168,85,247,0); }
+}
+
+.empty-title {
+  font-family: "Sora", sans-serif;
+  color: var(--purple-900);
+  font-weight: 600;
+}
+
+.empty-subtitle {
+  color: var(--gray-500);
+  font-size: 0.95rem;
+}
+
+.btn-explore {
+  background: linear-gradient(135deg, var(--purple-700), var(--purple-500));
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 28px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all var(--transition);
+}
+
+.btn-explore:hover {
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+}
+
+/* ── Responsive ── */
+@media (max-width: 576px) {
+  .wishlist-title { font-size: 1.5rem; }
+  .wishlist-header { padding: 20px 0; }
+}

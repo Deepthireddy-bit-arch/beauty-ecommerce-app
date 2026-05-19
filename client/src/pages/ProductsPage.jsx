@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux'; //connects to the store
 import {
   setSearchQuery,
   setCategory,
@@ -17,13 +17,13 @@ const ProductsPage = () => {
   const dispatch = useDispatch();
   const { loading, error, searchQuery, selectedCategory, sortBy } = useSelector(
     (state) => state.products
-  );
-  const products = useSelector((state) => state.products.items);
-  const page = useSelector((state) => state.products.page);
-  const categories = useSelector(selectCategories);
+  ); //get the products
+  const products = useSelector((state) => state.products.items); //get the product list
+  const page = useSelector((state) => state.products.page); //gets the current page no
+  const categories = useSelector(selectCategories); //get the categories from the store
 
   useEffect(() => {
-    dispatch(fetchProducts());
+    dispatch(fetchProducts()); //fetch products whenecer changes  in serach ,sortby..
   }, [searchQuery, selectedCategory, sortBy, page]);
 
   return (
