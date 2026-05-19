@@ -1,19 +1,8 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice } from '@reduxjs/toolkit';
+import { fetchProductById, fetchProducts } from '../reducers/thunks/productThunks';
 
-export const fetchProducts = createAsyncThunk(
-  'products/fetchAll',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/products');
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch products');
-    }
-  }
-);
 
-const productSlice = createSlice({
+const productSlice = createSlice({ //intial state of the product slice
   name: 'products',
   initialState: {
     items: [],
@@ -22,8 +11,11 @@ const productSlice = createSlice({
     searchQuery: '',
     selectedCategory: 'All',
     sortBy: 'default',
+    page: 1,
+    selectedProduct: null,
   },
-  reducers: { //update the satte based on user interactions
+
+  reducers: {  //update the state based on the user input
     setSearchQuery(state, action) {
       state.searchQuery = action.payload;
     },
@@ -33,12 +25,19 @@ const productSlice = createSlice({
     setSortBy(state, action) {
       state.sortBy = action.payload;
     },
+    setPage(state, action) {
+      state.page = action.payload;
+    },
+    clearSelectedProduct(state) {
+      state.selectedProduct = null;
+      state.error = null;
+    }
   },
-  extraReducers: (builder) => {
+
+  extraReducers: (builder) => { //handle the async thunks for fetching products and poduct details
     builder
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
@@ -47,40 +46,28 @@ const productSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(fetchProductById.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchProductById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedProduct = action.payload;
+      })
+      .addCase(fetchProductById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
-  },
+
+  }
 });
 
-export const { setSearchQuery, setCategory, setSortBy } = productSlice.actions;
-
-export const selectFilteredProducts = (state) => {
-  let products = [...state.products.items];
-  const { searchQuery, selectedCategory, sortBy } = state.products;
-
-  if (selectedCategory !== 'All') {
-    products = products.filter((p) => p.category === selectedCategory);
-  }
-
-  if (searchQuery.trim()) {
-    const q = searchQuery.toLowerCase();
-    products = products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.brand.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q)
-    );
-  }
-
-  if (sortBy === 'price_asc') products.sort((a, b) => a.price - b.price);
-  else if (sortBy === 'price_desc') products.sort((a, b) => b.price - a.price);
-  else if (sortBy === 'name_asc') products.sort((a, b) => a.name.localeCompare(b.name));
-
-  return products;
-};
-
-export const selectCategories = (state) => {
-  const cats = [...new Set(state.products.items.map((p) => p.category))];
-  return ['All', ...cats];
-};
+export const {
+  setSearchQuery,
+  setCategory,
+  setSortBy,
+  setPage,
+  clearSelectedProduct
+} = productSlice.actions;
 
 export default productSlice.reducer;

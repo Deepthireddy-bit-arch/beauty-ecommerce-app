@@ -4,24 +4,27 @@ import {
   setSearchQuery,
   setCategory,
   setSortBy,
-  selectFilteredProducts,
-  selectCategories,
-  fetchProducts,
+  setPage,
+  
+  
 } from '../redux/slices/productSlice';
 import ProductCard from '../components/ProductCard';
 import '../components/ProductCard.css';
+import { fetchProducts } from '../redux/reducers/thunks/productThunks';
+import { selectCategories } from '../redux/registerUser/selectors/productSelectors';
 
 const ProductsPage = () => {
   const dispatch = useDispatch();
   const { loading, error, searchQuery, selectedCategory, sortBy } = useSelector(
     (state) => state.products
   );
-  const products = useSelector(selectFilteredProducts);
+  const products = useSelector((state) => state.products.items);
+  const page = useSelector((state) => state.products.page);
   const categories = useSelector(selectCategories);
 
   useEffect(() => {
     dispatch(fetchProducts());
-  }, [dispatch]);
+  }, [searchQuery, selectedCategory, sortBy, page]);
 
   return (
     <div className="products-page">
@@ -31,14 +34,14 @@ const ProductsPage = () => {
           <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
             <div>
               <h1 className="page-title">All Products</h1>
-             
+
             </div>
 
             <div className="d-flex align-items-center gap-3 flex-wrap">
               <div className="search-wrapper">
                 <svg className="search-icon" width="15" height="15" viewBox="0 0 24 24"
                   fill="none" stroke="#888" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
                 <input
                   type="text"
@@ -110,6 +113,24 @@ const ProductsPage = () => {
             ))}
           </div>
         )}
+        <div className="pagination-wrapper">
+
+          <div className="pagination">
+            <button
+              disabled={page === 1}
+              onClick={() => dispatch(setPage(page - 1))}
+            >
+              Prev
+            </button>
+
+            <span>Page {page}</span>
+
+            <button onClick={() => dispatch(setPage(page + 1))}>
+              Next
+            </button>
+          </div>
+
+        </div>
 
       </div>
     </div>
