@@ -18,6 +18,7 @@ const store = configureStore({
     //landing page
     cart: cartReducer,
     wishlist: wishlistReducer,
+    
     ui: uiReducer,
   },
 });

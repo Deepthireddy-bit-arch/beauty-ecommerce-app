@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import toast from 'react-hot-toast';
 import api from '../../../api/axios';
 import { API_ENDPOINTS } from '../../../api/endpoints';
-
 
 /* -------------------------
    FETCH PRODUCTS (LIST)
@@ -42,9 +42,13 @@ export const fetchProducts = createAsyncThunk(
         }
       });
 
+      // Optional: show success toast only if you want to confirm load
+      // toast.success('Products loaded successfully');
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      const message = error.response?.data?.message || error.message || 'Failed to load products';
+      toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -57,9 +61,12 @@ export const fetchProductById = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await api.get(`${API_ENDPOINTS.products}/${id}`);
-      return response.data.product; //the data inside the product called as destructurring from the response
+      // toast.success('Product loaded');
+      return response.data.product;
     } catch (error) {
-      return rejectWithValue(error.message);
+      const message = error.response?.data?.message || error.message || 'Failed to load product details';
+      toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );

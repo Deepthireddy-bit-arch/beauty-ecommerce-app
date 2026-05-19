@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { addToCart, removeFromCart } from "../redux/slices/cartSlice";
-import { toggleWishlist } from "../redux/slices/wishlistSlice";
+
+
 import { hideToast, setCategory, showToast, toggleCart } from "../redux/slices/uiSlice";
 import hero1 from '../assets/hero1.png';
 import hero2 from '../assets/hero2.png';
 import hero3 from '../assets/hero1.png';
 import beautyVideo from "../assets/beauty-video.mp4";
+import { addToCartAsync, removeItemAsync } from "../redux/reducers/thunks/cartThunks";
+import { removeFromWishlist } from "../redux/reducers/thunks/wishlistActions";
 
 /* ─────────────────────────────────────────────
    GLOBAL CSS
@@ -1287,7 +1289,7 @@ const ProductCard = ({ p }) => {
         }}>{p.badge}</div>
       )}
       {/* Wishlist */}
-      <button onClick={() => { dispatch(toggleWishlist(p)); dispatch(showToast(inWish ? "💔 Removed from wishlist" : "💜 Added to wishlist!")); }}
+      <button onClick={() => { dispatch(removeFromWishlist(p)); dispatch(showToast(inWish ? "💔 Removed from wishlist" : "💜 Added to wishlist!")); }}
         style={{
           position:"absolute",top:14,right:14,zIndex:2,
           background: inWish ? "rgba(124,58,237,0.12)" : "rgba(255,255,255,0.9)",
@@ -1319,7 +1321,7 @@ const ProductCard = ({ p }) => {
         </div>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <span style={{fontSize:21,fontWeight:700,color:"var(--text-dark)",fontFamily:"Cormorant Garamond"}}>${p.price}</span>
-          <button onClick={() => { dispatch(addToCart(p)); dispatch(showToast(`✨ ${p.name} added to cart!`)); }}
+          <button onClick={() => { dispatch(addToCartAsync(p)); dispatch(showToast(`✨ ${p.name} added to cart!`)); }}
             className="btn-primary-purple" style={{borderRadius:100,padding:"8px 18px",fontSize:12}}>
             + Cart
           </button>
@@ -1838,7 +1840,7 @@ const CartDrawer = () => {
                 <div style={{fontWeight:600,fontSize:13,marginBottom:2,color:"var(--text-dark)"}}>{item.name}</div>
                 <div style={{color:"var(--purple-deep)",fontSize:13,fontWeight:700}}>${item.price} × {item.qty}</div>
               </div>
-              <button onClick={() => dispatch(removeFromCart(item.id))} style={{background:"rgba(217,70,168,0.08)",border:"1px solid rgba(217,70,168,0.2)",borderRadius:8,padding:"4px 10px",color:"var(--rose)",cursor:"pointer",fontSize:12,fontWeight:700}}>✕</button>
+              <button onClick={() => dispatch(removeItemAsync(item.id))} style={{background:"rgba(217,70,168,0.08)",border:"1px solid rgba(217,70,168,0.2)",borderRadius:8,padding:"4px 10px",color:"var(--rose)",cursor:"pointer",fontSize:12,fontWeight:700}}>✕</button>
             </div>
           ))}
         </div>

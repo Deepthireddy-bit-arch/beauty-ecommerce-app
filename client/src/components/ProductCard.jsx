@@ -1,15 +1,36 @@
 import React, { useState } from 'react';
-import './ProductCard.css';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+
+import './ProductCard.css';
+import { addToCartAsync } from '../redux/reducers/thunks/cartThunks';
 
 const ProductCard = ({ product }) => {
   const [imgError, setImgError] = useState(false);
   const [wishlist, setWishlist] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleQuickView = (id) => {
     navigate(`/product/${id}`);
   };
+
+  const handleAddToCart = async (e) => {
+    e.stopPropagation(); // prevents the click from bubbling to parent (e.g., product card link)
+    if (product.stock === 0 || addingToCart) return;
+
+    setAddingToCart(true);
+    try {
+      await dispatch(addToCartAsync({ productId: product._id, quantity: 1 })).unwrap();
+      // success toast is already shown inside the thunk
+    } catch (error) {
+      // error toast already shown inside the thunk
+    } finally {
+      setAddingToCart(false);
+    }
+  };
+
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
@@ -17,14 +38,9 @@ const ProductCard = ({ product }) => {
   return (
     <div className="col-sm-6 col-lg-4 col-xl-3 mb-4">
       <div className="product-card">
-
         <div className="product-img-wrapper">
-          {product.isFeatured && (
-            <span className="badge-featured">✦ Featured</span>
-          )}
-          {discount && (
-            <span className="badge-discount">{discount}% off</span>
-          )}
+          {product.isFeatured && <span className="badge-featured">✦ Featured</span>}
+          {discount && <span className="badge-discount">{discount}% off</span>}
 
           <button
             className={`wishlist-btn ${wishlist ? 'active' : ''}`}
@@ -51,10 +67,7 @@ const ProductCard = ({ product }) => {
           />
 
           <div className="quick-overlay">
-            <button
-              className="quick-view-btn"
-              onClick={() => handleQuickView(product._id)}
-            >
+            <button className="quick-view-btn" onClick={() => handleQuickView(product._id)}>
               Quick View
             </button>
           </div>
@@ -86,16 +99,19 @@ const ProductCard = ({ product }) => {
             )}
           </div>
 
-          <button className="cart-btn" disabled={product.stock === 0}>
+          <button
+            className="cart-btn"
+            disabled={product.stock === 0 || addingToCart}
+            onClick={handleAddToCart}
+          >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2" style={{ marginRight: 7, verticalAlign: -2 }}>
               <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
               <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
             </svg>
-            {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+            {addingToCart ? 'Adding...' : (product.stock === 0 ? 'Out of Stock' : 'Add to Cart')}
           </button>
         </div>
-
       </div>
     </div>
   );
