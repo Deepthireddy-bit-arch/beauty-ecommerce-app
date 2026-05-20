@@ -1,4 +1,5 @@
-const selectItems = (s) => s.cart.items;
+//selectors mainly used for cart page ,but can be used anywhere in the app to get the cart details 
+const selectItems = (s) => s.cart.items; 
 const selectCoupon = (s) => s.cart;
 const selectTotals = (s) => {
   const items = s.cart.items;

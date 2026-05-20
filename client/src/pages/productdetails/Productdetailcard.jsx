@@ -1,20 +1,37 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import './ProductCard.css';
 import { addToCartAsync } from '../../redux/reducers/thunks/cartThunks';
+import { addToWishlist, removeFromWishlist } from '../../redux/reducers/thunks/wishlistActions';
 
 const ProductCard = ({ product }) => {
   const [imgError, setImgError] = useState(false);
-  const [wishlist, setWishlist] = useState(false);
+
   const [addingToCart, setAddingToCart] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const { items } = useSelector((state) => state.wishlist);
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
+  const isWishlisted = items?.some(
+    (item) => item.productId === product._id
+  );
+  const handleWishlist = async (e) => {
+    e.stopPropagation();
+
+    try {
+      if (isWishlisted) {
+        await dispatch(removeFromWishlist(product._id)).unwrap();
+      } else {
+        await dispatch(addToWishlist(product._id)).unwrap();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const handleAddToCart = async (e) => {
     e.stopPropagation(); // prevent navigating to product detail when clicking the button
@@ -39,14 +56,18 @@ const ProductCard = ({ product }) => {
           {discount && <span className="badge-discount">{discount}% off</span>}
 
           <button
-            className={`wishlist-btn ${wishlist ? 'active' : ''}`}
-            onClick={(e) => { e.stopPropagation(); setWishlist(!wishlist); }}
+            className={`wishlist-btn ${isWishlisted ? 'active' : ''}`}
+            onClick={handleWishlist}
             aria-label="Add to wishlist"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24"
-              fill={wishlist ? '#534AB7' : 'none'}
-              stroke={wishlist ? '#534AB7' : '#aaa'}
-              strokeWidth="2">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill={isWishlisted ? '#534AB7' : 'none'}
+              stroke={isWishlisted ? '#534AB7' : '#aaa'}
+              strokeWidth="2"
+            >
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
           </button>
