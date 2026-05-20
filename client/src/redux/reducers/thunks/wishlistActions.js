@@ -1,7 +1,8 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../../api/axios";
+import { API_ENDPOINTS } from "../../../api/endpoints";
 
-const BASE_URL = "/api/wishlist";
+
 
 // Helper: get auth header from localStorage token
 const authHeader = () => ({
@@ -10,33 +11,22 @@ const authHeader = () => ({
   },
 });
 
-// // GET wishlist
-// export const fetchWishlist = createAsyncThunk(
-//   "wishlist/fetch",
-//   async (_, { rejectWithValue }) => {
-//     try {
-//       const { data } = await axios.get(BASE_URL, authHeader());
-//       return data.wishlist;
-//     } catch (err) {
-//       return rejectWithValue(
-//         err.response?.data?.message || "Failed to fetch wishlist"
-//       );
-//     }
-//   }
-// );
+
 export const fetchWishlist = createAsyncThunk(
   "wishlist/fetch",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(
-        `${BASE_URL}`,
+      const { data } = await api.get(
+        `${API_ENDPOINTS.wishlist}`,
         authHeader()
       );
 
-      return data.wishlist;
+      return data.wishlist.items;
+
     } catch (err) {
       return rejectWithValue(
-        err.response?.data?.message || "Failed to fetch wishlist"
+        err.response?.data?.message ||
+        "Failed to fetch wishlist"
       );
     }
   }
@@ -47,8 +37,8 @@ export const addToWishlist = createAsyncThunk(
   "wishlist/add",
   async (productId, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post(
-        BASE_URL,
+      const { data } = await api.post(
+        `${API_ENDPOINTS.wishlist}`,
         { productId },
         authHeader()
       );
@@ -66,8 +56,8 @@ export const removeFromWishlist = createAsyncThunk(
   "wishlist/remove",
   async (productId, { rejectWithValue }) => {
     try {
-      const { data } = await axios.delete(
-        `${BASE_URL}/${productId}`,
+      const { data } = await api.delete(
+        `${API_ENDPOINTS.wishlist}/${productId}`,
         authHeader()
       );
       return data;
