@@ -53,6 +53,7 @@ const styles = `
 const OrderConfirmationModal = ({ order, onViewOrders, onContinueShopping }) => {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
+  console.log("helo");
 
   if (!order || !mounted) return null;
 
