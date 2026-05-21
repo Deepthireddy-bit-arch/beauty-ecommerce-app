@@ -480,3 +480,15 @@ body {
 .justify-between { justify-content: space-between; }
 .fw-600 { font-weight: 600; }
 .w-100 { width: 100%; }
+/* Hide Stripe test mode badge */
+.StripeElement--complete ~ *,
+#stripe-badge-iframe,
+[data-testid="stripe-badge"] {
+  display: none !important;
+}
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 2rem;
+  align-items: start; /* ← this is the key fix */
+}

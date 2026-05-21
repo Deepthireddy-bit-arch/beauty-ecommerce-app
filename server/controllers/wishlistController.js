@@ -72,9 +72,9 @@ exports.addToWishlist = async (req, res) => {
 // REMOVE FROM WISHLIST
 exports.removeFromWishlist = async (req, res) => {
   try {
-    const { productId } = req.params; 
+    const { productId } = req.params;  //pass in url
 
-    let wishlist = await Wishlist.findOne({ user: req.user.id });
+    let wishlist = await Wishlist.findOne({ user: req.user.id }); //headers
 
     if (!wishlist) {
       return res.status(404).json({

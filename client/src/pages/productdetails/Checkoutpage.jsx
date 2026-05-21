@@ -34,9 +34,9 @@ const STEPS = ['Shipping', 'Payment', 'Review'];
    and a clientSecret is available.
 ───────────────────────────────────────────────────────────────────── */
 const StripeCardForm = ({ onConfirmed, onBack, totalPrice }) => {
-  const stripe   = useStripe();
+  const stripe = useStripe();
   const elements = useElements();
-  const [err, setErr]   = useState('');
+  const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
   const handlePay = async () => {
@@ -134,23 +134,24 @@ const SuccessScreen = ({ onViewOrders }) => (
 const CheckoutPage = ({ onOrderSuccess }) => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((s) => s.order);
-
-  const [step, setStep]           = useState(0);
+  const state = useSelector(s => s);
+  console.log('Full Redux state:', state);
+  const [step, setStep] = useState(0);
   const [orderDone, setOrderDone] = useState(false);
-  const [shipping, setShipping]   = useState({
+  const [shipping, setShipping] = useState({
     address: '', city: '', state: '', pincode: '', phone: '',
   });
   const [paymentMethod, setPaymentMethod] = useState('COD');
 
   // Stripe card state
-  const [clientSecret, setClientSecret]   = useState('');
+  const [clientSecret, setClientSecret] = useState('');
   const [stripeLoading, setStripeLoading] = useState(false);
   const [stripeInitErr, setStripeInitErr] = useState('');
 
-  const cartItems   = DEMO_CART; // replace with useSelector((s) => s.cart.items)
-  const subtotal    = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
+  const cartItems = DEMO_CART; // replace with useSelector((s) => s.cart.items)
+  const subtotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
   const shippingFee = subtotal > 999 ? 0 : 49;
-  const totalPrice  = subtotal + shippingFee;
+  const totalPrice = subtotal + shippingFee;
 
   const handleShippingChange = (e) =>
     setShipping({ ...shipping, [e.target.name]: e.target.value });
@@ -159,25 +160,66 @@ const CheckoutPage = ({ onOrderSuccess }) => {
     shipping.address && shipping.city && shipping.state && shipping.pincode && shipping.phone;
 
   // When user clicks "Review Order →" on the Payment step
+  // const handlePaymentContinue = async () => {
+  //   if (paymentMethod === 'Card') {
+  //     setStripeLoading(true);
+  //     setStripeInitErr('');
+  //     try {
+  //       const secret = await dispatch(createPaymentIntent(totalPrice)).unwrap();
+  //       setClientSecret(secret);
+  //       setStep(2);
+  //     } catch (e) {
+  //       setStripeInitErr(e || 'Could not initialise payment. Try again.');
+  //     } finally {
+  //       setStripeLoading(false);
+  //     }
+  //   } else {
+  //     setClientSecret('');
+  //     setStep(2);
+  //   }
+  // };
   const handlePaymentContinue = async () => {
+    console.log("➡️ Payment Continue clicked");
+    console.log("Selected payment method:", paymentMethod);
+    console.log("Total price:", totalPrice);
+
     if (paymentMethod === 'Card') {
+      console.log("💳 Card payment selected - starting Stripe flow");
+
       setStripeLoading(true);
       setStripeInitErr('');
+
       try {
+        console.log("🚀 Dispatching createPaymentIntent...");
+
         const secret = await dispatch(createPaymentIntent(totalPrice)).unwrap();
+
+        console.log("✅ PaymentIntent created successfully");
+        console.log("Client Secret received:", secret);
+
         setClientSecret(secret);
         setStep(2);
+
+        console.log("➡️ Moving to step 2 (payment UI)");
       } catch (e) {
+        console.error("❌ Error creating PaymentIntent:", e);
+
         setStripeInitErr(e || 'Could not initialise payment. Try again.');
+
+        console.log("⚠️ Stripe init error set in state");
       } finally {
         setStripeLoading(false);
+        console.log("⏹️ Stripe loading finished");
       }
     } else {
+      console.log("🟢 Non-card payment selected (e.g. COD)");
+
       setClientSecret('');
       setStep(2);
+
+      console.log("➡️ Moving directly to step 2 without Stripe");
     }
   };
-
   // COD / UPI — no Stripe charge
   const handlePlaceOrder = async () => {
     const result = await dispatch(
@@ -216,11 +258,11 @@ const CheckoutPage = ({ onOrderSuccess }) => {
   const appearance = {
     theme: 'stripe',
     variables: {
-      colorPrimary:    '#7c3aed',
+      colorPrimary: '#7c3aed',
       colorBackground: '#ffffff',
-      colorText:       '#1f2937',
-      colorDanger:     '#ef4444',
-      borderRadius:    '8px',
+      colorText: '#1f2937',
+      colorDanger: '#ef4444',
+      borderRadius: '8px',
     },
   };
 
@@ -253,7 +295,8 @@ const CheckoutPage = ({ onOrderSuccess }) => {
 
           {/* Step 0: Shipping */}
           {step === 0 && (
-            <div className="card-luxury">
+            // <div className="card-luxury">
+            <div className="card-luxury" style={{ position: 'sticky', top: '80px' }}>
               <p className="section-label">Shipping Details</p>
               <div className="form-group">
                 <label className="form-label">Street Address</label>
@@ -294,13 +337,13 @@ const CheckoutPage = ({ onOrderSuccess }) => {
 
           {/* Step 1: Payment method */}
           {step === 1 && (
-            <div className="card-luxury">
+           <div className="card-luxury" style={{ position: 'sticky', top: '80px' }}>
               <p className="section-label">Payment Method</p>
               <div className="payment-options">
                 {[
-                  { value: 'COD',  label: 'Cash on Delivery',      icon: '💵' },
-                  { value: 'UPI',  label: 'UPI',                   icon: '📱' },
-                  { value: 'Card', label: 'Credit / Debit Card',   icon: '💳' },
+                  { value: 'COD', label: 'Cash on Delivery', icon: '💵' },
+                  { value: 'UPI', label: 'UPI', icon: '📱' },
+                  { value: 'Card', label: 'Credit / Debit Card', icon: '💳' },
                 ].map((m) => (
                   <label key={m.value} className={`payment-option ${paymentMethod === m.value ? 'selected' : ''}`}>
                     <input type="radio" name="payment" value={m.value}
@@ -324,7 +367,7 @@ const CheckoutPage = ({ onOrderSuccess }) => {
 
           {/* Step 2: Review */}
           {step === 2 && (
-            <div className="card-luxury">
+    <div className="card-luxury" style={{ position: 'sticky', top: '80px' }}>
               <p className="section-label">Review Your Order</p>
 
               <div style={{ background: 'var(--purple-ghost)', borderRadius: 'var(--radius)', padding: '0.8rem 1rem', marginBottom: '1rem' }}>

@@ -40,10 +40,15 @@ const StepperPage = () => {
   );
 };
 
+// const StepperPage = () => (
+//   <Provider store={store}>
+//     <StepperPage />
+//   </Provider>
+// );
 const App = () => (
   <Provider store={store}>
     <StepperPage />
   </Provider>
 );
 
-export default StepperPage;
+export default App;
