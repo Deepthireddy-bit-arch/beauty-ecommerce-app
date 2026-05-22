@@ -11,6 +11,7 @@ import ProductDetailPage from "./pages/productdetails/Productdetailpage";
 import CartPage from './pages/cartdetails/CartPage';
 import WishlistPage from "./pages/wishlist/WishlistPage";
 import StepperPage from "./pages/productdetails/Stepperpage";
+import Profile from "./pages/profiledetails/ProfilePage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/checkoutpage" element={<StepperPage />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </BrowserRouter>
     </Provider>

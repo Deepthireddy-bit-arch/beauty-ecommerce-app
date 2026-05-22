@@ -9,6 +9,7 @@ import uiReducer from "./slices/uiSlice";
 import productReducer from './slices/productSlice';
 import productDetailReducer from './slices/productSlice';
 import orderReducer from './slices/orderSlice';
+import profileReducer from "./slices/profileSlice";
 const store = configureStore({
   reducer: {
     login: loginReducer,
@@ -19,6 +20,7 @@ const store = configureStore({
     cart: cartReducer,
     wishlist: wishlistReducer,
     order: orderReducer,
+    profile: profileReducer,
     
     ui: uiReducer,
   },

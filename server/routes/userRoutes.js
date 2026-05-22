@@ -1,12 +1,9 @@
-const express = require("express"); //“Only logged-in users can access this”
+const express = require("express");
 const router = express.Router();
 const protect = require("../middleware/authMiddleware");
+const { getProfile, updateProfile } = require("../controllers/userController");
 
-router.get("/profile", protect, (req, res) => {
-  res.json({
-    message: "Profile data accessed successfully",
-    user: req.user,
-  });
-});
+router.get("/profile", protect, getProfile);
+router.put("/profile", protect, updateProfile); //only logged users can edit own profile right
 
 module.exports = router;
