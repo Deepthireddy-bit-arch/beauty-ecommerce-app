@@ -10,6 +10,7 @@ import productReducer from './slices/productSlice';
 import productDetailReducer from './slices/productSlice';
 import orderReducer from './slices/orderSlice';
 import profileReducer from "./slices/profileSlice";
+import brandReducer from './slices/brandSlice';
 const store = configureStore({
   reducer: {
     login: loginReducer,
@@ -21,7 +22,7 @@ const store = configureStore({
     wishlist: wishlistReducer,
     order: orderReducer,
     profile: profileReducer,
-    
+    brands: brandReducer,
     ui: uiReducer,
   },
 });

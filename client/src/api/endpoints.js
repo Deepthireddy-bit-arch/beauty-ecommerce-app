@@ -5,5 +5,6 @@ export const API_ENDPOINTS = {
   products:"/products",
   cart:"/cart",
   wishlist:"/wishlist",
-  orders:"/orders"
+  orders:"/orders",
+  collectionbrands:'/brands',
 };
