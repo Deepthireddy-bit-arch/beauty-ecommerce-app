@@ -29,6 +29,14 @@ const orderRoutes = require("./routes/orderRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const brandRoutes = require("./routes/brandRoutes");
 const cloudinaryRoutes = require("./routes/cloudinaryRoutes");
+const homeRoutes = require("./routes/homeRoutes");
+const dealsRoutes = require("./routes/dealsRoutes");
+const categoryBannerRoutes = require("./routes/categoryBannerRoutes");
+const collectionRoutes = require("./routes/collectionRoutes");
+const bannerRoutes  = require("./routes/bannerRoutes");
+
+
+
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/products", productRoutes);
@@ -38,6 +46,12 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/brands", brandRoutes);
 app.use("/api/cloudinary", cloudinaryRoutes);
+app.use("/api", homeRoutes);
+app.use("/api", dealsRoutes);
+app.use("/api/category-banners", categoryBannerRoutes);
+app.use("/api/collections", collectionRoutes);
+app.use("/api/banners",  bannerRoutes);
+
 app.get("/", (req, res) => {
   res.send("API Running");
 });

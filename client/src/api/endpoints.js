@@ -7,4 +7,8 @@ export const API_ENDPOINTS = {
   wishlist:"/wishlist",
   orders:"/orders",
   collectionbrands:'/brands',
+  home: "/home",
+  deals:"/deals",
+  categoryBanners:"category-banners",
+  collections: "/collections",
 };

@@ -12,6 +12,8 @@ import CartPage from './pages/cartdetails/CartPage';
 import WishlistPage from "./pages/wishlist/WishlistPage";
 import StepperPage from "./pages/productdetails/Stepperpage";
 import Profile from "./pages/profiledetails/ProfilePage";
+import CollectionsPage from "./pages/collections/CollectionsPage";
+import BrandsPage from "./pages/brands/BrandsPage";
 
 function App() {
   return (
@@ -28,6 +30,8 @@ function App() {
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/checkoutpage" element={<StepperPage />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/collections" element={<CollectionsPage />} />
+          <Route path="/brands" element={<BrandsPage />} />
         </Routes>
       </BrowserRouter>
     </Provider>

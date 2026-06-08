@@ -11,6 +11,11 @@ import productDetailReducer from './slices/productSlice';
 import orderReducer from './slices/orderSlice';
 import profileReducer from "./slices/profileSlice";
 import brandReducer from './slices/brandSlice';
+import homeReducer from './slices/homeSlice'
+import dealsReducer from "./slices/dealsSlice";
+import categoryBannerReducer from "./slices/categoryBannerSlice";
+import collectionsReducer from "./slices/collectionsSlice";
+import brandsReducer from "./slices/brandpageSlice";
 const store = configureStore({
   reducer: {
     login: loginReducer,
@@ -24,6 +29,11 @@ const store = configureStore({
     profile: profileReducer,
     brands: brandReducer,
     ui: uiReducer,
+    home: homeReducer,
+    deals: dealsReducer,
+    categoryBanners: categoryBannerReducer,
+    collections: collectionsReducer,
+    brands: brandsReducer,
   },
 });
 

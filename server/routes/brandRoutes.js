@@ -1,29 +1,17 @@
 const express = require("express");
-const router = express.Router();
-
-const multer = require("../middleware/multer");
-
+const router  = express.Router();
 const {
   createBrand,
   getBrands,
+  getBrandsWithCount,
   updateBrand,
   deleteBrand,
 } = require("../controllers/brandController");
 
-// CREATE BRAND
-router.post(
-  "/create",
-  multer.single("logo"),
-  createBrand
-);
-
-// GET ALL BRANDS
-router.get("/", getBrands);
-
-// UPDATE BRAND
-router.put("/:id", updateBrand);
-
-// DELETE BRAND
-router.delete("/:id", deleteBrand);
+router.get("/",            getBrands);
+router.get("/with-count",  getBrandsWithCount);
+router.post("/",           createBrand);
+router.put("/:id",         updateBrand);
+router.delete("/:id",      deleteBrand);
 
 module.exports = router;

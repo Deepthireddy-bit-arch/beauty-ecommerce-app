@@ -1,12 +1,13 @@
 
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { loginReset } from "../redux/slices/loginSlice";
 
 import { loginUser } from "../redux/reducers/thunks/loginThunk";
 import { selectLoginError, selectLoginLoading, selectLoginUser } from "../redux/registerUser/selectors/registerSelectors";
+import { useNavigate } from "react-router-dom";
 
 /* Only styles Bootstrap cannot provide */
 const extra = `
@@ -91,7 +92,7 @@ export default function LoginPage() {
     const loading = useSelector(selectLoginLoading);
     const error = useSelector(selectLoginError);
     const user = useSelector(selectLoginUser);
-
+ const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPw, setShowPw] = useState(false);
@@ -107,6 +108,11 @@ export default function LoginPage() {
         if (emailErr || pwErr || !email || !password) return;
         dispatch(loginUser(email, password));
     };
+    useEffect(() => {
+    if (user) {
+        navigate("/");   // ← change "/" to your dashboard route e.g. "/dashboard"
+    }
+}, [user, navigate]);
 
     return (
         <>
@@ -129,30 +135,7 @@ export default function LoginPage() {
                     <h4 className="fw-bold text-center mb-4" style={{ color: "#1a1a2e" }}>Login</h4>
 
                     {/* Success state */}
-                    {user ? (
-                        <div className="text-center py-3">
-                            <div className="fs-1 mb-3">🛍️</div>
-
-                            <h4 className="fw-bold mb-2" style={{ color: "#7c3aed" }}>
-                                Welcome to ShopHub
-                            </h4>
-
-                            <p className="fw-semibold mb-1">
-                                Hello, {user.name} 👋
-                            </p>
-
-                            <p className="text-muted small mb-4">
-                                Explore the latest fashion, electronics, and trending products.
-                            </p>
-
-                            <button
-                                className="btn btn-purple text-white w-100 py-2 rounded-3"
-                                onClick={() => dispatch(loginReset())}
-                            >
-                                Log outo
-                            </button>
-                        </div>
-                    ) : (
+                   
                         <form onSubmit={handleSubmit} noValidate>
 
                             {/* Error alert */}
@@ -235,7 +218,7 @@ export default function LoginPage() {
                             </p>
 
                         </form>
-                    )}
+                   
 
                 </div>
             </div>

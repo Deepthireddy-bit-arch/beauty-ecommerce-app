@@ -11,6 +11,12 @@ const productSchema = new mongoose.Schema(
       type: String,
     },
 
+    // ── ADD THIS: links product to a Brand document ──
+    brandId: {
+      type: String,
+      default: "",
+    },
+
     description: {
       type: String,
       required: true,
@@ -23,6 +29,12 @@ const productSchema = new mongoose.Schema(
 
     originalPrice: {
       type: Number,
+    },
+
+    // ── ADD THIS: discount percentage ──
+    discount: {
+      type: Number,
+      default: 0,
     },
 
     category: {
@@ -40,15 +52,51 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
 
+    // ── ADD THIS: number of reviews ──
+    reviews: {
+      type: Number,
+      default: 0,
+    },
+
+    // ── ADD THIS: number of shades/variants ──
+    shades: {
+      type: Number,
+      default: 1,
+    },
+
     images: [
       {
         type: String,
       },
     ],
 
+    // ── ADD THIS: short label like "Most Reordered" ──
+    tag: {
+      type: String,
+      default: "",
+    },
+
     isFeatured: {
       type: Boolean,
       default: false,
+    },
+
+    // ── ADD THIS: for bestseller badge ──
+    isBestseller: {
+      type: Boolean,
+      default: false,
+    },
+
+    // ── ADD THIS: for active/inactive toggle ──
+    active: {
+      type: Boolean,
+      default: true,
+    },
+
+    // ── ADD THIS: for manual sort order ──
+    order: {
+      type: Number,
+      default: 0,
     },
   },
   {
