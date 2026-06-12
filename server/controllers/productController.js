@@ -13,11 +13,11 @@ const addProduct = async (req, res) => {
 // GET ALL PRODUCTS — updated with brand page filters
 const getProducts = async (req, res) => {
   try {
-    const page       = parseInt(req.query.page)  || 1;
-    const limit      = parseInt(req.query.limit) || 10;
-    const search     = req.query.search    || "";
-    const sortField  = req.query.sort      || "createdAt";
-    const order      = req.query.order === "asc" ? 1 : -1;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || "";
+    const sortField = req.query.sort || "createdAt";
+    const order = req.query.order === "asc" ? 1 : -1;
 
     // ── Brand page filter params ──────────────────────────────
     const { brands, categories, priceRanges, discounts, sortBy } = req.query;
@@ -28,7 +28,7 @@ const getProducts = async (req, res) => {
     // Existing search filter
     if (search) {
       filter.$or = [
-        { name:  { $regex: search, $options: "i" } },
+        { name: { $regex: search, $options: "i" } },
         { brand: { $regex: search, $options: "i" } },
       ];
     }
@@ -50,7 +50,9 @@ const getProducts = async (req, res) => {
     // ── Category filter ───────────────────────────────────────
     if (categories) {
       const cats = categories.split(",").filter(Boolean);
-      if (cats.length) filter.category = { $in: cats };
+      if (cats.length) {
+        filter.category = { $in: cats.map(c => new RegExp(`^${c}$`, 'i')) }; //case sensitive-exact match no need
+      }
     }
 
     // ── Price range filter ────────────────────────────────────
@@ -81,21 +83,25 @@ const getProducts = async (req, res) => {
     }
 
     // ── Sort: brand page sortBy overrides admin sort/order ────
-    let sortOption = { [sortField]: order }; // default admin sort
+    // ── Sort + optional featured filter ──
+    let sortOption = { [sortField]: order };
     if (sortBy) {
       switch (sortBy) {
-        case "price-low":  sortOption = { price: 1 };        break;
-        case "price-high": sortOption = { price: -1 };       break;
-        case "rating":     sortOption = { rating: -1 };      break;
-        case "discount":   sortOption = { discount: -1 };    break;
-        case "featured":   sortOption = { isFeatured: -1, order: 1, createdAt: -1 }; break;
+        case "price-low": sortOption = { price: 1 }; break;
+        case "price-high": sortOption = { price: -1 }; break;
+        case "rating": sortOption = { rating: -1 }; break;
+        case "discount": sortOption = { discount: -1 }; break;
+        case "featured":
+          sortOption = { isFeatured: -1, createdAt: -1 };
+          filter.isFeatured = true; // ✅ only show featured products
+          break;
       }
     }
 
     console.log("req.query:", req.query);
     console.log("filter:", JSON.stringify(filter, null, 2));
 
-    const total    = await Product.countDocuments(filter);
+    const total = await Product.countDocuments(filter);
     const products = await Product.find(filter)
       .sort(sortOption)
       .skip(skip)
@@ -103,13 +109,13 @@ const getProducts = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      count:         products.length,
+      count: products.length,
       totalProducts: total,
-      totalPages:    Math.ceil(total / limit),
-      currentPage:   page,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
       products,
       // ── brand page uses these keys ──
-      data:       products,
+      data: products,
       pagination: {
         total,
         page,

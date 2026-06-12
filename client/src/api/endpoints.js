@@ -11,4 +11,10 @@ export const API_ENDPOINTS = {
   deals:"/deals",
   categoryBanners:"category-banners",
   collections: "/collections",
+  getActiveOfferApi: "/offers/active",
+  GET_ALL: "/brands",
+  GET_SINGLE: (id) => `/brands/${id}`,
+  categoryGet:`/categories`,
+  newArrivals: `/newarrivals`,
+  bestSellers:`/bestSellers`,
 };

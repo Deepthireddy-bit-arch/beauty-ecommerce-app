@@ -34,8 +34,11 @@ const dealsRoutes = require("./routes/dealsRoutes");
 const categoryBannerRoutes = require("./routes/categoryBannerRoutes");
 const collectionRoutes = require("./routes/collectionRoutes");
 const bannerRoutes  = require("./routes/bannerRoutes");
-
-
+const searchRoutes = require("./routes/searchRoutes");
+const offerRoutes = require("./routes/offerRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
+const newArrivalRoutes = require('./routes/newArrivalRoutes');
+const bestSellerRoutes=require('./routes/bestsellersRoutes');
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
@@ -51,6 +54,12 @@ app.use("/api", dealsRoutes);
 app.use("/api/category-banners", categoryBannerRoutes);
 app.use("/api/collections", collectionRoutes);
 app.use("/api/banners",  bannerRoutes);
+app.use("/api/search", searchRoutes);
+app.use("/api/offers", offerRoutes);
+app.use("/api", categoryRoutes);
+app.use('/api/newarrivals', newArrivalRoutes);
+app.use('/api/bestSellers', bestSellerRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("API Running");

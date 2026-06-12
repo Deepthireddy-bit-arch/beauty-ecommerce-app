@@ -1,0 +1,274 @@
+.dc-section {
+  padding: 100px 0;
+  background: var(--white-2);
+  overflow: hidden;
+}
+
+.dc-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+/* ── Header ── */
+.dc-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 36px;
+}
+
+.dc-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mid);
+  font-family: "Outfit", sans-serif;
+  margin-bottom: 8px;
+}
+
+.dc-heading {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.dc-heading em {
+  font-style: italic;
+  color: #7c3aed;
+  font-weight: 300;
+}
+
+.dc-viewall {
+  background: none;
+  border: none;
+  font-family: "Outfit", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #7c3aed;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid rgba(124, 58, 237, 0.35);
+  padding-bottom: 2px;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.dc-viewall:hover {
+  opacity: 0.7;
+}
+
+/* ── Carousel wrapper ── */
+.dc-carousel-wrap {
+  position: relative;
+}
+
+/* ── Nav buttons ── */
+.dc-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid #e8e4de;
+  background: #fff;
+  font-size: 22px;
+  color: #1a1a1a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  line-height: 1;
+}
+
+.dc-nav:hover:not(:disabled) {
+  background: #f5f3ef;
+  border-color: #d0cbc4;
+  transform: translateY(-50%) scale(1.06);
+}
+
+.dc-nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.dc-nav--left  { left: -20px; }
+.dc-nav--right { right: -20px; }
+
+/* ── Track ── */
+.dc-overflow {
+  overflow: hidden;
+  margin: 0 24px;
+}
+
+.dc-track {
+  display: flex;
+  gap: 20px;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Card ── */
+.dc-card {
+  flex: 0 0 calc(33.333% - 14px);
+  height: 420px;
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  background: #e8e4de;
+  flex-shrink: 0;
+}
+
+.dc-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.45s ease;
+}
+
+.dc-card:hover .dc-card-img {
+  transform: scale(1.04);
+}
+
+/* ── Overlay ── */
+.dc-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(10, 10, 20, 0.78) 0%,
+    rgba(10, 10, 20, 0.1) 55%,
+    transparent 100%
+  );
+  transition: background 0.3s;
+}
+
+.dc-card:hover .dc-card-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(10, 10, 20, 0.86) 0%,
+    rgba(10, 10, 20, 0.15) 60%,
+    transparent 100%
+  );
+}
+
+/* ── Discount badge ── */
+.dc-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #7c3aed;
+  color: #fff;
+  font-family: "Outfit", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 6px 16px;
+  border-radius: 100px;
+  z-index: 1;
+}
+
+/* ── Card body ── */
+.dc-card-body {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 22px 22px 24px;
+  transform: translateY(4px);
+  transition: transform 0.3s ease;
+}
+
+.dc-card:hover .dc-card-body {
+  transform: translateY(0);
+}
+
+.dc-card-brand {
+  font-family: "Outfit", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 6px;
+}
+
+.dc-card-name {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.25;
+  margin-bottom: 16px;
+}
+
+.dc-card-btn {
+  display: inline-block;
+  background: #fff;
+  color: #7c3aed;
+  border: none;
+  border-radius: 100px;
+  padding: 10px 22px;
+  font-family: "Outfit", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.dc-card-btn:hover {
+  background: #f0ebff;
+  transform: scale(1.03);
+}
+
+/* ── Dots ── */
+.dc-dots {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 28px;
+}
+
+.dc-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: none;
+  background: #ddd;
+  cursor: pointer;
+  padding: 0;
+  transition: width 0.25s ease, background 0.25s ease;
+}
+
+.dc-dot--active {
+  background: #7c3aed;
+  width: 22px;
+  border-radius: 4px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .dc-card {
+    flex: 0 0 calc(50% - 10px);
+    height: 360px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dc-container { padding: 0 20px; }
+  .dc-card {
+    flex: 0 0 calc(100% - 0px);
+    height: 320px;
+  }
+  .dc-nav--left  { left: -12px; }
+  .dc-nav--right { right: -12px; }
+}

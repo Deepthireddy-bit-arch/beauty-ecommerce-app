@@ -98,6 +98,21 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    category: {
+      type: String,
+      required: true,
+    },
+
+    collectionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Collection",
+      default: null,
+    },
+
+    stock: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

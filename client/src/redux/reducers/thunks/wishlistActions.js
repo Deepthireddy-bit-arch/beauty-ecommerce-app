@@ -33,38 +33,50 @@ export const fetchWishlist = createAsyncThunk(
 );
 
 // ADD to wishlist
-export const addToWishlist = createAsyncThunk(
-  "wishlist/add",
+// export const addToWishlist = createAsyncThunk(
+//   "wishlist/add",
+//   async (productId, { rejectWithValue }) => {
+//     try {
+//       const { data } = await api.post(
+//         `${API_ENDPOINTS.wishlist}`,
+//         { productId },
+//         authHeader()
+//       );
+//       return data;
+//     } catch (err) {
+//       return rejectWithValue(
+//         err.response?.data?.message || "Failed to add item"
+//       );
+//     }
+//   }
+// );
+export const addToWishlist    = createAsyncThunk('wishlist/add',
   async (productId, { rejectWithValue }) => {
-    try {
-      const { data } = await api.post(
-        `${API_ENDPOINTS.wishlist}`,
-        { productId },
-        authHeader()
-      );
-      return data;
-    } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Failed to add item"
-      );
-    }
+    const { data } = await api.post('/wishlist/add', { productId });
+    return data.wishlist;
+  }
+);
+export const removeFromWishlist = createAsyncThunk('wishlist/remove',
+  async (productId, { rejectWithValue }) => {
+    const { data } = await api.delete(`/wishlist/remove/${productId}`);
+    return data.wishlist;
   }
 );
 
 // REMOVE from wishlist
-export const removeFromWishlist = createAsyncThunk(
-  "wishlist/remove",
-  async (productId, { rejectWithValue }) => {
-    try {
-      const { data } = await api.delete(
-        `${API_ENDPOINTS.wishlist}/${productId}`,
-        authHeader()
-      );
-      return data;
-    } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Failed to remove item"
-      );
-    }
-  }
-);
+// export const removeFromWishlist = createAsyncThunk(
+//   "wishlist/remove",
+//   async (productId, { rejectWithValue }) => {
+//     try {
+//       const { data } = await api.delete(
+//         `${API_ENDPOINTS.wishlist}/${productId}`,
+//         authHeader()
+//       );
+//       return data;
+//     } catch (err) {
+//       return rejectWithValue(
+//         err.response?.data?.message || "Failed to remove item"
+//       );
+//     }
+//   }
+// );

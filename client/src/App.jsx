@@ -6,7 +6,7 @@ import store from "./redux/store";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import LandingPage from "./pages/LandingPage";
-import ProductsPage from "./pages/ProductsPage";
+
 import ProductDetailPage from "./pages/productdetails/Productdetailpage";
 import CartPage from './pages/cartdetails/CartPage';
 import WishlistPage from "./pages/wishlist/WishlistPage";
@@ -14,6 +14,13 @@ import StepperPage from "./pages/productdetails/Stepperpage";
 import Profile from "./pages/profiledetails/ProfilePage";
 import CollectionsPage from "./pages/collections/CollectionsPage";
 import BrandsPage from "./pages/brands/BrandsPage";
+import SearchPage from "./pages/search/SearchPage";
+import ProductsPage from "./pages/products/ProductsPage";
+import CollectionSingleView from "./pages/collections/CollectionsSingleView";
+import BrandDetails from "./pages/brands/BrandDetails";
+
+
+
 
 function App() {
   return (
@@ -32,7 +39,11 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/collections" element={<CollectionsPage />} />
           <Route path="/brands" element={<BrandsPage />} />
-        </Routes>
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/collections/:id" element={<CollectionSingleView />}/>
+          <Route path="/brands/:id" element={<BrandDetails />} />
+         
+    </Routes>
       </BrowserRouter>
     </Provider>
   );

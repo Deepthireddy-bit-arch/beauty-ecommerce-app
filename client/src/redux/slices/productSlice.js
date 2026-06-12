@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchProductById, fetchProducts } from '../reducers/thunks/productThunks';
+import { fetchFeaturedProducts, fetchProductById, fetchProducts } from '../reducers/thunks/productThunks';
 
 
 const productSlice = createSlice({ //intial state of the product slice
@@ -13,6 +13,12 @@ const productSlice = createSlice({ //intial state of the product slice
     sortBy: 'default',
     page: 1,
     selectedProduct: null,
+    selectedBrands: [],   // ← must be array, not ''
+    selectedDiscounts: [],   // ← must be array, not ''
+    categories: [],
+    featuredItems: [],
+    featuredLoading: false,
+    featuredError: null,
   },
 
   reducers: {  //update the state based on the user input
@@ -39,10 +45,15 @@ const productSlice = createSlice({ //intial state of the product slice
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchProducts.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = action.payload.products;
-      })
+    builder.addCase(fetchProducts.fulfilled, (state, action) => {
+      state.items = action.payload.products;
+      state.totalPages = action.payload.totalPages;
+      state.loading = false;
+
+      // ✅ Derive and store unique categories
+      const cats = [...new Set(action.payload.products.map(p => p.category).filter(Boolean))];
+      state.categories = cats;
+    })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -57,6 +68,18 @@ const productSlice = createSlice({ //intial state of the product slice
       .addCase(fetchProductById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(fetchFeaturedProducts.pending, (state) => {
+        state.featuredLoading = true;
+        state.featuredError = null;
+      })
+      .addCase(fetchFeaturedProducts.fulfilled, (state, action) => {
+        state.featuredLoading = false;
+        state.featuredItems = action.payload;
+      })
+      .addCase(fetchFeaturedProducts.rejected, (state, action) => {
+        state.featuredLoading = false;
+        state.featuredError = action.payload;
       });
 
   }

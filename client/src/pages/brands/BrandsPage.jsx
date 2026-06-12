@@ -23,6 +23,7 @@ import {
   selectPagination,
 } from "../../redux/slices/brandpageSlice";
 import "./Brands.css";
+import DealsCarousel from "../../components/DealsCarousel";
 
 // ─── TOAST ───────────────────────────────────────────────────────────────────
 function useToast() {
@@ -33,7 +34,11 @@ function useToast() {
   }, []);
   return { toast, showToast };
 }
-
+const SLIDE_THEMES = [
+  { eyebrow: "✦ Featured Brand", btnBg: "#fff", btnColor: "#4c1d95", accent: "#e9d5ff" },
+  { eyebrow: "⭐ Top Pick",       btnBg: "#fff", btnColor: "#0c4a6e", accent: "#bae6fd" },
+  { eyebrow: "💄 Trending Now",   btnBg: "#fff", btnColor: "#9d174d", accent: "#fce7f3" },
+];
 // ─── STARS ───────────────────────────────────────────────────────────────────
 function Stars({ rating }) {
   return (
@@ -46,6 +51,8 @@ function Stars({ rating }) {
 }
 
 // ─── BANNER ──────────────────────────────────────────────────────────────────
+
+
 function BannerSection() {
   const dispatch = useDispatch();
   const banners  = useSelector(selectBanners);
@@ -62,26 +69,102 @@ function BannerSection() {
   if (!banners.length) return <div className="banner-skeleton" />;
 
   return (
-    <div className="banner-section">
-      {banners.map((ban, i) => (
-        <div key={ban._id} className={`banner-slide${i === active ? " active" : ""}`}>
-          <div className="banner-img-wrap">
-            <img src={ban.image} alt={ban.title} />
-            <div className="banner-overlay" />
+  // In BannerSection, change the wrapping divs:
+
+  <div
+    className="banner-section"
+    style={{ position: 'relative', overflow: 'hidden', borderRadius: 0, margin: 0 }}
+  >
+    {/* sliding track */}
+    <div
+      className="banner-track"
+      style={{
+        display: 'flex',
+        height: '100%',
+        transition: 'transform 0.6s cubic-bezier(0.77,0,0.175,1)',
+        transform: `translateX(-${active * 100}%)`,
+      }}
+    >
+      {banners.map((ban, i) => {
+        const theme = SLIDE_THEMES[i % SLIDE_THEMES.length];
+        return (
+          <div
+            key={ban._id}
+            style={{
+              minWidth: '100%',
+              height: '100%',
+              position: 'relative',
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              opacity: 1,
+            }}
+          >
+            {/* background image */}
+            <div style={{ position: 'absolute', inset: 0 }}>
+              <img
+                src={ban.image}
+                alt={ban.title}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
+              />
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 55%, rgba(0,0,0,0.08) 100%)'
+              }} />
+            </div>
+
+            {/* content */}
+            <div style={{ position: 'relative', zIndex: 2, padding: '0 64px', maxWidth: 560 }}>
+              <div className="banner-eyebrow">{theme.eyebrow}</div>
+              <h2 className="banner-headline">{ban.title}</h2>
+              <p className="banner-sub">{ban.sub}</p>
+              <div className="banner-offer-badge">{ban.offer}</div>
+              <div className="banner-cta-row">
+                <button className="banner-btn-primary" style={{ background: theme.btnBg, color: theme.btnColor }}>
+                  Shop Now
+                </button>
+                <button className="banner-btn-ghost">Explore Brand</button>
+              </div>
+            </div>
+
+            {/* progress bar */}
+            <div
+              className="banner-progress"
+              style={{
+                animationDuration: '4000ms',
+                animationPlayState: i === active ? 'running' : 'paused',
+              }}
+            />
           </div>
-        </div>
-      ))}
-      <div className="banner-dots">
-        {banners.map((_, i) => (
-          <button
-            key={i}
-            className={`dot${i === active ? " active" : ""}`}
-            onClick={() => dispatch(setActiveBanner(i))}
-            aria-label={`Go to banner ${i + 1}`}
-          />
-        ))}
-      </div>
+        );
+      })}
     </div>
+
+    {/* arrows */}
+    <button
+      className="banner-arrow banner-arrow--prev"
+      onClick={() => dispatch(setActiveBanner((active - 1 + banners.length) % banners.length))}
+      aria-label="Previous"
+    >‹</button>
+    <button
+      className="banner-arrow banner-arrow--next"
+      onClick={() => dispatch(setActiveBanner((active + 1) % banners.length))}
+      aria-label="Next"
+    >›</button>
+
+    {/* dots — MUST be last, inside banner-section */}
+    <div className="banner-dots">
+      {banners.map((_, i) => (
+        <button
+          key={i}
+          className={`dot${i === active ? ' active' : ''}`}
+          onClick={() => dispatch(setActiveBanner(i))}
+          aria-label={`Banner ${i + 1}`}
+        />
+      ))}
+    </div>
+  </div>
+
   );
 }
 
@@ -477,6 +560,7 @@ export default function BrandsPage() {
 
       {/* TOAST */}
       <div className={`toast${toast.show ? " show" : ""}`}>{toast.msg}</div>
+      <DealsCarousel/>
     </div>
   );
 }

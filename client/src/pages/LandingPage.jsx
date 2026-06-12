@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import {
   hideToast,
-  setCategory,
+
   showToast,
   toggleCart,
 } from "../redux/slices/uiSlice";
@@ -17,13 +17,25 @@ import {
 } from "../redux/reducers/thunks/cartThunks";
 import { removeFromWishlist } from "../redux/reducers/thunks/wishlistActions";
 import axios from "axios";
-import { fetchBrands } from "../redux/reducers/thunks/brandThunks";
+
 import { fetchHomeData } from "../redux/reducers/thunks/homeThunks";
 import { fetchDeals } from "../redux/reducers/thunks/dealsThunks";
 import { fetchCategoryBanners } from "../redux/reducers/thunks/categoryBannersThunks";
-import { fetchBrandBanners, selectActiveBanner, selectBanners } from "../redux/slices/brandpageSlice";
+import { fetchBrandBanners, fetchBrands, selectActiveBanner, selectBanners, setActiveBanner } from "../redux/slices/brandpageSlice";
 import { loginReset } from "../redux/slices/loginSlice";
-
+import { clearSuggestions, fetchSuggestions } from "../redux/slices/searchSlice";
+import { fetchActiveOffer } from "../redux/slices/offerSlice";
+import './promoBanner.css';
+import './luxebrand.css';
+import "./DealsCarousel.css";
+import { fetchProducts } from "../redux/reducers/thunks/productThunks";
+import { fetchCategoriesApi } from "../api/productApi";
+import { setCategory } from "../redux/slices/productSlice";
+import BannerCarousel from "../components/BannerCarousel";
+import DealsCarousel from "../components/DealsCarousel";
+import NewArrivalsSection from "../components/NewArrivalsSection";
+import FeaturedProductsSection from "../components/FeaturedProductsSection";
+import BestSellersSection from "../components/BestSellers";
 /* ─────────────────────────────────────────────────────────────────────────────
    API BASE
 ───────────────────────────────────────────────────────────────────────────── */
@@ -164,7 +176,7 @@ h1,h2,h3,h4,h5{font-family:'Cormorant Garamond',serif;line-height:1.1}
 /* ─────────────────────────────────────────────────────────────────────────────
    STATIC DATA (fallbacks / editorial)
 ───────────────────────────────────────────────────────────────────────────── */
-const CATEGORIES = ["All", "Skincare", "Lips", "Eyes", "Face"];
+
 const CAT_ICONS = { All: "✦", Skincare: "💧", Lips: "💄", Eyes: "👁", Face: "🌸" };
 
 const HERO_SLIDES = [
@@ -272,7 +284,7 @@ const Toast = () => {
 const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const { suggestions } = useSelector((state) => state.searchReducer);
   const user = useSelector(s => s.login?.user ?? null);
   const cartCount = useSelector(s => s.cart.items.reduce((a, i) => a + i.qty, 0));
   const wishCount = useSelector(s => s.wishlist.items.length);
@@ -287,6 +299,27 @@ const Navbar = () => {
     window.addEventListener("scroll", fn);
     return () => window.removeEventListener("scroll", fn);
   }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery.trim().length >= 2) {
+        dispatch(fetchSuggestions(searchQuery));
+      } else {
+        dispatch(clearSuggestions());
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, dispatch]);
+  const handleSearch = (e) => {
+    e.preventDefault();
+
+    if (!searchQuery.trim()) return;
+
+    navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+
+    dispatch(clearSuggestions());
+    setSearchOpen(false);
+  };
 
   // close dropdown on outside click
   useEffect(() => {
@@ -297,14 +330,7 @@ const Navbar = () => {
     return () => document.removeEventListener("click", fn);
   }, []);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchOpen(false);
-      setSearchQuery("");
-    }
-  };
+
 
   const requireAuth = (path) => {
     if (!user) navigate("/login");
@@ -320,11 +346,11 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { label: "Home",        to: "/" },
-    { label: "Shop",        to: "/products" },
+    { label: "Home", to: "/" },
+    { label: "Shop", to: "/products" },
     { label: "Collections", to: "/products?category=all" },
-    { label: "Brands",      to: "/products?brand=all" },
-    { label: "About",       to: "/about" },
+    { label: "Brands", to: "/products?brand=all" },
+    { label: "About", to: "/about" },
   ];
 
   const iconBtn = {
@@ -344,44 +370,101 @@ const Navbar = () => {
       {searchOpen && (
         <div
           style={{
-            position: "fixed", inset: 0,
-            background: "rgba(26,26,46,0.5)", zIndex: 1100,
+            position: "fixed",
+            inset: 0,
+            background: "rgba(26,26,46,0.5)",
+            zIndex: 1100,
             backdropFilter: "blur(8px)",
-            display: "flex", alignItems: "flex-start",
-            justifyContent: "center", paddingTop: 120,
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            paddingTop: 120
           }}
           onClick={() => setSearchOpen(false)}
         >
           <div
             style={{
-              background: "white", borderRadius: 20, padding: 8,
+              background: "white",
+              borderRadius: 20,
+              padding: 8,
               width: "min(640px,90vw)",
               boxShadow: "0 32px 80px rgba(0,0,0,0.2)",
-              border: "1px solid var(--border)",
-              animation: "slideUp .3s ease",
+              border: "1px solid var(--border)"
             }}
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
-            <form onSubmit={handleSearch} style={{ display: "flex" }}>
-              <input
-                autoFocus
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search for products, brands, categories…"
-                style={{
-                  flex: 1, padding: "16px 24px",
-                  border: "none", outline: "none",
-                  fontSize: 15, fontFamily: "Outfit",
-                  color: "var(--ink)", background: "transparent",
-                }}
-              />
-              <button
-                type="submit"
-                className="btn-purple"
-                style={{ borderRadius: 14, padding: "12px 24px", margin: 4 }}
-              >
-                🔍
-              </button>
+            <form
+              onSubmit={handleSearch}
+              style={{
+                display: "flex",
+                flexDirection: "column"
+              }}
+            >
+              <div style={{ display: "flex" }}>
+                <input
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+
+                    if (e.target.value.trim().length >= 2) {
+                      dispatch(fetchSuggestions(e.target.value));
+                    }
+                  }}
+                  placeholder="Search for products, brands, categories…"
+                  style={{
+                    flex: 1,
+                    padding: "16px 24px",
+                    border: "none",
+                    outline: "none",
+                    fontSize: 15,
+                    fontFamily: "Outfit",
+                    color: "var(--ink)",
+                    background: "transparent",
+                  }}
+                />
+
+                <button
+                  type="submit"
+                  className="btn-purple"
+                  style={{
+                    borderRadius: 14,
+                    padding: "12px 24px",
+                    margin: 4
+                  }}
+                >
+                  🔍
+                </button>
+              </div>
+
+              {suggestions?.length > 0 && (
+                <div
+                  style={{
+                    marginTop: 8,
+                    borderTop: "1px solid #eee",
+                    maxHeight: 300,
+                    overflowY: "auto"
+                  }}
+                >
+                  {suggestions.map((item) => (
+                    <div
+                      key={item._id}
+                      onClick={() => {
+                        navigate(`/search?q=${encodeURIComponent(item.name)}`);
+                        setSearchOpen(false);
+                        dispatch(clearSuggestions());
+                      }}
+                      style={{
+                        padding: "12px 20px",
+                        cursor: "pointer",
+                        borderBottom: "1px solid #f5f5f5"
+                      }}
+                    >
+                      🔍 {item.name}
+                    </div>
+                  ))}
+                </div>
+              )}
             </form>
           </div>
         </div>
@@ -661,47 +744,49 @@ const Navbar = () => {
 };
 
 
-const BannerSection=() =>{
-  const dispatch = useDispatch();
-  const banners  = useSelector(selectBanners);
-  const active   = useSelector(selectActiveBanner);
-  useEffect(() => {
-    dispatch(fetchBrandBanners());
-    dispatch(fetchBrands());
-  }, [dispatch]);
-  useEffect(() => {
-    if (!banners.length) return;
-    const t = setInterval(() => {
-      dispatch(setActiveBanner((active + 1) % banners.length));
-    }, 4000);
-    return () => clearInterval(t);
-  }, [active, banners.length, dispatch]);
+// const BannerSection = () => {
+//   // const state = useSelector((state) => state);
+//   // console.log(state);
+//   const dispatch = useDispatch();
+//   const banners = useSelector(selectBanners);
+//   const active = useSelector(selectActiveBanner);
+//   useEffect(() => {
+//     dispatch(fetchBrandBanners());
+//     dispatch(fetchBrands());
+//   }, [dispatch]);
+//   useEffect(() => {
+//     if (!banners.length) return;
+//     const t = setInterval(() => {
+//       dispatch(setActiveBanner((active + 1) % banners.length));
+//     }, 4000);
+//     return () => clearInterval(t);
+//   }, [active, banners.length, dispatch]);
 
-  if (!banners.length) return <div className="banner-skeleton" />;
+//   if (!banners.length) return <div className="banner-skeleton" />;
 
-  return (
-    <div className="banner-section">
-      {banners.map((ban, i) => (
-        <div key={ban._id} className={`banner-slide${i === active ? " active" : ""}`}>
-          <div className="banner-img-wrap">
-            <img src={ban.image} alt={ban.title} />
-            <div className="banner-overlay" />
-          </div>
-        </div>
-      ))}
-      <div className="banner-dots">
-        {banners.map((_, i) => (
-          <button
-            key={i}
-            className={`dot${i === active ? " active" : ""}`}
-            onClick={() => dispatch(setActiveBanner(i))}
-            aria-label={`Go to banner ${i + 1}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
+//   return (
+//     <div className="banner-section">
+//       {banners.map((ban, i) => (
+//         <div key={ban._id} className={`banner-slide${i === active ? " active" : ""}`}>
+//           <div className="banner-img-wrap">
+//             <img src={ban.image} alt={ban.title} />
+//             <div className="banner-overlay" />
+//           </div>
+//         </div>
+//       ))}
+//       <div className="banner-dots">
+//         {banners.map((_, i) => (
+//           <button
+//             key={i}
+//             className={`dot${i === active ? " active" : ""}`}
+//             onClick={() => dispatch(setActiveBanner(i))}
+//             aria-label={`Go to banner ${i + 1}`}
+//           />
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -744,8 +829,8 @@ const HeroCarousel = () => {
 const BrandStrip = () => {
   const dispatch = useDispatch();
   useEffect(() => { dispatch(fetchBrands()); }, [dispatch]);
-  const { brands, loading } = useSelector((state) => state.brands);
-  if (loading) return null;
+  const { brands, brandsStatus } = useSelector((state) => state.brands);
+  if (brandsStatus === "loading") return null;
   const marqueeBrands = [...brands, ...brands];
 
   return (
@@ -854,61 +939,95 @@ const StatsBand = () => (
 /* ─────────────────────────────────────────────────────────────────────────────
    LUXE BRANDS GRID
 ───────────────────────────────────────────────────────────────────────────── */
+
+
 const LuxeBrandsGrid = () => {
   const navigate = useNavigate();
-  const { brands } = useSelector((state) => state.brands);
+  const brands = useSelector((state) => state.brands.brands) ?? [];
+
+  // row1: first 2 brands, row2: next 3 brands (or however many exist)
+  const row1 = brands.slice(0, 2);
+  const row2 = brands.slice(2, 5);
 
   return (
-    <section style={{ padding: "100px 0", background: "var(--white-2)" }}>
-      <div style={{ maxWidth: 1360, margin: "0 auto", padding: "0 48px" }}>
-        <div style={{ textAlign: "center", marginBottom: 52 }}>
-          <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "clamp(2.4rem,5vw,4rem)", fontWeight: 700, color: "var(--purple)", letterSpacing: -1, marginBottom: 6 }}>ShopHub <span style={{ fontStyle: "italic" }}>Luxe</span></div>
-          <div style={{ fontSize: 12, letterSpacing: 3, color: "var(--mid)", textTransform: "uppercase", fontFamily: "Outfit", fontWeight: 500 }}>THE BEST OF LUXURY</div>
+    <section className="lb-section">
+      <div className="lb-container">
+
+        {/* ── Header ── */}
+        <div className="lb-header">
+          <div className="lb-header-left">
+            <div className="lb-eyebrow">Curated Selection</div>
+            <h2 className="lb-heading">
+              ShopHub <em>Luxe</em>
+            </h2>
+          </div>
+          <button className="lb-viewall" onClick={() => navigate("/brands")}>
+            View all brands →
+          </button>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 16 }}>
-          <div style={{ gridColumn: "1", gridRow: "1", borderRadius: 20, overflow: "hidden", position: "relative", height: 300, cursor: "pointer" }}
-            onClick={() => navigate("/products?brand=luxury")}>
-            <img src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=800" alt="Luxe Travel" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(26,26,46,0.75), transparent)" }} />
-            <div style={{ position: "absolute", bottom: 20, left: 20, color: "white" }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", opacity: .7, marginBottom: 4 }}>Featured Edit</div>
-              <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 20, fontWeight: 600 }}>Shop Beauty On the Move</div>
+        {/* ── Grid ── */}
+        <div className="lb-grid">
+
+          {/* Hero card — spans 2 rows */}
+          <div
+            className="lb-card lb-card--hero"
+            onClick={() => navigate("/products?brand=luxury")}
+          >
+            <img
+              src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=800"
+              alt="Luxe Travel"
+            />
+            <div className="lb-overlay lb-overlay--hero" />
+            <div className="lb-card-body">
+              <div className="lb-card-tag">Featured Edit</div>
+              <div className="lb-card-name lb-card-name--lg">
+                Shop Beauty<br />On the Move
+              </div>
             </div>
           </div>
 
-          {brands.slice(0, 5).map((b, i) => (
-            <div key={i} style={{ borderRadius: 20, overflow: "hidden", position: "relative", height: 145, cursor: "pointer", transition: "transform .3s" }}
+          {/* Row 1 — 2 brand cards */}
+          {row1.map((b) => (
+            <div
+              key={b._id || b.name}
+              className="lb-card lb-card--md"
               onClick={() => navigate(`/products?brand=${b.name.toLowerCase()}`)}
-              onMouseEnter={e => e.currentTarget.style.transform = "scale(1.02)"}
-              onMouseLeave={e => e.currentTarget.style.transform = "none"}>
-              <img src={resolveImg(b.logo)} alt={b.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", inset: 0, background: "rgba(26,26,46,0.45)" }} />
-              <div style={{ position: "absolute", bottom: 14, left: 14, color: "white" }}>
-                <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 18, fontWeight: 700, marginBottom: 2 }}>{b.name}</div>
-                <div style={{ fontSize: 11, opacity: .75, fontFamily: "Outfit" }}>{b.sub}</div>
+            >
+              <img src={resolveImg(b.logo)} alt={b.name} loading="lazy" />
+              <div className="lb-overlay" />
+              <div className="lb-card-body">
+                <div className="lb-card-tag">{b.category || "Brand"}</div>
+                <div className="lb-card-name">{b.name}</div>
+                {b.sub && <div className="lb-card-sub">{b.sub}</div>}
               </div>
             </div>
           ))}
 
-          {brands.slice(0).map((b, i) => (
-            <div key={`r2-${i}`} style={{ borderRadius: 20, overflow: "hidden", position: "relative", height: 145, cursor: "pointer", transition: "transform .3s" }}
+          {/* Row 2 — 3 brand cards */}
+          {row2.map((b) => (
+            <div
+              key={b._id || b.name}
+              className="lb-card lb-card--sm"
               onClick={() => navigate(`/products?brand=${b.name.toLowerCase()}`)}
-              onMouseEnter={e => e.currentTarget.style.transform = "scale(1.02)"}
-              onMouseLeave={e => e.currentTarget.style.transform = "none"}>
-              <img src={resolveImg(brands[(i + 2) % brands.length]?.logo)} alt={b.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", inset: 0, background: "rgba(26,26,46,0.45)" }} />
-              <div style={{ position: "absolute", bottom: 14, left: 14, color: "white" }}>
-                <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 18, fontWeight: 700, marginBottom: 2 }}>{brands[(i + 2) % brands.length]?.name}</div>
-                <div style={{ fontSize: 11, opacity: .75, fontFamily: "Outfit" }}>{brands[(i + 2) % brands.length]?.sub}</div>
+            >
+              <img src={resolveImg(b.logo)} alt={b.name} loading="lazy" />
+              <div className="lb-overlay" />
+              <div className="lb-card-body">
+                <div className="lb-card-tag">{b.category || "Brand"}</div>
+                <div className="lb-card-name">{b.name}</div>
+                {b.sub && <div className="lb-card-sub">{b.sub}</div>}
               </div>
             </div>
           ))}
+
         </div>
       </div>
     </section>
   );
 };
+
+
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SHOPPABLE REELS
@@ -985,7 +1104,7 @@ const TopBrandsCarousel = () => {
   const timerRef = useRef(null);
 
   const dispatch = useDispatch();
-  const { brands } = useSelector(state => state.brands);
+  const brands = useSelector(state => state.brands.brands) ?? [];
   const activeBrands = (brands || []).filter(b => b.active);
   const max = Math.max(activeBrands.length - VISIBLE, 0);
 
@@ -1179,92 +1298,11 @@ const TopBrandsCarousel = () => {
 
 
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   DEALS CAROUSEL
-───────────────────────────────────────────────────────────────────────────── */
-const DealsCarousel = () => {
-  const [index, setIndex] = useState(0);
-  const [cardWidth, setCardWidth] = useState(0);
-  const cardRef = useRef(null);
-  const timerRef = useRef(null);
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  const { items: deals } = useSelector(state => state.deals);
-  const safeDeals = deals || [];
-  const max = Math.max(safeDeals.length - 3, 0);
 
-  useEffect(() => { dispatch(fetchDeals()); }, [dispatch]);
 
-  useEffect(() => {
-    if (cardRef.current) setCardWidth(cardRef.current.offsetWidth);
-  }, [safeDeals.length]);
 
-  const goTo = useCallback((n) => {
-    setIndex(Math.max(0, Math.min(n, max)));
-  }, [max]);
 
-  const startTimer = useCallback(() => {
-    clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setIndex(p => (p >= max ? 0 : p + 1));
-    }, 3500);
-  }, [max]);
-
-  useEffect(() => {
-    if (!safeDeals.length) return;
-    startTimer();
-    return () => clearInterval(timerRef.current);
-  }, [startTimer, safeDeals.length]);
-
-  const handleNav = (dir) => { goTo(index + dir); startTimer(); };
-
-  return (
-    <section style={{ padding: "90px 0", background: "#f5f5f5", overflow: "hidden" }}>
-      <div style={{ textAlign: "center", marginBottom: 50 }}>
-        <h2 style={{ fontSize: "clamp(2.5rem,6vw,5rem)", fontWeight: 900, textTransform: "uppercase", lineHeight: 1, background: "linear-gradient(to bottom, #7c3aed, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 2 }}>
-          Coolest Deals Ever.
-        </h2>
-      </div>
-
-      <div style={{ position: "relative" }}>
-        <button onClick={() => handleNav(-1)} style={{ position: "absolute", top: "50%", left: 20, zIndex: 10, transform: "translateY(-50%)", width: 40, height: 40, borderRadius: "50%", border: "1px solid #ddd", background: "white", fontSize: 22, cursor: "pointer" }}>‹</button>
-        <button onClick={() => handleNav(1)} style={{ position: "absolute", top: "50%", right: 20, zIndex: 10, transform: "translateY(-50%)", width: 40, height: 40, borderRadius: "50%", border: "1px solid #ddd", background: "white", fontSize: 22, cursor: "pointer" }}>›</button>
-
-        <div style={{ overflow: "hidden", margin: "0 70px" }}>
-          <div style={{ display: "flex", gap: 24, transition: "transform .6s ease", transform: `translateX(-${index * (cardWidth + 24)}px)` }}>
-            {safeDeals.map((card, i) => (
-              <div
-                key={card._id}
-                ref={i === 0 ? cardRef : null}
-                style={{ flex: "0 0 calc(33.333% - 16px)", height: 420, borderRadius: 30, overflow: "hidden", position: "relative", flexShrink: 0, cursor: "pointer", boxShadow: "0 15px 40px rgba(0,0,0,0.12)" }}
-                onClick={() => navigate("/products")}
-              >
-                <img src={resolveImg(card.image)} alt={card.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.1))" }} />
-                <div style={{ position: "absolute", bottom: 30, left: 30, right: 30, color: "white" }}>
-                  <div style={{ fontSize: 18, fontWeight: 600 }}>{card.brand}</div>
-                  <div style={{ fontSize: 42, fontWeight: 800 }}>{card.discount}% OFF</div>
-                  <div style={{ fontSize: 16, opacity: .9 }}>{card.name}</div>
-                  <button style={{ padding: "15px 28px", borderRadius: 50, border: "none", background: "white", color: "#7c3aed", fontSize: 15, fontWeight: 700 }}>
-                    Shop Now →
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 28 }}>
-          {Array.from({ length: max + 1 }).map((_, i) => (
-            <button key={i} onClick={() => { goTo(i); startTimer(); }}
-              style={{ width: i === index ? 24 : 8, height: 8, borderRadius: 20, border: "none", background: i === index ? "#7c3aed" : "#ddd", cursor: "pointer", transition: "width .2s, background .2s" }} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
 
 /* ─────────────────────────────────────────────────────────────────────────────
    FEATURES SECTION
@@ -1366,81 +1404,142 @@ const ProductCard = ({ p }) => {
 const ProductsSection = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const activeCategory = useSelector(s => s.ui.activeCategory) || "All";
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  const fetchProducts = useCallback(async (cat) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = cat && cat !== "All" ? { category: cat } : {};
-      const res = await axios.get(`${BASE_URL}/products`, { params });
-      const data = res.data?.products || res.data?.data || res.data || [];
-      setProducts(Array.isArray(data) ? data.slice(0, 8) : []);
-    } catch (err) {
-      console.error("Products fetch error:", err);
-      setError("Failed to load products");
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
+  const {
+    items = [],
+    loading,
+    error,
+    selectedCategory
+  } = useSelector((state) => state.products);
+
+  const [categories, setCategories] = useState(["All"]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const activeCategory = selectedCategory;
+  // ✅ Fetch categories on mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      setCategoriesLoading(true);
+      try {
+        const res = await fetchCategoriesApi();
+        if (res.data.success) {
+          setCategories(["All", ...res.data.categories]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+    loadCategories();
   }, []);
 
-  useEffect(() => { fetchProducts(activeCategory); }, [activeCategory, fetchProducts]);
+  // ✅ Single useEffect — fetch products when selectedCategory changes
+
+  const handleCategoryClick = (c) => {
+    dispatch(setCategory(c)); // keep display value as-is for UI
+  };
+
+  useEffect(() => {
+    const category = selectedCategory === "All" ? "" : selectedCategory;
+    console.log("🟡 dispatching fetchProducts, category:", category);
+    dispatch(fetchProducts({ category }));
+  }, [selectedCategory, dispatch]);
+  const isActive = (c) => selectedCategory?.toLowerCase() === c.toLowerCase();
+
+  const formatLabel = (c) =>
+    c === "All" ? "All" : c.charAt(0).toUpperCase() + c.slice(1).toLowerCase();
 
   return (
     <section style={{ padding: "104px 0", background: "var(--white)" }}>
       <div style={{ maxWidth: 1360, margin: "0 auto", padding: "0 48px" }}>
+
+        {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 52 }}>
-          <div className="etiquette" style={{ marginBottom: 18 }}>✦ Our Collection</div>
-          <h2 style={{ fontSize: "clamp(2.2rem,4.5vw,3.8rem)", fontWeight: 600, color: "var(--ink)", marginBottom: 14, letterSpacing: -.5 }}>
-            Bestselling <span className="gradient-text">Products</span>
-          </h2>
-          <p style={{ color: "var(--mid)", fontSize: 15.5, maxWidth: 460, margin: "0 auto", lineHeight: 1.85 }}>
-            Handpicked luxuries loved by thousands of beauty devotees worldwide
-          </p>
+          <div className="etiquette">✦ Our Collection</div>
+          <h2>Bestselling <span className="gradient-text">Products</span></h2>
         </div>
 
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginBottom: 48 }}>
-          {CATEGORIES.map(c => (
-            <button key={c} onClick={() => dispatch(setCategory(c))}
-              style={{ padding: "10px 26px", borderRadius: 100, border: activeCategory === c ? "1.5px solid var(--purple)" : "1.5px solid var(--border-2)", background: activeCategory === c ? "var(--purple)" : "white", color: activeCategory === c ? "white" : "var(--mid)", fontWeight: activeCategory === c ? 700 : 500, fontSize: 12.5, cursor: "pointer", transition: "all .25s", letterSpacing: .5, textTransform: "uppercase", boxShadow: activeCategory === c ? "0 6px 20px rgba(124,58,237,0.3)" : "none" }}>
-              {CAT_ICONS[c]} {c}
-            </button>
-          ))}
+        {/* Categories */}
+        <div style={{
+          display: "flex", gap: 10, flexWrap: "wrap",
+          justifyContent: "center", marginBottom: 48
+        }}>
+          {categoriesLoading ? (
+            <div>Loading categories...</div>
+          ) : (
+            categories.map((c) => (
+              <button
+                key={c}
+                onClick={() => handleCategoryClick(c)}
+                style={{
+                  padding: "10px 26px",
+                  borderRadius: 100,
+                  border: isActive(c) ? "1.5px solid var(--purple)" : "1.5px solid var(--border-2)",
+                  background: isActive(c) ? "var(--purple)" : "white",
+                  color: isActive(c) ? "white" : "var(--mid)",
+                  fontWeight: isActive(c) ? 700 : 500,
+                  cursor: "pointer",
+                  transition: "all 0.25s ease",
+                  textTransform: "uppercase"
+                }}
+              >
+                {CAT_ICONS?.[c]} {formatLabel(c)}
+              </button>
+            ))
+          )}
         </div>
 
+        {/* Products */}
         {loading ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 24 }}>
-            {[...Array(8)].map((_, i) => <ProductSkeleton key={i} />)}
-          </div>
+          <div>Loading...</div>
         ) : error ? (
-          <div style={{ textAlign: "center", padding: 60 }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>😕</div>
-            <p style={{ color: "var(--mid)", fontSize: 16, marginBottom: 20 }}>{error}</p>
-            <button className="btn-purple" onClick={() => fetchProducts(activeCategory)}>Try Again</button>
-          </div>
-        ) : products.length === 0 ? (
-          <div style={{ textAlign: "center", padding: 60 }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
-            <p style={{ color: "var(--mid)", fontSize: 16 }}>No products found in this category.</p>
-          </div>
+          <div>{error}</div>
+        ) : items.length === 0 ? (
+          <div>No products found</div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 24 }}>
-            {products.map(p => <ProductCard key={p._id || p.id} p={p} />)}
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4,1fr)",
+            gap: 24
+          }}>
+            {items.map((p) => (
+              <ProductCard key={p._id || p.id} p={p} />
+            ))}
           </div>
         )}
 
         <div style={{ textAlign: "center", marginTop: 52 }}>
-          <button className="btn-outline-dark" onClick={() => navigate("/products")}>View All Products →</button>
+          <button
+            onClick={() => navigate("/products")}
+            className="btn-purple"
+            style={{
+              padding: "14px 48px",
+              fontSize: 13,
+              letterSpacing: 1.5,
+              borderRadius: 100,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = "var(--purple-2)";
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 14px 36px rgba(124,58,237,0.38)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "var(--purple)";
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+          >
+            VIEW ALL PRODUCTS
+            <span style={{ fontSize: 16, transition: "transform 0.2s" }}>→</span>
+          </button>
         </div>
       </div>
     </section>
   );
 };
-
 /* ─────────────────────────────────────────────────────────────────────────────
    CATEGORY BANNERS
 ───────────────────────────────────────────────────────────────────────────── */
@@ -1570,31 +1669,120 @@ const CategoryBanners = () => {
 ───────────────────────────────────────────────────────────────────────────── */
 const PromoBanner = () => {
   const dispatch = useDispatch();
+  const { offer } = useSelector((state) => state.offer);
+
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [copied, setCopied] = useState(false);
+  const [tick, setTick] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchActiveOffer());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!offer?.expiresAt) return;
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const end = new Date(offer.expiresAt).getTime();
+      const distance = end - now;
+
+      if (distance <= 0) {
+        setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        clearInterval(timer);
+        return;
+      }
+
+      setTick((t) => !t);
+      setCountdown({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((distance % (1000 * 60)) / 1000),
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [offer?.expiresAt]);
+
+  const handleCopy = () => {
+    navigator.clipboard?.writeText("BEAUTY30");
+    dispatch(showToast("✦ Code BEAUTY30 copied!"));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  const tiles = [
+    { value: countdown.days, label: "Days" },
+    { value: countdown.hours, label: "Hours" },
+    { value: countdown.minutes, label: "Mins" },
+    { value: countdown.seconds, label: "Secs" },
+  ];
+
   return (
-    <section style={{ padding: "112px 48px", background: "var(--charcoal)", position: "relative", overflow: "hidden", textAlign: "center" }}>
-      <div style={{ position: "absolute", top: "-20%", left: "50%", transform: "translateX(-50%)", width: 700, height: 700, borderRadius: "50%", background: "rgba(124,58,237,0.06)", filter: "blur(80px)", pointerEvents: "none" }} />
-      <div style={{ maxWidth: 760, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div style={{ display: "inline-block", background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 100, padding: "6px 20px", marginBottom: 24, fontSize: 10, fontWeight: 700, letterSpacing: 2.5, color: "var(--purple-2)", textTransform: "uppercase" }}>⚡ Limited Time Offer</div>
-        <h2 style={{ fontSize: "clamp(2.4rem,5vw,4.2rem)", fontWeight: 600, marginBottom: 18, color: "white", fontFamily: "Cormorant Garamond,serif", letterSpacing: -.5 }}>
-          Get <span className="shimmer-purple">30% OFF</span> on First Order
-        </h2>
-        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 15.5, marginBottom: 36, lineHeight: 1.85, maxWidth: 540, margin: "0 auto 36px" }}>
-          Use code{" "}
-          <strong style={{ color: "var(--purple-2)", background: "rgba(124,58,237,0.12)", padding: "3px 16px", borderRadius: 8, letterSpacing: 2, fontSize: 13 }}>BEAUTY30</strong>
-          {" "}at checkout. Valid on all skincare & makeup.
-        </p>
-        <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 48 }}>
-          <button onClick={() => { navigator.clipboard?.writeText("BEAUTY30"); dispatch(showToast("✦ Code BEAUTY30 copied!")); }} className="btn-purple" style={{ fontSize: 14, padding: "15px 38px" }}>✦ Copy Code</button>
-          <button className="btn-ghost-white" style={{ fontSize: 14, padding: "15px 38px" }}>Learn More</button>
+    <section className="pb-section">
+      {/* Concentric rings */}
+      <div className="pb-ring pb-ring--1" />
+      <div className="pb-ring pb-ring--2" />
+      <div className="pb-ring pb-ring--3" />
+      <div className="pb-ring pb-ring--4" />
+
+      {/* Ambient glow */}
+      <div className="pb-glow" />
+
+      <div className="pb-inner">
+        {/* Eyebrow */}
+        <div className="pb-eyebrow">
+          <span className="pb-eyebrow-dot" />
+          Limited time offer
         </div>
-        <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
-          {[["12", "Hours"], ["34", "Mins"], ["56", "Secs"]].map(([n, l]) => (
-            <div key={l} style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(12px)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 18, padding: "18px 28px", minWidth: 88, textAlign: "center" }}>
-              <div style={{ fontSize: 36, fontWeight: 600, color: "var(--purple)", fontFamily: "Cormorant Garamond,serif" }}>{n}</div>
-              <div style={{ fontSize: 9.5, color: "rgba(255,255,255,0.35)", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase" }}>{l}</div>
-            </div>
+
+        {/* Headline */}
+        <h2 className="pb-heading">
+          Get{" "}
+          <span className="pb-heading-accent">
+            30% off
+          </span>
+          <br />
+          <em className="pb-heading-italic">your first order</em>
+        </h2>
+
+        {/* Subtext */}
+        <p className="pb-sub">
+          Use code{" "}
+          <span className="pb-code-inline">BEAUTY30</span>
+          {" "}at checkout · Valid on all skincare &amp; makeup
+        </p>
+
+        {/* Countdown */}
+        <div className="pb-clock">
+          {tiles.map(({ value, label }, i) => (
+            <>
+              <div className="pb-tile" key={label}>
+                <div className="pb-tile-top-line" />
+                <div
+                  className={`pb-tile-num ${label === "Secs" && tick ? "pb-tile-num--tick" : ""}`}
+                >
+                  {String(value).padStart(2, "0")}
+                </div>
+                <div className="pb-tile-label">{label}</div>
+              </div>
+              {i < tiles.length - 1 && (
+                <div key={`sep-${i}`} className="pb-separator">:</div>
+              )}
+            </>
           ))}
         </div>
+
+        {/* CTA */}
+        <div className="pb-actions">
+          <button className={`pb-btn-copy ${copied ? "pb-btn-copy--done" : ""}`} onClick={handleCopy}>
+            <span className="pb-btn-icon">{copied ? "✓" : "⊕"}</span>
+            {copied ? "Copied!" : "Copy code — BEAUTY30"}
+          </button>
+          <button className="pb-btn-ghost">Explore collection</button>
+        </div>
+
+        {/* Fine print */}
+        <p className="pb-fine">One use per customer · Cannot be combined with other offers</p>
       </div>
     </section>
   );
@@ -1777,6 +1965,34 @@ const CartDrawer = () => {
     </>
   );
 };
+function SaleBanner() {
+  return (
+    <aside className="bd-sale-banner" aria-label="Current promotion">
+      <div className="bd-sale-orb bd-sale-orb-1" aria-hidden="true" />
+      <div className="bd-sale-orb bd-sale-orb-2" aria-hidden="true" />
+      <div className="bd-sale-left">
+        <div className="bd-sale-eyebrow">Limited time offer</div>
+        <div className="bd-sale-title">
+          Summer Edit<br />
+          Up to 40% off
+        </div>
+        <div className="bd-sale-sub">
+          Ends June 30 · Free delivery above ₹999
+        </div>
+        <button className="bd-sale-btn">Shop the sale →</button>
+      </div>
+      <div className="bd-sale-badge" aria-hidden="true">
+        <div className="bd-sale-badge-num">40%</div>
+        <div className="bd-sale-badge-label">Max savings</div>
+      </div>
+    </aside>
+  );
+}
+const BannerSection = () => {
+  const banners = useSelector(selectBanners);
+  return <BannerCarousel banners={banners} />;
+};
+
 
 /* ─────────────────────────────────────────────────────────────────────────────
    FOOTER
@@ -1843,26 +2059,40 @@ export default function LandingPage() {
       <HeroCarousel />
       <BrandStrip />
       <InsiderBuzz />
-      
+
       <StatsBand />
       <LuxeBrandsGrid />
-      <ShoppableReels />
-      <BannerSection/>
+
+
+
+      <BannerSection />
+
+
       <TopBrandsCarousel />
+      <ShoppableReels />
       <DealsCarousel />
       <div className="section-line" />
       <FeaturesSection />
       <div className="section-line" />
+
       <ProductsSection />
+
+
+
       <CategoryBanners />
+
       <PromoBanner />
       <SkincareRoutine />
+
       <div className="section-line" />
       <TestimonialsSection />
       <Newsletter />
       <Footer />
       <CartDrawer />
       <Toast />
+      <NewArrivalsSection />
+      <FeaturedProductsSection />
+      <BestSellersSection />
     </>
   );
 }

@@ -1,9 +1,14 @@
 /* -------------------------
    SELECT FILTERED CATEGORIES
 --------------------------*/
+// export const selectCategories = (state) => {
+//   const cats = [...new Set(state.products.items.map(p => p.category))];
+//   return ['All', ...cats];
+// };
 export const selectCategories = (state) => {
-  const cats = [...new Set(state.products.items.map(p => p.category))];
-  return ['All', ...cats];
+  const products = state.products.items ?? [];
+  const cats = [...new Set(products.map(p => p.category).filter(Boolean))];
+  return cats; // Don't include 'All' here, ProductsPage adds it
 };
 
 /* -------------------------

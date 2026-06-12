@@ -1,0 +1,208 @@
+.lb-section {
+  padding: 100px 0;
+  background: var(--white-2);
+}
+
+.lb-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+/* ── Header ── */
+.lb-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.lb-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mid);
+  font-family: "Outfit", sans-serif;
+  margin-bottom: 6px;
+}
+
+.lb-heading {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-weight: 700;
+  color: var(--purple);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.lb-heading em {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.lb-viewall {
+  background: none;
+  border: none;
+  font-family: "Outfit", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--purple);
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid rgba(124, 58, 237, 0.35);
+  padding-bottom: 2px;
+  transition: opacity 0.2s;
+}
+
+.lb-viewall:hover {
+  opacity: 0.7;
+}
+
+/* ── Grid ── */
+.lb-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 300px 160px;
+  gap: 12px;
+}
+
+/* Hero spans both rows */
+.lb-card--hero {
+  grid-column: 1;
+  grid-row: 1 / 3;
+}
+
+/* Row 1 cards */
+.lb-card--md {
+  grid-row: 1;
+}
+
+/* Row 2 cards — spread across columns 1-3 but hero takes col 1 */
+.lb-card--sm:nth-child(4) { grid-column: 1; grid-row: 2; }
+.lb-card--sm:nth-child(5) { grid-column: 2; grid-row: 2; }
+.lb-card--sm:nth-child(6) { grid-column: 3; grid-row: 2; }
+
+/* ── Card base ── */
+.lb-card {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #e8e4de;
+}
+
+.lb-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.45s ease;
+}
+
+.lb-card:hover img {
+  transform: scale(1.04);
+}
+
+/* ── Overlay ── */
+.lb-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(10, 10, 20, 0.72) 0%,
+    rgba(10, 10, 20, 0.1) 50%,
+    transparent 100%
+  );
+  transition: background 0.3s;
+}
+
+.lb-card:hover .lb-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(10, 10, 20, 0.82) 0%,
+    rgba(10, 10, 20, 0.15) 55%,
+    transparent 100%
+  );
+}
+
+.lb-overlay--hero {
+  background: linear-gradient(
+    to top,
+    rgba(10, 10, 20, 0.78) 0%,
+    rgba(10, 10, 20, 0.2) 45%,
+    transparent 100%
+  );
+}
+
+/* ── Card body ── */
+.lb-card-body {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 18px;
+  transform: translateY(3px);
+  transition: transform 0.3s ease;
+}
+
+.lb-card:hover .lb-card-body {
+  transform: translateY(0);
+}
+
+.lb-card-tag {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: "Outfit", sans-serif;
+  margin-bottom: 5px;
+}
+
+.lb-card-name {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.25;
+}
+
+.lb-card-name--lg {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.lb-card-sub {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: "Outfit", sans-serif;
+  margin-top: 3px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .lb-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+  }
+
+  .lb-card--hero {
+    grid-column: 1 / 3;
+    grid-row: auto;
+    height: 260px;
+  }
+
+  .lb-card--md,
+  .lb-card--sm {
+    grid-column: auto;
+    grid-row: auto;
+    height: 160px;
+  }
+}
+
+@media (max-width: 560px) {
+  .lb-container { padding: 0 20px; }
+  .lb-grid { grid-template-columns: 1fr; }
+  .lb-card--hero { grid-column: 1; height: 220px; }
+}
