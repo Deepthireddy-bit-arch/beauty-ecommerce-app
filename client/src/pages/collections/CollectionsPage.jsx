@@ -36,6 +36,8 @@ import {
 import "./collections.css";
 import BannerCarousel from "../../components/BannerCarousel";
 import { fetchBrandBanners, selectBanners } from "../../redux/slices/brandpageSlice";
+import FeaturedProductsSection from "../../components/FeaturedProductsSection";
+import NewArrivalsSection from "../../components/NewArrivalsSection";
 
 // ─── TOAST HOOK ───────────────────────────────────────────────────────────────
 function useToast() {
@@ -562,6 +564,8 @@ const displayedItems = allCollections;
             ))}
         </main>
       </div>
+      <FeaturedProductsSection />
+      <NewArrivalsSection />
 
       {/* ── TOAST ── */}
       <div className={`toast${toast.show ? " show" : ""}`} role="status" aria-live="polite">

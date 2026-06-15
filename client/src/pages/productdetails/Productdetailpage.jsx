@@ -8,6 +8,7 @@ import './ProductDetailPage.css';
 import { fetchProductById } from '../../redux/reducers/thunks/productThunks';
 import { clearSelectedProduct } from '../../redux/slices/productSlice';
 import { addToCartAsync } from '../../redux/reducers/thunks/cartThunks'; // ✅ import
+import DealsCarousel from '../../components/DealsCarousel';
 
 const ProductDetailPage = () => {
     const { id } = useParams();
@@ -254,6 +255,8 @@ const ProductDetailPage = () => {
                     </div>
                 </div>
             </div>
+              <BannerSection />
+               <DealsCarousel />
         </div>
     );
 };

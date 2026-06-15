@@ -315,7 +315,7 @@ const NewArrivalsSection = () => {
         <div className="container">
 
           {/* ── Heading row ── */}
-          <div className="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
+          {/* <div className="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
             <div>
               <p className="na-eyebrow">Just dropped</p>
               <h2 className="na-heading">New <em>Arrivals</em></h2>
@@ -327,7 +327,7 @@ const NewArrivalsSection = () => {
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
             </a>
-          </div>
+          </div> */}
 
           {/* ── Loading skeleton ── */}
           {loading && (

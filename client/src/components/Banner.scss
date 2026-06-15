@@ -1,0 +1,292 @@
+//SCSS is very common because it keeps large UI code much cleaner than plain CSS.
+//SCSS stands for Sassy CSS.
+
+//It is an extension of CSS that provides extra features to write cleaner and more maintainable styles.
+.banner-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.banner-track {
+  display: flex;
+  transition: transform 0.6s ease;
+}
+
+.banner-slide {
+  min-width: 100%;
+  height: 500px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.banner-bg {
+  position: absolute;
+  inset: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.4) 60%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+}
+
+.banner-content {
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
+  padding: 0 64px;
+  color: #fff;
+}
+
+.banner-eyebrow {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.banner-headline {
+  font-size: 52px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.banner-sub {
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.banner-offer-badge {
+  margin-top: 20px;
+  display: inline-block;
+  background: #fff;
+  color: #000;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.banner-cta-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.banner-btn-primary,
+.banner-btn-ghost {
+  border: none;
+  cursor: pointer;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.banner-btn-ghost {
+  background: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+}
+
+.banner-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.25);
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.banner-arrow--prev {
+  left: 20px;
+}
+
+.banner-arrow--next {
+  right: 20px;
+}
+
+.banner-dots {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,.4);
+}
+
+.dot.active {
+  background: white;
+}
+
+/* ===========================
+   Skeleton
+=========================== */
+
+.banner-skeleton {
+  height: 500px;
+  border-radius: 16px;
+  background: #ececec;
+  overflow: hidden;
+  position: relative;
+}
+
+.skeleton-overlay {
+  padding: 70px;
+}
+
+.skeleton-line,
+.skeleton-btn {
+  background: linear-gradient(
+    90deg,
+    #f1f1f1 25%,
+    #fafafa 50%,
+    #f1f1f1 75%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+.skeleton-line {
+  height: 18px;
+  margin-bottom: 15px;
+}
+
+.w-120 {
+  width: 120px;
+}
+
+.w-350 {
+  width: 350px;
+  height: 40px;
+}
+
+.w-250 {
+  width: 250px;
+}
+
+.skeleton-btn {
+  width: 150px;
+  height: 48px;
+  margin-top: 20px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100%;
+  }
+  100% {
+    background-position: -100%;
+  }
+}
+
+/* ===========================
+   Empty State
+=========================== */
+
+.banner-empty {
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-empty-img {
+  width: 220px;
+  margin-bottom: 20px;
+}
+
+.banner-empty h3 {
+  margin-bottom: 10px;
+}
+
+.banner-empty p {
+  color: #666;
+}
+
+/* ===========================
+   Responsive
+=========================== */
+
+@media (max-width: 992px) {
+  .banner-slide {
+    height: 420px;
+  }
+
+  .banner-content {
+    padding: 0 40px;
+  }
+
+  .banner-headline {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .banner-slide {
+    height: 360px;
+  }
+
+  .banner-content {
+    padding: 0 24px;
+  }
+
+  .banner-headline {
+    font-size: 30px;
+  }
+
+  .banner-sub {
+    font-size: 14px;
+  }
+
+  .banner-cta-row {
+    flex-direction: column;
+  }
+
+  .banner-arrow {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-slide {
+    height: 300px;
+  }
+
+  .banner-headline {
+    font-size: 24px;
+  }
+
+  .banner-eyebrow {
+    font-size: 12px;
+  }
+
+  .banner-offer-badge {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}

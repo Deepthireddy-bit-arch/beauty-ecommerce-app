@@ -24,6 +24,7 @@ import {
 } from "../../redux/slices/brandpageSlice";
 import "./Brands.css";
 import DealsCarousel from "../../components/DealsCarousel";
+import BestSellersSection from "../../components/BestSellers";
 
 // ─── TOAST ───────────────────────────────────────────────────────────────────
 function useToast() {
@@ -560,7 +561,7 @@ export default function BrandsPage() {
 
       {/* TOAST */}
       <div className={`toast${toast.show ? " show" : ""}`}>{toast.msg}</div>
-      <DealsCarousel/>
+       <BestSellersSection />
     </div>
   );
 }

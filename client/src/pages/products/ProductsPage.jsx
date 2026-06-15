@@ -10,6 +10,9 @@ import { fetchProducts } from '../../redux/reducers/thunks/productThunks';
 import { selectCategories } from '../../redux/registerUser/selectors/productSelectors';
 import ProductCard from './ProductCard';
 import './ProductsPage.css';
+import BannerCarousel from '../../components/BannerCarousel';
+import FeaturedProductsSection from '../../components/FeaturedProductsSection';
+import { selectBanners } from '../../redux/slices/brandpageSlice';
 
 const SORT_OPTIONS = [
   { value: 'featured', label: 'Featured' },
@@ -68,7 +71,10 @@ export default function ProductsPage() {
     }));
   }, [searchQuery, selectedCategory, sortBy, page,
     selectedBrands, minPrice, maxPrice, selectedDiscounts]);
-
+  const BannerSection = () => {
+    const banners = useSelector(selectBanners);
+    return <BannerCarousel banners={banners} />;
+  };
   return (
     <div className="pp-root">
 
@@ -295,6 +301,8 @@ export default function ProductsPage() {
 
         </div>{/* /pp-main */}
       </div>{/* /pp-body */}
+      <BannerSection />
+      <FeaturedProductsSection />
     </div>
   );
 }

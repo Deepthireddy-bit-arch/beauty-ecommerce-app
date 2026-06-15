@@ -5,6 +5,8 @@ import "./Wishlistpage.css";
 import WishlistCard from "./WishlistPageCard";
 import { fetchWishlist } from "../../redux/reducers/thunks/wishlistActions";
 import { clearMessages } from "../../redux/slices/wishlistSlice";
+import FeaturedProductsSection from "../../components/FeaturedProductsSection";
+import BestSellersSection from "../../components/BestSellers";
 
 const WishlistPage = () => {
   const dispatch = useDispatch();
@@ -56,9 +58,8 @@ const WishlistPage = () => {
               <p className="wishlist-subtitle mb-0">
                 {normalizedItems.length === 0
                   ? "Your wishlist is empty"
-                  : `${normalizedItems.length} item${
-                      normalizedItems.length > 1 ? "s" : ""
-                    } saved`}
+                  : `${normalizedItems.length} item${normalizedItems.length > 1 ? "s" : ""
+                  } saved`}
               </p>
             </div>
 
@@ -124,6 +125,9 @@ const WishlistPage = () => {
         )}
 
       </div>
+      <FeaturedProductsSection />
+
+      <BestSellersSection />
     </div>
   );
 };

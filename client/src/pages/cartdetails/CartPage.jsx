@@ -9,6 +9,8 @@ import {
   updateQuantityAsync,
   removeItemAsync,
 } from "../../redux/reducers/thunks/cartThunks";
+import FeaturedProductsSection from "../../components/FeaturedProductsSection";
+import BestSellersSection from "../../components/BestSellers";
 
 /* ─────────────────────────────────────────────
    SELECTORS (inline – no external file needed)
@@ -555,6 +557,9 @@ export default function App() {
     <Provider store={store}>
       <style>{styles}</style>
       <CartPage />
+      <FeaturedProductsSection />
+
+      <BestSellersSection />
     </Provider>
   );
 }

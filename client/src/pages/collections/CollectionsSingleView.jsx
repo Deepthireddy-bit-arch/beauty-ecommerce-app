@@ -649,6 +649,7 @@ export default function CollectionsSingleView() {
           )}
         </Container>
       </section>
+      
 
       <PremiumFooter />
     </div>

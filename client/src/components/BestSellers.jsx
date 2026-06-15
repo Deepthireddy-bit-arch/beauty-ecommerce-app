@@ -208,7 +208,7 @@ function BestSellersSection() {
       )}
 
       {/* Footer controls */}
-      <div style={{
+      {/* <div style={{
         display: "flex", alignItems: "center", justifyContent: "center",
         gap: 12, marginTop: 20,
       }}>
@@ -242,7 +242,7 @@ function BestSellersSection() {
         >
           View All <span style={{ fontSize: 15 }}>→</span>
         </button>
-      </div>
+      </div> */}
     </section>
   );
 }

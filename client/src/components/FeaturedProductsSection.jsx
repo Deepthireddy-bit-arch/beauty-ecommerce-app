@@ -109,7 +109,7 @@ const FeaturedProductsSection = () => {
           font-family: 'Segoe UI', system-ui, sans-serif;
           overflow: hidden;
         }
-        .fp-inner { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
+        .fp-inner {  margin: 0 auto; padding: 0 32px; }
 
         /* heading */
         .fp-eyebrow {
@@ -282,28 +282,7 @@ const FeaturedProductsSection = () => {
             </div>
           </div>
 
-          {/* Controls */}
-          {!featuredLoading && featuredItems.length > 0 && (
-            <div className="fp-controls">
-              <button className="fp-ctrl" onClick={() => scrollBy(-1)} aria-label="Scroll left">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 18l-6-6 6-6"/>
-                </svg>
-              </button>
-              <span className="fp-pause-label">{isPaused ? 'Paused' : 'Auto-scrolling'}</span>
-              <button className="fp-ctrl" onClick={togglePause} aria-label={isPaused ? 'Play' : 'Pause'}>
-                {isPaused
-                  ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                }
-              </button>
-              <button className="fp-ctrl" onClick={() => scrollBy(1)} aria-label="Scroll right">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 18l6-6-6-6"/>
-                </svg>
-              </button>
-            </div>
-          )}
+        
 
         </div>
       </section>
