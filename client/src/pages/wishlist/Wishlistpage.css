@@ -80,6 +80,7 @@
   border-radius: 50px;
   font-size: 0.85rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 /* ── Header Buttons ── */
@@ -93,13 +94,22 @@
   font-size: 0.9rem;
   transition: all var(--transition);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
-.btn-add-all:hover {
+.btn-add-all:hover:not(:disabled) {
   background: var(--purple-50);
   color: var(--purple-800);
   transform: translateY(-1px);
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+}
+
+.btn-add-all:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 /* ── Filter Bar ── */
@@ -136,7 +146,7 @@
 .wishlist-card {
   border-radius: var(--radius) !important;
   background: var(--white);
-  transition: transform var(--transition), box-shadow var(--transition);
+  transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
   box-shadow: var(--shadow-sm) !important;
 }
 
@@ -145,12 +155,21 @@
   box-shadow: var(--shadow-lg) !important;
 }
 
+.wishlist-card.removing {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 /* Image wrapper */
 .card-img-wrapper {
   border-radius: var(--radius) var(--radius) 0 0;
 }
 
 .card-img-wrapper img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
   transition: transform 0.4s ease;
 }
 
@@ -187,10 +206,15 @@
   z-index: 2;
 }
 
-.btn-remove:hover {
+.btn-remove:hover:not(:disabled) {
   background: #fee2e2;
   color: #ef4444;
   transform: scale(1.1);
+}
+
+.btn-remove:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 /* Product meta */
@@ -276,10 +300,15 @@
   transition: all var(--transition);
 }
 
-.btn-remove-outline:hover {
+.btn-remove-outline:hover:not(:disabled) {
   background: #fee2e2;
   color: #dc2626;
   border-color: #fca5a5;
+}
+
+.btn-remove-outline:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 /* ── Alerts ── */
@@ -312,9 +341,64 @@
   font-size: 0.9rem;
 }
 
+/* ══════════════════════════════════
+   SKELETON LOADER (matches card layout)
+══════════════════════════════════ */
+@keyframes wishlist-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.wishlist-skeleton {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background: var(--white);
+}
+
+.skeleton-img {
+  height: 220px;
+  background: linear-gradient(90deg, var(--purple-50) 25%, var(--purple-100) 50%, var(--purple-50) 75%);
+  background-size: 200% 100%;
+  animation: wishlist-shimmer 1.5s infinite;
+}
+
+.skeleton-line {
+  height: 10px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--purple-50) 25%, var(--purple-100) 50%, var(--purple-50) 75%);
+  background-size: 200% 100%;
+  animation: wishlist-shimmer 1.5s infinite;
+}
+
+.skeleton-short { width: 35%; height: 8px; }
+.skeleton-med   { width: 75%; height: 14px; }
+.skeleton-stars { width: 50%; }
+.skeleton-price { width: 40%; height: 16px; }
+.skeleton-pill  { width: 90px; height: 20px; border-radius: 100px; }
+
+.skeleton-btn {
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--purple-50) 25%, var(--purple-100) 50%, var(--purple-50) 75%);
+  background-size: 200% 100%;
+  animation: wishlist-shimmer 1.5s infinite;
+}
+
+.skeleton-btn-grow   { flex: 1; }
+.skeleton-btn-square { width: 44px; flex-shrink: 0; }
+
 /* ── Empty State ── */
 .empty-state {
   padding: 60px 20px;
+}
+
+.empty-state-img {
+  width: 220px;
+  max-width: 60%;
+  height: auto;
+  margin: 0 auto;
+  display: block;
 }
 
 .empty-icon {
@@ -359,6 +443,10 @@
   font-weight: 600;
   font-size: 0.9rem;
   transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .btn-explore:hover {
@@ -367,8 +455,112 @@
   box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
 }
 
+/* ── Toast ── */
+.wishlist-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 999;
+  background: var(--purple-900);
+  color: #fff;
+  border-radius: 12px;
+  padding: 13px 20px;
+  font-size: 13.5px;
+  box-shadow: 0 8px 32px rgba(76, 29, 149, 0.3);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 90vw;
+}
+
+.wishlist-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.wishlist-toast-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
 /* ── Responsive ── */
+
+/* Tablet landscape / small desktop */
+@media (max-width: 991px) {
+  .wishlist-title { font-size: 1.75rem; }
+}
+
+/* Tablet portrait */
+@media (max-width: 768px) {
+  .wishlist-header { padding: 24px 0; }
+  .wishlist-title { font-size: 1.6rem; }
+  .wishlist-subtitle { font-size: 0.88rem; }
+
+  .card-img-wrapper img { height: 190px; }
+
+  .empty-state { padding: 48px 16px; }
+}
+
+/* Mobile */
 @media (max-width: 576px) {
-  .wishlist-title { font-size: 1.5rem; }
   .wishlist-header { padding: 20px 0; }
+  .wishlist-title { font-size: 1.5rem; }
+
+  .wishlist-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .wishlist-header-actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .btn-add-all {
+    flex: 1;
+  }
+
+  .card-img-wrapper img { height: 170px; }
+
+  .product-name { font-size: 0.88rem; }
+  .product-price { font-size: 1rem; }
+
+  .btn-add-cart, .btn-remove-outline {
+    font-size: 0.8rem;
+    padding: 7px 10px;
+  }
+
+  .empty-state-img { width: 170px; }
+  .empty-title { font-size: 1.2rem; }
+  .empty-subtitle { font-size: 0.88rem; }
+  .btn-explore { padding: 9px 22px; font-size: 0.85rem; }
+
+  .wishlist-toast {
+    right: 14px;
+    left: 14px;
+    bottom: 14px;
+    font-size: 12.5px;
+    padding: 10px 16px;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 400px) {
+  .wishlist-count-badge { font-size: 0.78rem; padding: 5px 12px; }
+
+  .card-img-wrapper img { height: 160px; }
+
+  .mt-auto.d-flex.gap-2 { flex-wrap: nowrap; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-img, .skeleton-line, .skeleton-btn { animation: none; }
+  .empty-icon { animation: none; }
+  .wishlist-card, .card-img-wrapper img, .wishlist-toast { transition: none; }
 }

@@ -3,17 +3,15 @@ import { useDispatch } from "react-redux";
 import { removeFromWishlist } from "../../redux/reducers/thunks/wishlistActions";
 import { addToCartAsync } from "../../redux/reducers/thunks/cartThunks";
 
-const WishlistCard = ({ item }) => {
+const WishlistCard = ({ item, onToast = () => {} }) => {
   const dispatch = useDispatch();
   const [addingToCart, setAddingToCart] = useState(false);
-  const handleRemove = () => {
-    dispatch(removeFromWishlist(item.productId));
-  };
+  const [removing, setRemoving] = useState(false);
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();
 
-    if (item.stock === 0 || addingToCart) return;
+    if (item.stock === 0 || addingToCart || removing) return;
 
     setAddingToCart(true);
 
@@ -25,17 +23,40 @@ const WishlistCard = ({ item }) => {
         })
       ).unwrap();
 
+      onToast(`Added ${item.name} to cart 🛍️`, "cart");
     } catch (error) {
-      console.log(error);
-
+      onToast(`Couldn't add ${item.name} to cart`, "error");
     } finally {
       setAddingToCart(false);
     }
   };
 
+  const handleRemoveFromWishlist = async (e) => {
+    e?.stopPropagation?.();
+
+    if (removing) return;
+
+    setRemoving(true);
+
+    try {
+      await dispatch(removeFromWishlist(item.productId)).unwrap();
+      onToast(`Removed ${item.name} from wishlist`, "wishlist");
+    } catch (error) {
+      onToast("Couldn't remove item, please try again", "error");
+      setRemoving(false);
+    }
+    // on success we deliberately don't reset `removing` - the item is about
+    // to unmount once the parent's `items` list updates, so leaving the
+    // disabled/faded state on prevents a flash back to the normal card.
+  };
+
   return (
-    <div className="col-12 col-sm-6 col-lg-4 mb-4">
-      <div className="wishlist-card card h-100 border-0 shadow-sm">
+    <div className="col-12 col-sm-6 col-lg-4 col-xl-3 mb-4">
+      <div
+        className={`wishlist-card card h-100 border-0 shadow-sm${
+          removing ? " removing" : ""
+        }`}
+      >
 
         {/* Product Image */}
         <div className="card-img-wrapper position-relative overflow-hidden">
@@ -47,10 +68,6 @@ const WishlistCard = ({ item }) => {
             }
             alt={item.name}
             className="card-img-top"
-            style={{
-              height: "220px",
-              objectFit: "cover"
-            }}
           />
 
           {/* Discount Badge */}
@@ -62,26 +79,21 @@ const WishlistCard = ({ item }) => {
 
           {/* Remove Button */}
           <button
-            onClick={handleRemove}
+            onClick={handleRemoveFromWishlist}
+            disabled={removing}
             className="btn-remove position-absolute top-0 end-0 m-2 d-flex align-items-center justify-content-center"
             title="Remove from wishlist"
-            style={{
-              width: "38px",
-              height: "38px",
-              borderRadius: "50%",
-              border: "none",
-
-              color: "#dc3545",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.12)",
-              zIndex: 10
-            }}
+            aria-label="Remove from wishlist"
           >
-            <i
-              className="bi bi-trash3-fill"
-              style={{
-                fontSize: "15px"
-              }}
-            ></i>
+            {removing ? (
+              <span
+                className="spinner-border spinner-border-sm"
+                role="status"
+                style={{ width: "13px", height: "13px", borderWidth: "2px" }}
+              ></span>
+            ) : (
+              <i className="bi bi-trash3-fill" style={{ fontSize: "15px" }}></i>
+            )}
           </button>
 
         </div>
@@ -162,7 +174,7 @@ const WishlistCard = ({ item }) => {
 
             <button
               onClick={handleAddToCart}
-              disabled={item.stock === 0 || addingToCart}
+              disabled={item.stock === 0 || addingToCart || removing}
               className="btn btn-add-cart flex-grow-1 d-flex align-items-center justify-content-center"
             >
               {addingToCart ? (
@@ -182,11 +194,20 @@ const WishlistCard = ({ item }) => {
             </button>
 
             <button
-              onClick={handleRemove}
+              onClick={handleRemoveFromWishlist}
+              disabled={removing}
               className="btn btn-remove-outline"
               title="Remove"
+              aria-label="Remove from wishlist"
             >
-              <i className="bi bi-trash3"></i>
+              {removing ? (
+                <span
+                  className="spinner-border spinner-border-sm"
+                  role="status"
+                ></span>
+              ) : (
+                <i className="bi bi-trash3"></i>
+              )}
             </button>
 
           </div>

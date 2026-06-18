@@ -1,52 +1,358 @@
-/* ════════════════════════════════════════════
-   ProductCard.css
-   Append this to ProductsPage.css  OR  keep
-   as a separate file imported in ProductCard.jsx
-════════════════════════════════════════════ */
+/* productcard.css - White + Purple Theme */
 
-/* Add to Cart button */
-.product-card__cart-btn {
-  margin-top: 10px;
+.product-card {
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(157, 78, 221, 0.08);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(157, 78, 221, 0.06);
+}
+
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px rgba(157, 78, 221, 0.15);
+  border-color: rgba(157, 78, 221, 0.15);
+}
+
+.product-card-img-wrap {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #fafaff;
+  padding: 16px;
+}
+
+.product-card-img-wrap img {
   width: 100%;
-  padding: 8px 0;
-  border-radius: 8px;
-  border: 1.5px solid #7c3aed;
-  background: #fff;
-  color: #7c3aed;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.product-card__cart-btn:hover {
-  background: #ede9fe;
-}
-.product-card__cart-btn--in {
-  background: #7c3aed;
-  color: #fff;
-}
-.product-card__cart-btn--in:hover {
-  background: #6d28d9;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Per-card toast (shows inside the card briefly) */
-.product-card__toast {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #111827;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 500;
-  padding: 5px 14px;
-  border-radius: 20px;
-  white-space: nowrap;
-  pointer-events: none;
-  animation: pc-toast-in 0.2s ease;
-  z-index: 10;
+.product-card:hover .product-card-img-wrap img {
+  transform: scale(1.05);
 }
-@keyframes pc-toast-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── BADGES - FIXED POSITIONS ─── */
+.product-badge {
+  position: absolute;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
+
+/* Bestseller - Top Left */
+.product-badge.bestseller {
+  top: 12px;
+  left: 12px;
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+/* New - Top Left (below bestseller if both exist) */
+.product-badge.new {
+  top: 44px;
+  left: 12px;
+  background: #9D4EDD;
+  color: #ffffff;
+}
+
+/* Discount - Top Right */
+.product-badge.discount {
+  top: 12px;
+  right: 56px; /* Space for wishlist button */
+  background: #ef4444;
+  color: #ffffff;
+}
+
+/* If you want discount on left too, use this instead */
+/*
+.product-badge.discount {
+  top: 76px;
+  left: 12px;
+  background: #ef4444;
+  color: #ffffff;
+}
+*/
+
+/* Wishlist Button */
+.product-wishlist-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(157, 78, 221, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 3;
+  font-size: 18px;
+  color: #9ca3af;
+  box-shadow: 0 2px 8px rgba(157, 78, 221, 0.08);
+}
+
+.product-wishlist-btn:hover {
+  transform: scale(1.1);
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(157, 78, 221, 0.15);
+  border-color: #9D4EDD;
+}
+
+.product-wishlist-btn.liked {
+  color: #9D4EDD;
+  background: rgba(157, 78, 221, 0.1);
+  border-color: #9D4EDD;
+}
+
+.product-wishlist-btn.liked:hover {
+  background: rgba(157, 78, 221, 0.2);
+  transform: scale(1.1);
+}
+
+.product-wishlist-btn.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.heart-icon {
+  line-height: 1;
+}
+
+/* Quick Add Button - Purple Theme */
+.product-quick-add {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(157, 78, 221, 0.15);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 12px;
+  color: #1A0B2E;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(10px);
+  box-shadow: 0 2px 12px rgba(157, 78, 221, 0.08);
+  z-index: 3;
+  letter-spacing: 0.3px;
+}
+
+.product-card:hover .product-quick-add {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.product-quick-add:hover {
+  background: #9D4EDD;
+  color: #ffffff;
+  border-color: #9D4EDD;
+  transform: translateY(0) scale(1.02);
+  box-shadow: 0 4px 16px rgba(157, 78, 221, 0.25);
+}
+
+.product-quick-add:active {
+  transform: scale(0.98);
+}
+
+.product-quick-add.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Product Body */
+.product-card-body {
+  padding: 16px 16px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.product-brand {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+
+.product-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.4;
+  min-height: 40px;
+  color: #1A0B2E;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-title:hover {
+  color: #9D4EDD;
+}
+
+/* Rating */
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.stars {
+  color: #f59e0b;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.review-count {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Price */
+.product-price-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 4px 0;
+}
+
+.current-price {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1A0B2E;
+  letter-spacing: -0.3px;
+}
+
+.original-price {
+  font-size: 13px;
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+.discount-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9D4EDD;
+  background: rgba(157, 78, 221, 0.1);
+  padding: 2px 10px;
+  border-radius: 12px;
+}
+
+/* Add to Cart Button - Purple Theme */
+.product-add-to-cart {
+  width: 100%;
+  padding: 10px 16px;
+  background: #9D4EDD;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.3px;
+  margin-top: 8px;
+}
+
+.product-add-to-cart:hover {
+  background: #7c3aed;
+  transform: scale(1.02);
+  box-shadow: 0 4px 16px rgba(157, 78, 221, 0.3);
+}
+
+.product-add-to-cart:active {
+  transform: scale(0.98);
+}
+
+.product-add-to-cart:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .product-card-img-wrap {
+    padding: 10px;
+  }
+
+  .product-card-body {
+    padding: 12px 12px 16px;
+  }
+
+  .product-title {
+    font-size: 13px;
+    min-height: 36px;
+  }
+
+  .current-price {
+    font-size: 15px;
+  }
+
+  .product-wishlist-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+    top: 8px;
+    right: 8px;
+  }
+
+  /* Badge positions for mobile */
+  .product-badge.bestseller {
+    top: 8px;
+    left: 8px;
+    font-size: 8px;
+    padding: 3px 10px;
+  }
+
+  .product-badge.new {
+    top: 36px;
+    left: 8px;
+    font-size: 8px;
+    padding: 3px 10px;
+  }
+
+  .product-badge.discount {
+    top: 8px;
+    right: 48px;
+    font-size: 8px;
+    padding: 3px 10px;
+  }
+
+  .product-quick-add {
+    padding: 8px 12px;
+    font-size: 11px;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+  }
+
+  .product-add-to-cart {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
 }

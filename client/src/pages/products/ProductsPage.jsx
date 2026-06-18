@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   setSearchQuery,
@@ -12,7 +12,9 @@ import ProductCard from './ProductCard';
 import './ProductsPage.css';
 import BannerCarousel from '../../components/BannerCarousel';
 import FeaturedProductsSection from '../../components/FeaturedProductsSection';
-import { selectBanners } from '../../redux/slices/brandpageSlice';
+import { selectBanners, fetchBrandBanners, selectBrands, fetchBrands } from '../../redux/slices/brandpageSlice';
+import { fetchWishlist } from '../../redux/reducers/thunks/wishlistActions';
+import noDataImg from '../../assets/nodata.avif';
 
 const SORT_OPTIONS = [
   { value: 'featured', label: 'Featured' },
@@ -22,29 +24,184 @@ const SORT_OPTIONS = [
   { value: 'discount', label: '% Discount' },
 ];
 
-const BRANDS = ['Maybelline', "L'Oreal", 'NYX', 'MAC'];
-const DISC_OPTIONS = [10, 20, 30];
+const DISC_OPTIONS = [
+  { value: '10', label: '10% & above' },
+  { value: '20', label: '20% & above' },
+  { value: '30', label: '30% & above' },
+];
+
+// ========== TOAST HOOK ==========
+function useToast() {
+  const [toast, setToast] = useState({ msg: "", show: false, type: "default" });
+  const showToast = useCallback((msg, type = "default") => {
+    setToast({ msg, show: true, type });
+    setTimeout(() => setToast((t) => ({ ...t, show: false })), 2400);
+  }, []);
+  return { toast, showToast };
+}
+
+// ========== FILTER CHECKBOX ==========
+function FilterCheckbox({ label, count, checked, onChange, icon }) {
+  return (
+    <label className="filter-checkbox-row">
+      <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
+      <span className={`checkbox-box${checked ? " checked" : ""}`}>
+        {checked && <span className="checkbox-tick">✓</span>}
+      </span>
+      <span className="filter-checkbox-label">
+        {icon && <span className="cat-icon">{icon}</span>}
+        {label}
+      </span>
+      {count !== undefined && <span className="filter-checkbox-count">{count}</span>}
+    </label>
+  );
+}
+
+// ========== COLLAPSIBLE FILTER SECTION ==========
+function FilterSection({ title, count, children, defaultOpen = true }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="filter-section">
+      <button
+        className="filter-section-toggle"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
+        <span className="filter-section-title">
+          {title}
+          {count > 0 && <span className="filter-count-badge">{count}</span>}
+        </span>
+        <span className={`chevron${open ? " open" : ""}`}>›</span>
+      </button>
+      {open && <div className="filter-section-body">{children}</div>}
+    </div>
+  );
+}
+
+// ========== SKELETON CARD ==========
+function SkeletonCard() {
+  return (
+    <div className="pp-skeleton-card">
+      <div className="pp-skeleton pp-skeleton-img" />
+      <div className="pp-skeleton-body">
+        <div className="pp-skeleton pp-skeleton-line pp-skeleton-line--short" />
+        <div className="pp-skeleton pp-skeleton-line" />
+        <div className="pp-skeleton pp-skeleton-line pp-skeleton-line--med" />
+        <div className="pp-skeleton pp-skeleton-line pp-skeleton-line--short" />
+        <div className="pp-skeleton pp-skeleton-btn" />
+      </div>
+    </div>
+  );
+}
+
+// ========== BANNER SECTION ==========
+function BannerSection() {
+  const dispatch = useDispatch();
+  const banners = useSelector(selectBanners);
+  
+  useEffect(() => {
+    dispatch(fetchBrandBanners());
+  }, [dispatch]);
+
+  if (!banners.length) return null;
+  
+  return <BannerCarousel banners={banners} />;
+}
+
+// ========== ACTIVE FILTER CHIPS ==========
+function ActiveFilterChips({ 
+  selectedBrands, 
+  setSelectedBrands, 
+  minPrice, 
+  setMinPrice, 
+  maxPrice, 
+  setMaxPrice, 
+  selectedDiscounts, 
+  setSelectedDiscounts,
+  selectedCategory,
+  setSelectedCategory,
+  clearAll 
+}) {
+  const chips = [];
+
+  // Category chip
+  if (selectedCategory && selectedCategory !== 'All') {
+    chips.push({
+      key: 'category',
+      label: selectedCategory,
+      remove: () => setSelectedCategory('All')
+    });
+  }
+
+  // Brand chips
+  selectedBrands.forEach(brand => {
+    chips.push({
+      key: `brand-${brand}`,
+      label: brand,
+      remove: () => setSelectedBrands(selectedBrands.filter(b => b !== brand))
+    });
+  });
+
+  // Price chip
+  if (minPrice > 0 || maxPrice < 2000) {
+    chips.push({
+      key: 'price',
+      label: `₹${minPrice} - ₹${maxPrice}`,
+      remove: () => { setMinPrice(0); setMaxPrice(2000); }
+    });
+  }
+
+  // Discount chips
+  selectedDiscounts.forEach(discount => {
+    chips.push({
+      key: `disc-${discount}`,
+      label: `${discount}% off`,
+      remove: () => setSelectedDiscounts(selectedDiscounts.filter(d => d !== discount))
+    });
+  });
+
+  if (chips.length === 0) return null;
+
+  return (
+    <div className="active-filters-bar">
+      <span className="active-filters-label">Active filters:</span>
+      <div className="active-tags">
+        {chips.map((chip) => (
+          <button key={chip.key} className="active-tag" onClick={chip.remove}>
+            {chip.label}
+            <span className="tag-close" aria-hidden="true">×</span>
+          </button>
+        ))}
+      </div>
+      <button className="clear-all-btn" onClick={clearAll}>
+        Clear all
+      </button>
+    </div>
+  );
+}
 
 export default function ProductsPage() {
   const dispatch = useDispatch();
+  const { toast, showToast } = useToast();
+
   const { loading, error, searchQuery, selectedCategory, sortBy, page } =
     useSelector((s) => s.products);
   const products = useSelector((s) => s.products.items);
   const totalPages = useSelector((s) => s.products.totalPages);
   const categories = useSelector(selectCategories);
+  const brands = useSelector(selectBrands);
 
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(2000);
   const [selectedDiscounts, setSelectedDiscounts] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const toggleItem = (arr, setArr, val) =>
-    setArr(arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   const activeFilterCount =
     selectedBrands.length +
     selectedDiscounts.length +
+    (selectedCategory !== 'All' ? 1 : 0) +
     (minPrice > 0 || maxPrice < 2000 ? 1 : 0);
 
   const clearAll = () => {
@@ -58,7 +215,40 @@ export default function ProductsPage() {
     dispatch(setPage(1));
   };
 
+  // Update first load state
   useEffect(() => {
+    if (!loading && products.length > 0) {
+      setIsFirstLoad(false);
+    }
+  }, [loading, products]);
+
+  // Fetch brands and wishlist on load
+  useEffect(() => {
+    dispatch(fetchBrands());
+    dispatch(fetchWishlist());
+  }, [dispatch]);
+
+  // Close sidebar on resize to desktop
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth > 768) setSidebarOpen(false);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // 🔴 FIXED: Fetch products when filters change
+  useEffect(() => {
+    console.log('🔄 Fetching products with filters:', {
+      search: searchQuery,
+      category: selectedCategory !== 'All' ? selectedCategory : '',
+      brands: selectedBrands.join(','),
+      priceRanges: minPrice > 0 || maxPrice < 2000 ? `${minPrice}-${maxPrice}` : '',
+      discounts: selectedDiscounts.join(','),
+      sortBy,
+      page,
+    });
+
     dispatch(fetchProducts({
       search: searchQuery,
       category: selectedCategory !== 'All' ? selectedCategory : '',
@@ -69,19 +259,32 @@ export default function ProductsPage() {
       page,
       limit: 12,
     }));
-  }, [searchQuery, selectedCategory, sortBy, page,
-    selectedBrands, minPrice, maxPrice, selectedDiscounts]);
-  const BannerSection = () => {
-    const banners = useSelector(selectBanners);
-    return <BannerCarousel banners={banners} />;
-  };
+  }, [
+    dispatch, 
+    searchQuery, 
+    selectedCategory, 
+    sortBy, 
+    page,
+    // Convert arrays to strings for proper dependency comparison
+    selectedBrands.join(','),
+    minPrice,
+    maxPrice,
+    selectedDiscounts.join(',')
+  ]);
+
+  const showSkeletons = loading || (isFirstLoad && products.length === 0);
+
   return (
     <div className="pp-root">
+
+      {/* ── BANNER ── */}
+      <BannerSection />
 
       {/* ── Mobile filter toggle ── */}
       <button
         className="pp-mob-filter-btn"
         onClick={() => setSidebarOpen((o) => !o)}
+        aria-label="Toggle filters"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" strokeWidth="2">
@@ -100,88 +303,131 @@ export default function ProductsPage() {
         <div className="pp-overlay" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* ── Body: sidebar + main ──
-          IMPORTANT: display:flex is set BOTH here (inline) and in CSS
-          so it works even before the stylesheet loads. */}
-      <div className="pp-body" style={{ display: 'flex', alignItems: 'flex-start' }}>
+      {/* ── Body: sidebar + main ── */}
+      <div className="pp-body">
 
-        {/* ════ SIDEBAR ════ */}
-        <aside
-          className={`pp-sidebar${sidebarOpen ? ' pp-sidebar--open' : ''}`}
-          style={{
-            width: 200,
-            flexShrink: 0,
-            background: '#fff',
-            borderRight: '1px solid #e5e7eb',
-            minHeight: '100vh',
-            padding: '20px 16px',
-          }}
-        >
+        {/* ════ SIDEBAR - Premium Design ════ */}
+        <aside className={`pp-sidebar${sidebarOpen ? ' pp-sidebar--open' : ''}`}>
+
+          {/* Mobile close button */}
+          <button
+            className="pp-sidebar-close"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close filters"
+          >✕</button>
+
           {/* Header */}
-          <div className="pp-sidebar-head">
-            <span className="pp-sidebar-title">Filters</span>
-            <button className="pp-clear-btn" onClick={clearAll}>Clear all</button>
-          </div>
-
-          {/* Brand */}
-          <div className="pp-filter-group">
-            <p className="pp-filter-label">Brand</p>
-            {BRANDS.map((b) => (
-              <label key={b} className="pp-check-row">
-                <input
-                  type="checkbox"
-                  checked={selectedBrands.includes(b)}
-                  onChange={() => {
-                    toggleItem(selectedBrands, setSelectedBrands, b);
-                    dispatch(setPage(1));
-                  }}
-                />
-                <span>{b}</span>
-              </label>
-            ))}
-          </div>
-
-          {/* Price range */}
-          <div className="pp-filter-group">
-            <p className="pp-filter-label">Price range</p>
-            <div className="pp-price-vals">
-              <span>₹{minPrice}</span>
-              <span>₹{maxPrice}</span>
+          <div className="filter-panel-header">
+            <div className="filter-panel-title">
+              <span>Filters</span>
+              {activeFilterCount > 0 && <span className="filter-total-badge">{activeFilterCount}</span>}
             </div>
-            <input type="range" className="pp-range"
-              min={0} max={2000} step={100} value={minPrice}
-              onChange={(e) => { setMinPrice(+e.target.value); dispatch(setPage(1)); }}
-            />
-            <input type="range" className="pp-range"
-              min={0} max={2000} step={100} value={maxPrice}
-              onChange={(e) => { setMaxPrice(+e.target.value); dispatch(setPage(1)); }}
-            />
+            <div className="filter-panel-actions">
+              {activeFilterCount > 0 && (
+                <button className="clear-filters-link" onClick={clearAll}>
+                  Clear all
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Discount */}
-          <div className="pp-filter-group">
-            <p className="pp-filter-label">Discount</p>
-            {DISC_OPTIONS.map((d) => (
-              <label key={d} className="pp-check-row">
-                <input
-                  type="checkbox"
-                  checked={selectedDiscounts.includes(d)}
-                  onChange={() => {
-                    toggleItem(selectedDiscounts, setSelectedDiscounts, d);
-                    dispatch(setPage(1));
-                  }}
-                />
-                <span>{d}% and above</span>
-              </label>
+          {/* ── Category Section ── */}
+          <FilterSection title="Category" count={selectedCategory !== 'All' ? 1 : 0}>
+            {['All', ...categories].map((cat) => (
+              <FilterCheckbox
+                key={cat}
+                label={cat}
+                icon={cat !== 'All' ? "📂" : "📋"}
+                checked={selectedCategory === cat}
+                onChange={() => { dispatch(setCategory(cat)); dispatch(setPage(1)); }}
+              />
             ))}
-          </div>
+          </FilterSection>
+
+          {/* ── Brand Section - From API ── */}
+          <FilterSection title="Brand" count={selectedBrands.length}>
+            {brands.map((brand) => (
+              <FilterCheckbox
+                key={brand._id}
+                label={brand.name}
+                count={brand.count}
+                icon="🏷️"
+                checked={selectedBrands.includes(brand.name)}
+                onChange={() => {
+                  setSelectedBrands(
+                    selectedBrands.includes(brand.name)
+                      ? selectedBrands.filter(b => b !== brand.name)
+                      : [...selectedBrands, brand.name]
+                  );
+                  dispatch(setPage(1));
+                }}
+              />
+            ))}
+          </FilterSection>
+
+          {/* ── Price Section ── */}
+          <FilterSection title="Price" count={minPrice > 0 || maxPrice < 2000 ? 1 : 0}>
+            <div className="pp-price-range-group">
+              <div className="pp-price-vals">
+                <span>₹{minPrice}</span>
+                <span>₹{maxPrice}</span>
+              </div>
+              <input 
+                type="range" 
+                className="pp-range"
+                min={0} 
+                max={2000} 
+                step={100} 
+                value={minPrice}
+                onChange={(e) => { setMinPrice(+e.target.value); dispatch(setPage(1)); }}
+              />
+              <input 
+                type="range" 
+                className="pp-range"
+                min={0} 
+                max={2000} 
+                step={100} 
+                value={maxPrice}
+                onChange={(e) => { setMaxPrice(+e.target.value); dispatch(setPage(1)); }}
+              />
+              <div className="pp-price-labels">
+                <span>₹0</span>
+                <span>₹2000</span>
+              </div>
+            </div>
+          </FilterSection>
+
+          {/* ── Discount Section ── */}
+          <FilterSection title="Discount" count={selectedDiscounts.length}>
+            {DISC_OPTIONS.map((d) => (
+              <FilterCheckbox
+                key={d.value}
+                label={d.label}
+                icon="🔥"
+                checked={selectedDiscounts.includes(d.value)}
+                onChange={() => {
+                  setSelectedDiscounts(
+                    selectedDiscounts.includes(d.value)
+                      ? selectedDiscounts.filter(disc => disc !== d.value)
+                      : [...selectedDiscounts, d.value]
+                  );
+                  dispatch(setPage(1));
+                }}
+              />
+            ))}
+          </FilterSection>
+
+          {/* Apply button (mobile) */}
+          <button
+            className="pp-sidebar-apply"
+            onClick={() => setSidebarOpen(false)}
+          >
+            Apply Filters ({activeFilterCount} active)
+          </button>
         </aside>
 
         {/* ════ MAIN ════ */}
-        <div
-          className="pp-main"
-          style={{ flex: 1, minWidth: 0, padding: '20px 20px 40px' }}
-        >
+        <div className="pp-main">
 
           {/* Top bar: search + sort pills */}
           <div className="pp-topbar">
@@ -215,38 +461,42 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          {/* Category tabs */}
-          <div className="pp-cat-tabs">
-
-            {['All', ...categories].map((cat) => (
-              <button
-                key={cat}
-                className={`pp-cat-tab${selectedCategory === cat ? ' pp-cat-tab--active' : ''}`}
-                onClick={() => { dispatch(setCategory(cat)); dispatch(setPage(1)); }}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+          {/* ── ACTIVE FILTER CHIPS ── */}
+          <ActiveFilterChips
+            selectedBrands={selectedBrands}
+            setSelectedBrands={setSelectedBrands}
+            minPrice={minPrice}
+            setMinPrice={setMinPrice}
+            maxPrice={maxPrice}
+            setMaxPrice={setMaxPrice}
+            selectedDiscounts={selectedDiscounts}
+            setSelectedDiscounts={setSelectedDiscounts}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={(cat) => { dispatch(setCategory(cat)); dispatch(setPage(1)); }}
+            clearAll={clearAll}
+          />
 
           {/* Results count */}
-          {!loading && !error && (
+          {!showSkeletons && !error && products.length > 0 && (
             <p className="pp-results-count">
               {products.length} Product{products.length !== 1 ? 's' : ''}
             </p>
           )}
 
-          {/* Loading */}
-          {loading && (
-            <div className="pp-state">
-              <div className="pp-spinner" />
-              <p>Fetching products…</p>
+          {/* ── SKELETON LOADER ── */}
+          {showSkeletons && (
+            <div className="pp-grid">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
             </div>
           )}
 
-          {/* Error */}
-          {error && (
+          {/* ── Error ── */}
+          {!showSkeletons && error && (
             <div className="pp-state">
+              <div className="pp-state-icon pp-state-icon--error">⚠</div>
+              <h5>Something went wrong</h5>
               <p className="pp-state-err">{error}</p>
               <button className="pp-retry-btn" onClick={() => dispatch(fetchProducts())}>
                 Try Again
@@ -254,31 +504,39 @@ export default function ProductsPage() {
             </div>
           )}
 
-          {/* Empty */}
-          {!loading && !error && products.length === 0 && (
-            <div className="pp-state">
-              <div className="pp-empty-icon">✦</div>
+          {/* ── Empty / No data ── */}
+          {!showSkeletons && !error && products.length === 0 && (
+            <div className="pp-state pp-state--nodata">
+              <img
+                src={noDataImg}
+                alt="No products found"
+                className="pp-nodata-img"
+              />
               <h5>No products found</h5>
-              <p>Try adjusting your filters or search.</p>
+              <p>Try adjusting your filters or search term.</p>
+              <button className="pp-retry-btn" onClick={clearAll}>
+                Clear Filters
+              </button>
             </div>
           )}
 
-          {/* Grid */}
-          {!loading && !error && products.length > 0 && (
+          {/* ── Grid ── */}
+          {!showSkeletons && !error && products.length > 0 && (
             <div className="pp-grid">
               {products.map((p) => (
-                <ProductCard key={p._id} product={p} />
+                <ProductCard key={p._id} product={p} onToast={showToast} />
               ))}
             </div>
           )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
+          {/* ── Pagination ── */}
+          {!showSkeletons && totalPages > 1 && (
             <div className="pp-pagination">
               <button
                 className="pp-page-btn"
                 disabled={page === 1}
                 onClick={() => dispatch(setPage(page - 1))}
+                aria-label="Previous page"
               >‹</button>
 
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
@@ -286,6 +544,7 @@ export default function ProductsPage() {
                   key={n}
                   className={`pp-page-btn${page === n ? ' pp-page-btn--active' : ''}`}
                   onClick={() => dispatch(setPage(n))}
+                  aria-current={page === n ? 'page' : undefined}
                 >
                   {n}
                 </button>
@@ -295,14 +554,27 @@ export default function ProductsPage() {
                 className="pp-page-btn"
                 disabled={page === totalPages}
                 onClick={() => dispatch(setPage(page + 1))}
+                aria-label="Next page"
               >›</button>
             </div>
           )}
 
         </div>{/* /pp-main */}
       </div>{/* /pp-body */}
-      <BannerSection />
+
       <FeaturedProductsSection />
+
+      {/* ── Toast ── */}
+      <div
+        className={`toast-notification${toast.show ? " visible" : ""} toast--${toast.type}`}
+        role="status"
+        aria-live="polite"
+      >
+        <span className="toast-icon">
+          {toast.type === "cart" ? "🛍️" : toast.type === "wishlist" ? "♥" : "✓"}
+        </span>
+        {toast.msg}
+      </div>
     </div>
   );
 }

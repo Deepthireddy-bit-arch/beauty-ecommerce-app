@@ -1,52 +1,52 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-// import {
-//   fetchCollections,
-//   setFilter,
-//   toggleLike,
-//   selectFilteredCollections,
-  
-//   selectStatus,
-//   selectError,
-//   selectFilter,
-//   selectLiked,
-//   selectAllCollections,
-// } from "../../redux/slices/collectionsSlice";
 import {
   fetchCollections,
-  setAllCollections,
-  setSortBy,
-  setPage,
-  setCategory,
-  clearFilters,
-  clearCollection,
   toggleWishlist,
-  selectCollections,
   selectAllCollections,
   selectCollectionsStatus,
-  selectCollection,
-  selectCollectionStatus,
-  selectProducts,
-  selectProductsStatus,
-  selectPagination,
-  selectFilters,
   selectWishlist,
   selectError,
 } from "../../redux/slices/collectionsSlice";
 import "./collections.css";
 import BannerCarousel from "../../components/BannerCarousel";
-import { fetchBrandBanners, selectBanners } from "../../redux/slices/brandpageSlice";
+import {
+  fetchBrandBanners,
+  selectActiveBanner,
+  selectBanners,
+  setActiveBanner,
+} from "../../redux/slices/brandpageSlice";
 import FeaturedProductsSection from "../../components/FeaturedProductsSection";
 import NewArrivalsSection from "../../components/NewArrivalsSection";
+import { addToCartAsync } from "../../redux/reducers/thunks/cartThunks";
+import { addToWishlist, removeFromWishlist, fetchWishlist } from "../../redux/reducers/thunks/wishlistActions";
 
 // ─── TOAST HOOK ───────────────────────────────────────────────────────────────
 function useToast() {
-  const [toast, setToast] = useState({ msg: "", show: false });
-  const showToast = (msg) => {
-    setToast({ msg, show: true });
+  const [toast, setToast] = useState({ msg: "", show: false, type: "default" });
+  const showToast = useCallback((msg, type = "default") => {
+    setToast({ msg, show: true, type });
     setTimeout(() => setToast((t) => ({ ...t, show: false })), 2400);
-  };
+  }, []);
   return { toast, showToast };
+}
+
+// ─── RESPONSIVE HOOK ──────────────────────────────────────────────────────────
+// Drives the desktop/mobile filter trigger from JS instead of CSS display
+// toggles, so exactly one trigger is ever mounted - never both at once.
+function useIsDesktop(breakpoint = 1024) {
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== "undefined" ? window.innerWidth >= breakpoint : true
+  );
+
+  useEffect(() => {
+    const handler = () => setIsDesktop(window.innerWidth >= breakpoint);
+    handler();
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, [breakpoint]);
+
+  return isDesktop;
 }
 
 // ─── SKELETON CARD ────────────────────────────────────────────────────────────
@@ -70,80 +70,155 @@ function SkeletonCard() {
 // ─── COLLECTION CARD ──────────────────────────────────────────────────────────
 function CollectionCard({ item, onToast }) {
   const dispatch = useDispatch();
+  const wishlistItems = useSelector((state) => state.wishlist?.items || []);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
 
-  const wishlist = useSelector(selectWishlist);
-  const liked = wishlist[item._id];
+  // Check if product is in wishlist - handles duplicate checking
+  const liked = wishlistItems.some(
+    (wishlistItem) => wishlistItem.productId === item._id || wishlistItem._id === item._id
+  );
 
-  const handleLike = (e) => {
+  const handleAddToCart = async (e) => {
     e.stopPropagation();
-    dispatch(toggleWishlist(item._id));
-    onToast(liked ? "Removed from wishlist" : "Added to wishlist ♥");
+    setIsAddingToCart(true);
+    try {
+      await dispatch(addToCartAsync({ productId: item._id, quantity: 1 })).unwrap();
+      onToast(`Added ${item.title} to cart 🛍️`, "cart");
+    } catch (error) {
+      // Error is already handled in the thunk
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
+  const handleToggleWishlist = async (e) => {
+    e.stopPropagation();
+    setIsTogglingWishlist(true);
+    try {
+      if (liked) {
+        await dispatch(removeFromWishlist(item._id)).unwrap();
+        onToast(`Removed ${item.title} from wishlist`, "wishlist");
+      } else {
+        await dispatch(addToWishlist(item._id)).unwrap();
+        onToast(`Added ${item.title} to wishlist ♥`, "wishlist");
+      }
+      // Refresh wishlist to get updated state
+      await dispatch(fetchWishlist()).unwrap();
+    } catch (error) {
+      // Refresh wishlist to sync state
+      await dispatch(fetchWishlist()).unwrap();
+      if (error?.includes?.("already") || error?.message?.includes?.("already")) {
+        onToast(`${item.title} is already in your wishlist ♥`, "wishlist");
+      } else {
+        onToast(`Failed to update wishlist`, "error");
+      }
+    } finally {
+      setIsTogglingWishlist(false);
+    }
   };
 
   return (
     <div className="card">
       <div className="card-img-wrap">
         <img src={item.image} alt={item.title} loading="lazy" />
-
         <span className="card-badge">{item.category}</span>
-
         <button
-          className={`card-wishlist${liked ? " liked" : ""}`}
-          onClick={handleLike}
+          className={`card-wishlist${liked ? " liked" : ""} ${isTogglingWishlist ? "loading" : ""}`}
+          onClick={handleToggleWishlist}
+          disabled={isTogglingWishlist}
+          aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
         >
           {liked ? "♥" : "♡"}
         </button>
+        <div className="card-overlay">
+          <button
+            className={`quick-shop ${isAddingToCart ? "loading" : ""}`}
+            onClick={handleAddToCart}
+            disabled={isAddingToCart}
+          >
+            {isAddingToCart ? "Adding..." : "Quick Shop"}
+          </button>
+        </div>
       </div>
-
       <div className="card-body">
-        <h3>{item.title}</h3>
-        <p>{item.sub}</p>
-        <span>{item.offer}</span>
+        <div className="card-category">{item.category}</div>
+        <h3 className="card-title">{item.title}</h3>
+        <p className="card-sub">{item.sub}</p>
+        <div className="card-footer">
+          <span className="offer-pill">{item.offer}</span>
+          <button className="explore-btn">
+            Explore
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <line x1={5} y1={12} x2={19} y2={12} />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </button>
+        </div>
       </div>
+    </div>
+  );
+}
+
+// ─── FILTER CHECKBOX ──────────────────────────────────────────────────────────
+function FilterCheckbox({ label, count, checked, onChange, icon }) {
+  return (
+    <label className="filter-checkbox-row">
+      <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
+      <span className={`checkbox-box${checked ? " checked" : ""}`}>
+        {checked && <span className="checkbox-tick">✓</span>}
+      </span>
+      <span className="filter-checkbox-label">
+        {icon && <span className="cat-icon">{icon}</span>}
+        {label}
+      </span>
+      {count !== undefined && <span className="filter-checkbox-count">{count}</span>}
+    </label>
+  );
+}
+
+// ─── COLLAPSIBLE FILTER SECTION ───────────────────────────────────────────────
+function FilterSection({ title, count, children, defaultOpen = true }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="filter-section">
+      <button
+        className="filter-section-toggle"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
+        <span className="filter-section-title">
+          {title}
+          {count > 0 && <span className="filter-count-badge">{count}</span>}
+        </span>
+        <span className={`chevron${open ? " open" : ""}`}>›</span>
+      </button>
+      {open && <div className="filter-section-body">{children}</div>}
     </div>
   );
 }
 
 // ─── FILTER PANEL ─────────────────────────────────────────────────────────────
 function FilterPanel({ collections, localFilters, setLocalFilters, onClear, isOpen, onClose }) {
-  // Derive unique values from collections data
+  // Remove duplicates from categories using Set
   const categories = useMemo(() => {
     const cats = [...new Set(collections.map((c) => c.category).filter(Boolean))];
     return cats.sort();
   }, [collections]);
 
   const priceRanges = [
-    { label: "Under ₹500", min: 0, max: 500 },
-    { label: "₹500 – ₹1,000", min: 500, max: 1000 },
-    { label: "₹1,000 – ₹2,500", min: 1000, max: 2500 },
-    { label: "₹2,500+", min: 2500, max: Infinity },
+    { value: "0-499", label: "Under ₹499" },
+    { value: "500-999", label: "₹500 – ₹999" },
+    { value: "1000-1999", label: "₹1000 – ₹1999" },
+    { value: "2000-3999", label: "₹2000 – ₹3999" },
   ];
 
-  const ratingOptions = [4, 3, 2];
-
-  const toggleCategory = (cat) => {
-    setLocalFilters((prev) => ({
-      ...prev,
-      categories: prev.categories.includes(cat)
-        ? prev.categories.filter((c) => c !== cat)
-        : [...prev.categories, cat],
-    }));
-  };
-
-  const togglePrice = (range) => {
-    const key = `${range.min}-${range.max}`;
-    setLocalFilters((prev) => ({
-      ...prev,
-      priceRange: prev.priceRange === key ? null : key,
-    }));
-  };
-
-  const toggleRating = (rating) => {
-    setLocalFilters((prev) => ({
-      ...prev,
-      minRating: prev.minRating === rating ? null : rating,
-    }));
-  };
+  const ratingOptions = [
+    { value: 4, label: "4★ & up" },
+    { value: 3, label: "3★ & up" },
+    { value: 2, label: "2★ & up" },
+  ];
 
   const activeCount = [
     localFilters.categories.length,
@@ -153,215 +228,275 @@ function FilterPanel({ collections, localFilters, setLocalFilters, onClear, isOp
     localFilters.onSaleOnly ? 1 : 0,
   ].reduce((a, b) => a + b, 0);
 
+  const toggleCategory = (cat) =>
+    setLocalFilters((p) => ({
+      ...p,
+      categories: p.categories.includes(cat)
+        ? p.categories.filter((c) => c !== cat)
+        : [...p.categories, cat],
+    }));
+
+  const togglePriceRange = (value) =>
+    setLocalFilters((p) => ({
+      ...p,
+      priceRange: p.priceRange === value ? null : value,
+    }));
+
+  const toggleRating = (rating) =>
+    setLocalFilters((p) => ({
+      ...p,
+      minRating: p.minRating === rating ? null : rating,
+    }));
+
+  // Prevent body scroll when filter drawer is open on mobile/tablet
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isOpen]);
+
   return (
     <>
-      {/* Mobile overlay */}
       {isOpen && <div className="filter-backdrop" onClick={onClose} />}
 
-      <aside className={`filter-panel${isOpen ? " open" : ""}`}>
-        {/* Panel header */}
-        <div className="fp-header">
-          <div className="fp-title-row">
-            <h3 className="fp-title">Filters</h3>
-            {activeCount > 0 && (
-              <span className="fp-count-badge">{activeCount}</span>
-            )}
+      <aside className={`left-filters${isOpen ? " open" : ""}`} aria-label="Filters">
+        <div className="filter-panel-header">
+          <div className="filter-panel-title">
+            <span>Filters</span>
+            {activeCount > 0 && <span className="filter-total-badge">{activeCount}</span>}
           </div>
-          <div className="fp-header-actions">
+          <div className="filter-panel-actions">
             {activeCount > 0 && (
-              <button className="fp-clear-btn" onClick={onClear}>
+              <button className="clear-filters-link" onClick={onClear}>
                 Clear all
               </button>
             )}
-            <button className="fp-close-btn" onClick={onClose} aria-label="Close filters">
-              <svg width={16} height={16} viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
-                <line x1={18} y1={6} x2={6} y2={18} />
-                <line x1={6} y1={6} x2={18} y2={18} />
-              </svg>
+            <button className="filter-close-btn" onClick={onClose} aria-label="Close filters">
+              ✕
             </button>
           </div>
         </div>
 
-        {/* Category filter */}
+        {/* Category Section - removes duplicates automatically */}
         {categories.length > 0 && (
-          <div className="fp-section">
-            <h4 className="fp-section-title">Category</h4>
-            <div className="fp-options">
-              {categories.map((cat) => (
-                <label key={cat} className="fp-checkbox-label">
-                  <input
-                    type="checkbox"
-                    className="fp-checkbox"
-                    checked={localFilters.categories.includes(cat)}
-                    onChange={() => toggleCategory(cat)}
-                  />
-                  <span className="fp-checkbox-box" />
-                  <span className="fp-checkbox-text">{cat}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+          <FilterSection title="Category" count={localFilters.categories.length}>
+            {categories.map((cat) => (
+              <FilterCheckbox
+                key={cat}
+                label={cat}
+                icon="📂"
+                checked={localFilters.categories.includes(cat)}
+                onChange={() => toggleCategory(cat)}
+              />
+            ))}
+          </FilterSection>
         )}
 
-        {/* Price range */}
-        <div className="fp-section">
-          <h4 className="fp-section-title">Price Range</h4>
-          <div className="fp-options">
-            {priceRanges.map((range) => {
-              const key = `${range.min}-${range.max}`;
-              return (
-                <label key={key} className="fp-radio-label">
-                  <input
-                    type="radio"
-                    className="fp-radio"
-                    name="priceRange"
-                    checked={localFilters.priceRange === key}
-                    onChange={() => togglePrice(range)}
-                  />
-                  <span className="fp-radio-dot" />
-                  <span className="fp-checkbox-text">{range.label}</span>
-                </label>
-              );
-            })}
-          </div>
-        </div>
+        {/* Price Section */}
+        <FilterSection title="Price" count={localFilters.priceRange ? 1 : 0}>
+          {priceRanges.map((range) => (
+            <FilterCheckbox
+              key={range.value}
+              label={range.label}
+              checked={localFilters.priceRange === range.value}
+              onChange={() => togglePriceRange(range.value)}
+            />
+          ))}
+        </FilterSection>
 
-        {/* Min rating */}
-        <div className="fp-section">
-          <h4 className="fp-section-title">Minimum Rating</h4>
-          <div className="fp-options">
-            {ratingOptions.map((r) => (
-              <label key={r} className="fp-radio-label">
-                <input
-                  type="radio"
-                  className="fp-radio"
-                  name="minRating"
-                  checked={localFilters.minRating === r}
-                  onChange={() => toggleRating(r)}
-                />
-                <span className="fp-radio-dot" />
-                <span className="fp-checkbox-text">
-                  {"★".repeat(r)}{"☆".repeat(5 - r)} &amp; up
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
+        {/* Rating Section */}
+        <FilterSection title="Minimum Rating" count={localFilters.minRating ? 1 : 0}>
+          {ratingOptions.map((rating) => (
+            <FilterCheckbox
+              key={rating.value}
+              label={rating.label}
+              checked={localFilters.minRating === rating.value}
+              onChange={() => toggleRating(rating.value)}
+            />
+          ))}
+        </FilterSection>
 
-        {/* Availability toggles */}
-        <div className="fp-section">
-          <h4 className="fp-section-title">Availability</h4>
-          <div className="fp-options">
-            <label className="fp-toggle-label">
-              <div className={`fp-toggle${localFilters.inStockOnly ? " on" : ""}`}
-                onClick={() =>
-                  setLocalFilters((p) => ({ ...p, inStockOnly: !p.inStockOnly }))
-                }
-                role="switch"
-                aria-checked={localFilters.inStockOnly}
-                tabIndex={0}
-                onKeyDown={(e) => e.key === " " &&
-                  setLocalFilters((p) => ({ ...p, inStockOnly: !p.inStockOnly }))
-                }
-              >
-                <span className="fp-toggle-knob" />
-              </div>
-              <span className="fp-checkbox-text">In stock only</span>
-            </label>
-            <label className="fp-toggle-label">
-              <div className={`fp-toggle${localFilters.onSaleOnly ? " on" : ""}`}
-                onClick={() =>
-                  setLocalFilters((p) => ({ ...p, onSaleOnly: !p.onSaleOnly }))
-                }
-                role="switch"
-                aria-checked={localFilters.onSaleOnly}
-                tabIndex={0}
-                onKeyDown={(e) => e.key === " " &&
-                  setLocalFilters((p) => ({ ...p, onSaleOnly: !p.onSaleOnly }))
-                }
-              >
-                <span className="fp-toggle-knob" />
-              </div>
-              <span className="fp-checkbox-text">On sale</span>
-            </label>
-          </div>
-        </div>
-
-        {/* Mobile apply button */}
-        <button className="fp-apply-btn" onClick={onClose}>
-          Apply filters{activeCount > 0 ? ` (${activeCount})` : ""}
-        </button>
+        {/* Availability Section */}
+        <FilterSection title="Availability" count={(localFilters.inStockOnly ? 1 : 0) + (localFilters.onSaleOnly ? 1 : 0)}>
+          <label className="filter-checkbox-row">
+            <input
+              type="checkbox"
+              checked={localFilters.inStockOnly}
+              onChange={() => setLocalFilters((p) => ({ ...p, inStockOnly: !p.inStockOnly }))}
+              className="sr-only"
+            />
+            <span className={`checkbox-box${localFilters.inStockOnly ? " checked" : ""}`}>
+              {localFilters.inStockOnly && <span className="checkbox-tick">✓</span>}
+            </span>
+            <span className="filter-checkbox-label">In stock only</span>
+          </label>
+          <label className="filter-checkbox-row">
+            <input
+              type="checkbox"
+              checked={localFilters.onSaleOnly}
+              onChange={() => setLocalFilters((p) => ({ ...p, onSaleOnly: !p.onSaleOnly }))}
+              className="sr-only"
+            />
+            <span className={`checkbox-box${localFilters.onSaleOnly ? " checked" : ""}`}>
+              {localFilters.onSaleOnly && <span className="checkbox-tick">✓</span>}
+            </span>
+            <span className="filter-checkbox-label">On sale</span>
+          </label>
+        </FilterSection>
       </aside>
     </>
   );
 }
 
-// ─── ACTIVE FILTER CHIPS ──────────────────────────────────────────────────────
+// ─── ACTIVE CHIPS ─────────────────────────────────────────────────────────────
 function ActiveFilterChips({ localFilters, setLocalFilters }) {
   const priceLabels = {
-    "0-500": "Under ₹500",
-    "500-1000": "₹500 – ₹1,000",
-    "1000-2500": "₹1,000 – ₹2,500",
-    "2500-Infinity": "₹2,500+",
+    "0-499": "Under ₹499",
+    "500-999": "₹500 – ₹999",
+    "1000-1999": "₹1000 – ₹1999",
+    "2000-3999": "₹2000 – ₹3999",
   };
 
   const chips = [
     ...localFilters.categories.map((cat) => ({
       key: `cat-${cat}`,
       label: cat,
-      remove: () =>
-        setLocalFilters((p) => ({
-          ...p,
-          categories: p.categories.filter((c) => c !== cat),
-        })),
+      remove: () => setLocalFilters((p) => ({ ...p, categories: p.categories.filter((c) => c !== cat) })),
     })),
-    ...(localFilters.priceRange
-      ? [{
-          key: "price",
-          label: priceLabels[localFilters.priceRange] || localFilters.priceRange,
-          remove: () => setLocalFilters((p) => ({ ...p, priceRange: null })),
-        }]
-      : []),
-    ...(localFilters.minRating
-      ? [{
-          key: "rating",
-          label: `${localFilters.minRating}★ & up`,
-          remove: () => setLocalFilters((p) => ({ ...p, minRating: null })),
-        }]
-      : []),
-    ...(localFilters.inStockOnly
-      ? [{
-          key: "stock",
-          label: "In stock",
-          remove: () => setLocalFilters((p) => ({ ...p, inStockOnly: false })),
-        }]
-      : []),
-    ...(localFilters.onSaleOnly
-      ? [{
-          key: "sale",
-          label: "On sale",
-          remove: () => setLocalFilters((p) => ({ ...p, onSaleOnly: false })),
-        }]
-      : []),
+    ...(localFilters.priceRange ? [{
+      key: "price",
+      label: priceLabels[localFilters.priceRange] || localFilters.priceRange,
+      remove: () => setLocalFilters((p) => ({ ...p, priceRange: null }))
+    }] : []),
+    ...(localFilters.minRating ? [{
+      key: "rating",
+      label: `${localFilters.minRating}★ & up`,
+      remove: () => setLocalFilters((p) => ({ ...p, minRating: null }))
+    }] : []),
+    ...(localFilters.inStockOnly ? [{
+      key: "stock",
+      label: "In stock",
+      remove: () => setLocalFilters((p) => ({ ...p, inStockOnly: false }))
+    }] : []),
+    ...(localFilters.onSaleOnly ? [{
+      key: "sale",
+      label: "On sale",
+      remove: () => setLocalFilters((p) => ({ ...p, onSaleOnly: false }))
+    }] : []),
   ];
 
   if (chips.length === 0) return null;
 
   return (
-    <div className="active-chips">
-      {chips.map((chip) => (
-        <button key={chip.key} className="active-chip" onClick={chip.remove}>
-          {chip.label}
-          <svg width={12} height={12} viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
-            <line x1={18} y1={6} x2={6} y2={18} />
-            <line x1={6} y1={6} x2={18} y2={18} />
-          </svg>
-        </button>
-      ))}
+    <div className="collections-active-filters">
+      <span className="active-filters-label">Active filters:</span>
+      <div className="active-tags">
+        {chips.map((chip) => (
+          <button key={chip.key} className="active-tag" onClick={chip.remove}>
+            {chip.label}
+            <span className="tag-close" aria-hidden="true">×</span>
+          </button>
+        ))}
+      </div>
+      <button className="clear-all-btn" onClick={() => {
+        setLocalFilters({
+          categories: [],
+          priceRange: null,
+          minRating: null,
+          inStockOnly: false,
+          onSaleOnly: false,
+        });
+      }}>
+        Clear all
+      </button>
     </div>
   );
+}
+
+// ─── SORT DROPDOWN ────────────────────────────────────────────────────────────
+// Replaces the native <select> with a fully custom, consistently-styled
+// dropdown. Native selects render with OS/browser chrome (esp. on iOS/iPadOS)
+// that ignores most of our CSS, so the options list looked broken there.
+const SORT_OPTIONS = [
+  { value: "featured", label: "Featured" },
+  { value: "newest", label: "Newest" },
+  { value: "price-asc", label: "Price: Low to High" },
+  { value: "price-desc", label: "Price: High to Low" },
+  { value: "rating", label: "Top Rated" },
+];
+
+function SortDropdown({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+  const current = SORT_OPTIONS.find((o) => o.value === value) || SORT_OPTIONS[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClick = (e) => {
+      if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
+    };
+    const handleKey = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("touchstart", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("touchstart", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [open]);
+
+  return (
+    <div className="sort-dropdown" ref={rootRef}>
+      <button
+        type="button"
+        className={`sort-trigger${open ? " open" : ""}`}
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span>{current.label}</span>
+        <svg width={12} height={12} viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {open && (
+        <ul className="sort-menu" role="listbox">
+          {SORT_OPTIONS.map((opt) => (
+            <li
+              key={opt.value}
+              role="option"
+              aria-selected={opt.value === value}
+              className={`sort-option${opt.value === value ? " selected" : ""}`}
+              onClick={() => {
+                onChange(opt.value);
+                setOpen(false);
+              }}
+            >
+              {opt.label}
+              {opt.value === value && <span className="sort-check">✓</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+const SLIDE_THEMES = [
+  { eyebrow: "✦ Featured Collection", btnColor: "#4c1d95" },
+  { eyebrow: "⭐ Editor's Pick",       btnColor: "#0c4a6e" },
+  { eyebrow: "💄 Trending Now",        btnColor: "#9d174d" },
+];
+
+function resolveImg(path) {
+  const base = import.meta.env.VITE_API_URL || "";
+  if (!path) return "";
+  if (path.startsWith("http")) return path;
+  return `${base}${path}`;
 }
 
 // ─── DEFAULT FILTERS ──────────────────────────────────────────────────────────
@@ -372,16 +507,94 @@ const defaultFilters = {
   inStockOnly: false,
   onSaleOnly: false,
 };
-const BannerSection = () => {
-  const dispatch=useDispatch();
+
+// ─── BANNER SECTION ───────────────────────────────────────────────────────────
+function BannerSection() {
+  const dispatch = useDispatch();
+  const banners  = useSelector(selectBanners);
+  const active   = useSelector(selectActiveBanner);
+  const [paused, setPaused] = useState(false);
+
+  // This was missing entirely, which is why banners never showed up - the
+  // slice's `banners` array stayed empty forever and the component fell
+  // straight through to the skeleton on every render.
   useEffect(() => {
-  dispatch(fetchBrandBanners());
-}, [dispatch]);
-  const banners = useSelector(selectBanners);
-  return <BannerCarousel banners={banners} />;
-};
+    dispatch(fetchBrandBanners());
+  }, [dispatch]);
 
+  useEffect(() => {
+    if (!banners.length || paused) return;
+    const t = setInterval(() => {
+      dispatch(setActiveBanner((active + 1) % banners.length));
+    }, 4500);
+    return () => clearInterval(t);
+  }, [active, banners.length, dispatch, paused]);
 
+  if (!banners.length) return <BannerSkeleton />;
+
+  return (
+    <section
+      className="banner-section"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      aria-label="Featured collections"
+    >
+      <div
+        className="banner-track"
+        style={{ transform: `translateX(-${active * 100}%)` }}
+      >
+        {banners.map((ban, i) => {
+          const theme = SLIDE_THEMES[i % SLIDE_THEMES.length];
+          return (
+            <div key={ban._id} className="banner-slide" aria-hidden={i !== active}>
+              <div className="banner-bg">
+                <img
+                  src={resolveImg(ban.image)}
+                  alt={ban.title}
+                  loading={i === 0 ? "eager" : "lazy"}
+                />
+                <div className="banner-overlay" />
+              </div>
+              <div className="banner-content">
+                <span className="banner-eyebrow">{theme.eyebrow}</span>
+                <h1 className="banner-headline">{ban.title}</h1>
+                {ban.sub && <p className="banner-sub">{ban.sub}</p>}
+                {ban.offer && (
+                  <div className="banner-badge">{ban.offer}</div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="banner-dots" role="tablist">
+        {banners.map((_, i) => (
+          <button
+            key={i}
+            role="tab"
+            aria-selected={i === active}
+            className={`dot${i === active ? " active" : ""}`}
+            onClick={() => dispatch(setActiveBanner(i))}
+            aria-label={`Go to slide ${i + 1}`}
+          />
+        ))}
+      </div>
+
+      <div className="banner-progress-wrap">
+        <div
+          key={active}
+          className={`banner-progress${paused ? " paused" : ""}`}
+          style={{ animationDuration: "4500ms" }}
+        />
+      </div>
+    </section>
+  );
+}
+
+function BannerSkeleton() {
+  return <div className="banner-skeleton" aria-busy="true" aria-label="Loading banner" />;
+}
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function CollectionsPage() {
@@ -394,32 +607,34 @@ export default function CollectionsPage() {
 
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [localFilters, setLocalFilters] = useState(defaultFilters);
-  const [sortBy, setSortBy] = useState("featured");
+  const [sortBy, setSortByLocal] = useState("featured");
 
- 
-
-  // Close filter panel on desktop resize
-  useEffect(() => {
-    const handler = () => {
-      if (window.innerWidth >= 1024) setFilterPanelOpen(false);
-    };
-    window.addEventListener("resize", handler);
-    return () => window.removeEventListener("resize", handler);
-  }, []);
+  // Single source of truth for the breakpoint - used both to close the
+  // drawer on resize and to decide which filter trigger to mount, so the
+  // desktop label and the mobile button can never both exist in the DOM
+  // at once.
+  const isDesktop = useIsDesktop(1024);
 
   useEffect(() => {
-  dispatch(
-    fetchCollections({
+    if (isDesktop) setFilterPanelOpen(false);
+  }, [isDesktop]);
+
+  // Fetch wishlist on load
+  useEffect(() => {
+    dispatch(fetchWishlist());
+  }, [dispatch]);
+
+  // Fetch collections when filters change
+  useEffect(() => {
+    dispatch(fetchCollections({
       categories: localFilters.categories,
       priceRange: localFilters.priceRange,
       minRating: localFilters.minRating,
       inStockOnly: localFilters.inStockOnly,
       onSaleOnly: localFilters.onSaleOnly,
       sortBy,
-    })
-  );
-}, [dispatch, localFilters, sortBy]);
-const displayedItems = allCollections;
+    }));
+  }, [dispatch, localFilters, sortBy]);
 
   const activeFilterCount = [
     localFilters.categories.length,
@@ -429,151 +644,146 @@ const displayedItems = allCollections;
     localFilters.onSaleOnly ? 1 : 0,
   ].reduce((a, b) => a + b, 0);
 
-  const clearFilters = () => {
+  const handleClearFilters = () => {
     setLocalFilters(defaultFilters);
-    setSortBy("featured");
+    setSortByLocal("featured");
+  };
+
+  const handleRetry = () => {
+    dispatch(fetchCollections({
+      categories: localFilters.categories,
+      priceRange: localFilters.priceRange,
+      minRating: localFilters.minRating,
+      inStockOnly: localFilters.inStockOnly,
+      onSaleOnly: localFilters.onSaleOnly,
+      sortBy,
+    }));
   };
 
   return (
     <>
-    <div>
-          <BannerSection />
-           <div className="collections-topbar">
-        <div className="topbar-left">
-          {/* Mobile filter button */}
-          <button
-            className="mobile-filter-btn"
-            onClick={() => setFilterPanelOpen(true)}
-            aria-label="Open filters"
-          >
-            <svg width={16} height={16} viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth={2} strokeLinecap="round"
-              strokeLinejoin="round">
-              <line x1={4} y1={6} x2={20} y2={6} />
-              <line x1={8} y1={12} x2={16} y2={12} />
-              <line x1={11} y1={18} x2={13} y2={18} />
-            </svg>
-            Filters
-            {activeFilterCount > 0 && (
-              <span className="mobile-filter-badge">{activeFilterCount}</span>
-            )}
-          </button>
+      <BannerSection />
+
+      {/* ══ TOP BAR ══════════════════════════════════════════════════════════ */}
+      <div className="collections-topbar">
+        <div className="topbar-sidebar-cell">
+          {isDesktop ? (
+            <div className="topbar-filter-label">
+              <svg width={14} height={14} viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <line x1={4} y1={6} x2={20} y2={6} />
+                <line x1={8} y1={12} x2={16} y2={12} />
+                <line x1={11} y1={18} x2={13} y2={18} />
+              </svg>
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="fp-count-badge">{activeFilterCount}</span>
+              )}
+            </div>
+          ) : (
+            <button
+              className="mobile-filter-btn"
+              onClick={() => setFilterPanelOpen(true)}
+              aria-label="Open filters"
+            >
+              <svg width={15} height={15} viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <line x1={4} y1={6} x2={20} y2={6} />
+                <line x1={8} y1={12} x2={16} y2={12} />
+                <line x1={11} y1={18} x2={13} y2={18} />
+              </svg>
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="mobile-filter-badge">{activeFilterCount}</span>
+              )}
+            </button>
+          )}
         </div>
 
-        <div className="topbar-right">
+        <div className="topbar-main-cell">
           {status === "succeeded" && (
             <span className="topbar-count">
               {allCollections.length} result{allCollections.length !== 1 ? "s" : ""}
             </span>
           )}
-          <select
-            className="sort-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            aria-label="Sort collections"
-          >
-            <option value="featured">Featured</option>
-            <option value="newest">Newest</option>
-            <option value="price-asc">Price: Low to High</option>
-            <option value="price-desc">Price: High to Low</option>
-            <option value="rating">Top Rated</option>
-          </select>
+          <SortDropdown value={sortBy} onChange={setSortByLocal} />
         </div>
       </div>
 
-      {/* ── LAYOUT: sidebar + grid ── */}
-      
+      {/* ══ ACTIVE FILTER CHIPS ══════════════════════════════════════════════ */}
+      <ActiveFilterChips localFilters={localFilters} setLocalFilters={setLocalFilters} />
+
+      {/* ══ LAYOUT ══════════════════════════════════════════════════════════ */}
       <div className="collections-layout">
-          
-        {/* Sidebar filter panel (desktop: always visible, mobile: drawer) */}
         <FilterPanel
           collections={allCollections}
           localFilters={localFilters}
           setLocalFilters={setLocalFilters}
-          onClear={clearFilters}
+          onClear={handleClearFilters}
           isOpen={filterPanelOpen}
           onClose={() => setFilterPanelOpen(false)}
         />
 
-        {/* Main content area */}
         <main className="main">
-          {/* Active filter chips */}
-          <ActiveFilterChips
-            localFilters={localFilters}
-            setLocalFilters={setLocalFilters}
-          />
-
-          {/* Section meta */}
           {status !== "loading" && (
             <div className="section-meta">
               <h2 className="section-title">All Collections</h2>
               <span className="section-count">
-                {allCollections.length} collection
-                {allCollections.length !== 1 ? "s" : ""}
+                {allCollections.length} collection{allCollections.length !== 1 ? "s" : ""}
               </span>
             </div>
           )}
 
-          {/* Loading skeletons */}
           {status === "loading" && (
             <div className="grid" aria-label="Loading collections">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <SkeletonCard key={i} />
-              ))}
+              {[1,2,3,4,5,6].map((i) => <SkeletonCard key={i} />)}
             </div>
           )}
 
-          {/* Error state */}
           {status === "failed" && (
             <div className="error-state">
               <div className="error-icon">✦</div>
               <h3 className="error-title">Something went wrong</h3>
               <p className="error-msg">{error || "Failed to load collections"}</p>
-              <button
-                className="retry-btn"
-                onClick={() => dispatch(fetchCollections())}
-              >
+              <button className="retry-btn" onClick={handleRetry}>
                 Try Again
               </button>
             </div>
           )}
 
-          {/* Grid */}
-          {status === "succeeded" &&
-            (allCollections.length === 0 ? (
+          {status === "succeeded" && (
+            allCollections.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">◇</div>
                 <h3 className="empty-title">No collections match</h3>
-                <p className="empty-sub">
-                  Try adjusting or clearing your filters
-                </p>
-                <button className="retry-btn" onClick={clearFilters}>
-                  Clear filters
-                </button>
+                <p className="empty-sub">Try adjusting or clearing your filters</p>
+                <button className="retry-btn" onClick={handleClearFilters}>Clear filters</button>
               </div>
             ) : (
               <div className="grid">
                 {allCollections.map((item) => (
-                  <CollectionCard
-                    key={item._id}
-                    item={item}
-                    onToast={showToast}
-                  />
+                  <CollectionCard key={item._id} item={item} onToast={showToast} />
                 ))}
               </div>
-            ))}
+            )
+          )}
         </main>
       </div>
+
       <FeaturedProductsSection />
       <NewArrivalsSection />
 
-      {/* ── TOAST ── */}
-      <div className={`toast${toast.show ? " show" : ""}`} role="status" aria-live="polite">
+      {/* Toast */}
+      <div
+        className={`toast${toast.show ? " show" : ""}`}
+        role="status"
+        aria-live="polite"
+      >
+        <span className="toast-icon">
+          {toast.type === "cart" ? "🛍️" : toast.type === "wishlist" ? "♥" : "✓"}
+        </span>
         {toast.msg}
       </div>
-    </div>
-      {/* ── TOP BAR: sort + mobile filter toggle ── */}
-     
     </>
   );
 }

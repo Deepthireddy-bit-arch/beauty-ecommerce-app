@@ -1,70 +1,93 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { addToWishlist, fetchWishlist, removeFromWishlist } from "../reducers/thunks/wishlistActions";
+// src/redux/slices/wishlistSlice.js
+import { createSlice } from '@reduxjs/toolkit';
+import { fetchWishlist, addToWishlist, removeFromWishlist } from '../reducers/thunks/wishlistActions';
 
+const initialState = {
+  items: [],
+  status: 'idle',
+  error: null,
+  message: null, // Add this for messages
+};
 
 const wishlistSlice = createSlice({
-  name: "wishlist",
-  initialState: {
-    items: [],
-    loading: false,
-    error: null,
-    successMessage: null,
-  },
+  name: 'wishlist',
+  initialState,
   reducers: {
+    clearWishlist: (state) => {
+      state.items = [];
+      state.status = 'idle';
+      state.error = null;
+      state.message = null;
+    },
+    updateWishlist: (state, action) => {
+      state.items = action.payload;
+      console.log("🔄 Wishlist updated manually:", state.items.length, "items");
+    },
+    // Add this - clearMessages reducer
     clearMessages: (state) => {
       state.error = null;
-      state.successMessage = null;
+      state.message = null;
+    },
+    // Add this - set message
+    setMessage: (state, action) => {
+      state.message = action.payload;
+    },
+    // Add this - set error
+    setError: (state, action) => {
+      state.error = action.payload;
     },
   },
   extraReducers: (builder) => {
-    // FETCH
     builder
       .addCase(fetchWishlist.pending, (state) => {
-        state.loading = true;
+        state.status = 'loading';
         state.error = null;
+        console.log("🔄 Fetching wishlist...");
       })
       .addCase(fetchWishlist.fulfilled, (state, action) => {
-        state.loading = false;
+        state.status = 'succeeded';
         state.items = action.payload;
+        state.error = null;
+        console.log("✅ Wishlist refreshed:", state.items.length, "items");
       })
       .addCase(fetchWishlist.rejected, (state, action) => {
-        state.loading = false;
+        state.status = 'failed';
         state.error = action.payload;
-      });
-
-    // ADD
-    builder
+        console.log("❌ Wishlist fetch failed:", action.payload);
+      })
       .addCase(addToWishlist.pending, (state) => {
-        state.loading = true;
         state.error = null;
+        console.log("🔄 Adding to wishlist...");
       })
       .addCase(addToWishlist.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = action.payload.wishlist?.items || [];
-        state.successMessage = "Item added to wishlist!";
+        state.message = 'Item added to wishlist';
+        console.log("✅ Added to wishlist");
       })
       .addCase(addToWishlist.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.payload;
-      });
-
-    // REMOVE
-    builder
+        console.log("❌ Add to wishlist failed:", action.payload);
+      })
       .addCase(removeFromWishlist.pending, (state) => {
-        state.loading = true;
         state.error = null;
+        console.log("🔄 Removing from wishlist...");
       })
       .addCase(removeFromWishlist.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = action.payload.wishlist?.items || [];
-        state.successMessage = "Item removed from wishlist.";
+        state.message = 'Item removed from wishlist';
+        console.log("✅ Removed from wishlist - state updated via updateWishlist");
       })
       .addCase(removeFromWishlist.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.payload;
+        console.log("❌ Remove from wishlist failed:", action.payload);
       });
   },
 });
 
-export const { clearMessages } = wishlistSlice.actions;
+export const { 
+  clearWishlist, 
+  updateWishlist, 
+  clearMessages,  // Make sure this is exported
+  setMessage,
+  setError 
+} = wishlistSlice.actions;
+
 export default wishlistSlice.reducer;
