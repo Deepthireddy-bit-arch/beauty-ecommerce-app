@@ -1,81 +1,80 @@
-import React, { useEffect, useState } from "react";
+// ─── ProfilePage.jsx ──────────────────────────────────────────────────────────
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector }   from "react-redux";
 
+import ProfileCard    from "../../pages/profiledetails/components/ProfileCard";
+import ProfileDetails from "../../pages/profiledetails/components/ProfileDetails";
+import "./profile.css";
+import { clearProfileErrors, fetchProfile, updateProfile } from "../../redux/slices/profileSlice";
 
+const ProfilePage = () => {
+  const dispatch = useDispatch();
 
+  const { user, fetchLoading, saveLoading, saveError } = useSelector(
+    (s) => s.profile
+  );
 
-import Navbar from "./components/Navbar";
-import ProfileCard from "./components/ProfileCard";
-import Avatar from "./components/Avatar";
+  const [editing, setEditing] = useState(false);
 
-import EditProfileForm from "./components/EditProfileForm";
-import { fetchProfileApi, updateProfileApi } from "../../api/profileApi";
-import ProfileDetails from "./components/ProfileDetails";
-
-const Profile = () => {
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // fetch profile
-  const getProfile = async () => {
-    try {
-      const data = await fetchProfileApi();
-      setProfile(data);
-    } catch (error) {
-      console.log(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  /* Fetch on mount */
   useEffect(() => {
-    getProfile();
-  }, []);
+    dispatch(fetchProfile());
+    return () => dispatch(clearProfileErrors());
+  }, [dispatch]);
 
-  // update profile
-  const handleUpdate = async (updatedData) => {
-    try {
-      const updatedUser = await updateProfileApi(updatedData);
+  const handleEdit   = () => setEditing(true);
+  const handleCancel = () => { setEditing(false); dispatch(clearProfileErrors()); };
 
-      setProfile(updatedUser);
-
-      alert("Profile updated successfully");
-    } catch (error) {
-      console.log(error.message);
-      alert(error.message);
+  const handleSave = async (payload) => {
+    const result = await dispatch(updateProfile(payload));
+    if (updateProfile.fulfilled.match(result)) {
+      setEditing(false);
     }
   };
 
-  if (loading) return <h2>Loading...</h2>;
+  /* While first fetch is in flight show skeleton (user === null) */
+  const displayUser = fetchLoading && !user ? null : user;
 
   return (
-    <div>
-      <Navbar />
+    <main className="profile-page">
+        <div className="profile-layout-wrap">
+      <h1 className="profile-page-title">My Profile</h1>
 
-      <div className="container mt-4">
-        <div className="row">
-
-          {/* LEFT SIDE */}
-          <div className="col-md-4">
-            <ProfileCard user={profile} />
-            <Avatar user={profile} />
-          </div>
-
-          {/* RIGHT SIDE */}
-          <div className="col-md-8">
-            <ProfileDetails user={profile} />
-
-            <div className="mt-4">
-              <EditProfileForm
-                user={profile}
-                onUpdate={handleUpdate}
-              />
-            </div>
-          </div>
-
+      {/* Global save error toast */}
+      {saveError && (
+        <div
+          style={{
+            marginBottom: 20,
+            padding: "12px 18px",
+            background: "#fef2f2",
+            border: "1px solid #fecaca",
+            borderRadius: 12,
+            color: "#dc2626",
+            fontSize: 14,
+            fontFamily: "'DM Sans', sans-serif",
+            fontWeight: 500,
+          }}
+        >
+          ⚠️ {saveError}
         </div>
+      )}
+
+      <div className="profile-layout">
+        {/* Left: avatar card */}
+        <ProfileCard user={displayUser} onEdit={handleEdit} />
+
+        {/* Right: account details / inline edit */}
+        <ProfileDetails
+          user={displayUser}
+          editing={editing}
+          saving={saveLoading}
+          onSave={handleSave}
+          onCancel={handleCancel}
+        />
       </div>
-    </div>
+      </div>
+    </main>
   );
 };
 
-export default Profile;
+export default ProfilePage;

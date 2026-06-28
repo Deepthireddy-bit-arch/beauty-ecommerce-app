@@ -10,6 +10,7 @@ const {
   getOrderById,
   updateOrderStatus,
 } = require("../controllers/orderController");
+const { cancelOrder } = require("../controllers/cartController");
 
 // create order
 router.post("/", protect, createOrder);
@@ -19,6 +20,7 @@ router.get("/myorders", protect, getMyOrders);
 
 // single order
 router.get("/:id", protect, getOrderById);
+router.put("/:id/cancel", protect, cancelOrder);
 
 // update status (admin)
 router.put("/:id/status", protect, updateOrderStatus);

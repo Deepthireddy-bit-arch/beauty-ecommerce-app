@@ -1,15 +1,13 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   fetchCollections,
-  toggleWishlist,
   selectAllCollections,
   selectCollectionsStatus,
-  selectWishlist,
   selectError,
 } from "../../redux/slices/collectionsSlice";
 import "./collections.css";
-import BannerCarousel from "../../components/BannerCarousel";
 import {
   fetchBrandBanners,
   selectActiveBanner,
@@ -18,8 +16,9 @@ import {
 } from "../../redux/slices/brandpageSlice";
 import FeaturedProductsSection from "../../components/FeaturedProductsSection";
 import NewArrivalsSection from "../../components/NewArrivalsSection";
-import { addToCartAsync } from "../../redux/reducers/thunks/cartThunks";
-import { addToWishlist, removeFromWishlist, fetchWishlist } from "../../redux/reducers/thunks/wishlistActions";
+import { fetchWishlist } from "../../redux/reducers/thunks/wishlistActions";
+import CollectionCard from "./CollectionsCard";
+
 
 // ─── TOAST HOOK ───────────────────────────────────────────────────────────────
 function useToast() {
@@ -67,100 +66,6 @@ function SkeletonCard() {
   );
 }
 
-// ─── COLLECTION CARD ──────────────────────────────────────────────────────────
-function CollectionCard({ item, onToast }) {
-  const dispatch = useDispatch();
-  const wishlistItems = useSelector((state) => state.wishlist?.items || []);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
-
-  // Check if product is in wishlist - handles duplicate checking
-  const liked = wishlistItems.some(
-    (wishlistItem) => wishlistItem.productId === item._id || wishlistItem._id === item._id
-  );
-
-  const handleAddToCart = async (e) => {
-    e.stopPropagation();
-    setIsAddingToCart(true);
-    try {
-      await dispatch(addToCartAsync({ productId: item._id, quantity: 1 })).unwrap();
-      onToast(`Added ${item.title} to cart 🛍️`, "cart");
-    } catch (error) {
-      // Error is already handled in the thunk
-    } finally {
-      setIsAddingToCart(false);
-    }
-  };
-
-  const handleToggleWishlist = async (e) => {
-    e.stopPropagation();
-    setIsTogglingWishlist(true);
-    try {
-      if (liked) {
-        await dispatch(removeFromWishlist(item._id)).unwrap();
-        onToast(`Removed ${item.title} from wishlist`, "wishlist");
-      } else {
-        await dispatch(addToWishlist(item._id)).unwrap();
-        onToast(`Added ${item.title} to wishlist ♥`, "wishlist");
-      }
-      // Refresh wishlist to get updated state
-      await dispatch(fetchWishlist()).unwrap();
-    } catch (error) {
-      // Refresh wishlist to sync state
-      await dispatch(fetchWishlist()).unwrap();
-      if (error?.includes?.("already") || error?.message?.includes?.("already")) {
-        onToast(`${item.title} is already in your wishlist ♥`, "wishlist");
-      } else {
-        onToast(`Failed to update wishlist`, "error");
-      }
-    } finally {
-      setIsTogglingWishlist(false);
-    }
-  };
-
-  return (
-    <div className="card">
-      <div className="card-img-wrap">
-        <img src={item.image} alt={item.title} loading="lazy" />
-        <span className="card-badge">{item.category}</span>
-        <button
-          className={`card-wishlist${liked ? " liked" : ""} ${isTogglingWishlist ? "loading" : ""}`}
-          onClick={handleToggleWishlist}
-          disabled={isTogglingWishlist}
-          aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
-        >
-          {liked ? "♥" : "♡"}
-        </button>
-        <div className="card-overlay">
-          <button
-            className={`quick-shop ${isAddingToCart ? "loading" : ""}`}
-            onClick={handleAddToCart}
-            disabled={isAddingToCart}
-          >
-            {isAddingToCart ? "Adding..." : "Quick Shop"}
-          </button>
-        </div>
-      </div>
-      <div className="card-body">
-        <div className="card-category">{item.category}</div>
-        <h3 className="card-title">{item.title}</h3>
-        <p className="card-sub">{item.sub}</p>
-        <div className="card-footer">
-          <span className="offer-pill">{item.offer}</span>
-          <button className="explore-btn">
-            Explore
-            <svg width={14} height={14} viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <line x1={5} y1={12} x2={19} y2={12} />
-              <polyline points="12 5 19 12 12 19" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── FILTER CHECKBOX ──────────────────────────────────────────────────────────
 function FilterCheckbox({ label, count, checked, onChange, icon }) {
   return (
@@ -200,13 +105,10 @@ function FilterSection({ title, count, children, defaultOpen = true }) {
 }
 
 // ─── FILTER PANEL ─────────────────────────────────────────────────────────────
-function FilterPanel({ collections, localFilters, setLocalFilters, onClear, isOpen, onClose }) {
-  // Remove duplicates from categories using Set
-  const categories = useMemo(() => {
-    const cats = [...new Set(collections.map((c) => c.category).filter(Boolean))];
-    return cats.sort();
-  }, [collections]);
-
+// Takes a static `categories` list (fetched once on the page, independent of
+// the currently-filtered result set) so options never disappear from the
+// list just because a filter narrowed the visible products.
+function FilterPanel({ categories, localFilters, setLocalFilters, onClear, isOpen, onClose }) {
   const priceRanges = [
     { value: "0-499", label: "Under ₹499" },
     { value: "500-999", label: "₹500 – ₹999" },
@@ -276,7 +178,6 @@ function FilterPanel({ collections, localFilters, setLocalFilters, onClear, isOp
           </div>
         </div>
 
-        {/* Category Section - removes duplicates automatically */}
         {categories.length > 0 && (
           <FilterSection title="Category" count={localFilters.categories.length}>
             {categories.map((cat) => (
@@ -291,7 +192,6 @@ function FilterPanel({ collections, localFilters, setLocalFilters, onClear, isOp
           </FilterSection>
         )}
 
-        {/* Price Section */}
         <FilterSection title="Price" count={localFilters.priceRange ? 1 : 0}>
           {priceRanges.map((range) => (
             <FilterCheckbox
@@ -303,7 +203,6 @@ function FilterPanel({ collections, localFilters, setLocalFilters, onClear, isOp
           ))}
         </FilterSection>
 
-        {/* Rating Section */}
         <FilterSection title="Minimum Rating" count={localFilters.minRating ? 1 : 0}>
           {ratingOptions.map((rating) => (
             <FilterCheckbox
@@ -315,7 +214,6 @@ function FilterPanel({ collections, localFilters, setLocalFilters, onClear, isOp
           ))}
         </FilterSection>
 
-        {/* Availability Section */}
         <FilterSection title="Availability" count={(localFilters.inStockOnly ? 1 : 0) + (localFilters.onSaleOnly ? 1 : 0)}>
           <label className="filter-checkbox-row">
             <input
@@ -413,9 +311,6 @@ function ActiveFilterChips({ localFilters, setLocalFilters }) {
 }
 
 // ─── SORT DROPDOWN ────────────────────────────────────────────────────────────
-// Replaces the native <select> with a fully custom, consistently-styled
-// dropdown. Native selects render with OS/browser chrome (esp. on iOS/iPadOS)
-// that ignores most of our CSS, so the options list looked broken there.
 const SORT_OPTIONS = [
   { value: "featured", label: "Featured" },
   { value: "newest", label: "Newest" },
@@ -487,9 +382,9 @@ function SortDropdown({ value, onChange }) {
 }
 
 const SLIDE_THEMES = [
-  { eyebrow: "✦ Featured Collection", btnColor: "#4c1d95" },
-  { eyebrow: "⭐ Editor's Pick",       btnColor: "#0c4a6e" },
-  { eyebrow: "💄 Trending Now",        btnColor: "#9d174d" },
+  { eyebrow: "✦ Featured Collection" },
+  { eyebrow: "⭐ Editor's Pick" },
+  { eyebrow: "💄 Trending Now" },
 ];
 
 function resolveImg(path) {
@@ -511,13 +406,10 @@ const defaultFilters = {
 // ─── BANNER SECTION ───────────────────────────────────────────────────────────
 function BannerSection() {
   const dispatch = useDispatch();
-  const banners  = useSelector(selectBanners);
-  const active   = useSelector(selectActiveBanner);
+  const banners = useSelector(selectBanners);
+  const active = useSelector(selectActiveBanner);
   const [paused, setPaused] = useState(false);
 
-  // This was missing entirely, which is why banners never showed up - the
-  // slice's `banners` array stayed empty forever and the component fell
-  // straight through to the skeleton on every render.
   useEffect(() => {
     dispatch(fetchBrandBanners());
   }, [dispatch]);
@@ -559,9 +451,7 @@ function BannerSection() {
                 <span className="banner-eyebrow">{theme.eyebrow}</span>
                 <h1 className="banner-headline">{ban.title}</h1>
                 {ban.sub && <p className="banner-sub">{ban.sub}</p>}
-                {ban.offer && (
-                  <div className="banner-badge">{ban.offer}</div>
-                )}
+                {ban.offer && <div className="banner-badge">{ban.offer}</div>}
               </div>
             </div>
           );
@@ -604,27 +494,39 @@ export default function CollectionsPage() {
   const status = useSelector(selectCollectionsStatus);
   const error = useSelector(selectError);
   const allCollections = useSelector(selectAllCollections);
+  const isAuthenticated = useSelector((state) => Boolean(state.auth?.isAuthenticated && state.auth?.token));
 
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [localFilters, setLocalFilters] = useState(defaultFilters);
   const [sortBy, setSortByLocal] = useState("featured");
+  const [allCategories, setAllCategories] = useState([]);
 
-  // Single source of truth for the breakpoint - used both to close the
-  // drawer on resize and to decide which filter trigger to mount, so the
-  // desktop label and the mobile button can never both exist in the DOM
-  // at once.
   const isDesktop = useIsDesktop(1024);
 
   useEffect(() => {
     if (isDesktop) setFilterPanelOpen(false);
   }, [isDesktop]);
 
-  // Fetch wishlist on load
+  // Static category list for the filter panel, captured once from the first
+  // unfiltered load so options never disappear once a filter narrows the
+  // visible product set. Re-derives only if it's still empty by the time
+  // collections arrive (e.g. categories endpoint isn't available).
   useEffect(() => {
-    dispatch(fetchWishlist());
-  }, [dispatch]);
+    if (allCollections.length > 0 && allCategories.length === 0) {
+      const cats = [...new Set(allCollections.map((c) => c.category).filter(Boolean))].sort();
+      setAllCategories(cats);
+    }
+  }, [allCollections, allCategories.length]);
 
-  // Fetch collections when filters change
+  // Wishlist is only fetched for logged-in users. Logged-out users simply
+  // see an empty wishlist state (every heart renders unfilled) and clicking
+  // any wishlist/cart action sends them to /login - see CollectionCard.
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchWishlist());
+    }
+  }, [dispatch, isAuthenticated]);
+
   useEffect(() => {
     dispatch(fetchCollections({
       categories: localFilters.categories,
@@ -660,129 +562,128 @@ export default function CollectionsPage() {
     }));
   };
 
+
   return (
     <>
       <BannerSection />
+      <div className="collections-page-body">
 
-      {/* ══ TOP BAR ══════════════════════════════════════════════════════════ */}
-      <div className="collections-topbar">
-        <div className="topbar-sidebar-cell">
-          {isDesktop ? (
-            <div className="topbar-filter-label">
-              <svg width={14} height={14} viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                <line x1={4} y1={6} x2={20} y2={6} />
-                <line x1={8} y1={12} x2={16} y2={12} />
-                <line x1={11} y1={18} x2={13} y2={18} />
-              </svg>
-              Filters
-              {activeFilterCount > 0 && (
-                <span className="fp-count-badge">{activeFilterCount}</span>
-              )}
-            </div>
-          ) : (
-            <button
-              className="mobile-filter-btn"
-              onClick={() => setFilterPanelOpen(true)}
-              aria-label="Open filters"
-            >
-              <svg width={15} height={15} viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                <line x1={4} y1={6} x2={20} y2={6} />
-                <line x1={8} y1={12} x2={16} y2={12} />
-                <line x1={11} y1={18} x2={13} y2={18} />
-              </svg>
-              Filters
-              {activeFilterCount > 0 && (
-                <span className="mobile-filter-badge">{activeFilterCount}</span>
-              )}
-            </button>
-          )}
-        </div>
 
-        <div className="topbar-main-cell">
-          {status === "succeeded" && (
-            <span className="topbar-count">
-              {allCollections.length} result{allCollections.length !== 1 ? "s" : ""}
-            </span>
-          )}
-          <SortDropdown value={sortBy} onChange={setSortByLocal} />
-        </div>
-      </div>
-
-      {/* ══ ACTIVE FILTER CHIPS ══════════════════════════════════════════════ */}
-      <ActiveFilterChips localFilters={localFilters} setLocalFilters={setLocalFilters} />
-
-      {/* ══ LAYOUT ══════════════════════════════════════════════════════════ */}
-      <div className="collections-layout">
-        <FilterPanel
-          collections={allCollections}
-          localFilters={localFilters}
-          setLocalFilters={setLocalFilters}
-          onClear={handleClearFilters}
-          isOpen={filterPanelOpen}
-          onClose={() => setFilterPanelOpen(false)}
-        />
-
-        <main className="main">
-          {status !== "loading" && (
-            <div className="section-meta">
-              <h2 className="section-title">All Collections</h2>
-              <span className="section-count">
-                {allCollections.length} collection{allCollections.length !== 1 ? "s" : ""}
-              </span>
-            </div>
-          )}
-
-          {status === "loading" && (
-            <div className="grid" aria-label="Loading collections">
-              {[1,2,3,4,5,6].map((i) => <SkeletonCard key={i} />)}
-            </div>
-          )}
-
-          {status === "failed" && (
-            <div className="error-state">
-              <div className="error-icon">✦</div>
-              <h3 className="error-title">Something went wrong</h3>
-              <p className="error-msg">{error || "Failed to load collections"}</p>
-              <button className="retry-btn" onClick={handleRetry}>
-                Try Again
+        {/* ══ TOP BAR ══════════════════════════════════════════════════════════ */}
+        <div className="collections-topbar">
+          <div className="topbar-sidebar-cell">
+            {!isDesktop && (
+              <button
+                className="mobile-filter-btn"
+                onClick={() => setFilterPanelOpen(true)}
+                aria-label="Open filters"
+              >
+                <svg width={15} height={15} viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <line x1={4} y1={6} x2={20} y2={6} />
+                  <line x1={8} y1={12} x2={16} y2={12} />
+                  <line x1={11} y1={18} x2={13} y2={18} />
+                </svg>
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="mobile-filter-badge">{activeFilterCount}</span>
+                )}
               </button>
-            </div>
-          )}
+            )}
+            {/* On desktop, the sidebar's own FilterPanel header already shows
+              "Filters" + the active count - nothing renders here to avoid a
+              duplicate heading stacked above it. */}
+          </div>
 
-          {status === "succeeded" && (
-            allCollections.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-icon">◇</div>
-                <h3 className="empty-title">No collections match</h3>
-                <p className="empty-sub">Try adjusting or clearing your filters</p>
-                <button className="retry-btn" onClick={handleClearFilters}>Clear filters</button>
+          <div className="topbar-main-cell">
+            {status === "succeeded" && (
+              <span className="topbar-count">
+                {allCollections.length} result{allCollections.length !== 1 ? "s" : ""}
+              </span>
+            )}
+            <SortDropdown value={sortBy} onChange={setSortByLocal} />
+          </div>
+        </div>
+
+        {/* ══ ACTIVE FILTER CHIPS ══════════════════════════════════════════════ */}
+        <ActiveFilterChips localFilters={localFilters} setLocalFilters={setLocalFilters} />
+
+        {/* ══ LAYOUT ══════════════════════════════════════════════════════════ */}
+        <div className="collections-layout">
+          <FilterPanel
+            categories={allCategories}
+            localFilters={localFilters}
+            setLocalFilters={setLocalFilters}
+            onClear={handleClearFilters}
+            isOpen={filterPanelOpen}
+            onClose={() => setFilterPanelOpen(false)}
+          />
+
+          <main className="main">
+            {status !== "loading" && (
+              <div className="section-meta">
+                <h2 className="section-title">All Collections</h2>
+                <span className="section-count">
+                  {allCollections.length} collection{allCollections.length !== 1 ? "s" : ""}
+                </span>
               </div>
-            ) : (
-              <div className="grid">
-                {allCollections.map((item) => (
-                  <CollectionCard key={item._id} item={item} onToast={showToast} />
-                ))}
+            )}
+
+            {status === "loading" && (
+              <div className="grid" aria-label="Loading collections">
+                {[1, 2, 3, 4, 5, 6].map((i) => <SkeletonCard key={i} />)}
               </div>
-            )
-          )}
-        </main>
-      </div>
+            )}
 
-      <FeaturedProductsSection />
-      <NewArrivalsSection />
+            {status === "failed" && (
+              <div className="error-state">
+                <div className="error-icon">✦</div>
+                <h3 className="error-title">Something went wrong</h3>
+                <p className="error-msg">{error || "Failed to load collections"}</p>
+                <button className="retry-btn" onClick={handleRetry}>
+                  Try Again
+                </button>
+              </div>
+            )}
 
-      {/* Toast */}
-      <div
-        className={`toast${toast.show ? " show" : ""}`}
-        role="status"
-        aria-live="polite"
-      >
-        <span className="toast-icon">
-          {toast.type === "cart" ? "🛍️" : toast.type === "wishlist" ? "♥" : "✓"}
-        </span>
-        {toast.msg}
+            {status === "succeeded" && (
+              allCollections.length === 0 ? (
+                <div className="empty-state">
+                  <div className="empty-icon">◇</div>
+                  <h3 className="empty-title">No collections match</h3>
+                  <p className="empty-sub">Try adjusting or clearing your filters</p>
+                  <button className="retry-btn" onClick={handleClearFilters}>Clear filters</button>
+                </div>
+              ) : (
+                <div className="grid">
+                  {allCollections.map((item) => (
+                    <CollectionCard
+                      key={item._id}
+                      item={item}
+                      onToast={showToast}
+                      isAuthenticated={isAuthenticated}
+                    />
+                  ))}
+                </div>
+              )
+            )}
+          </main>
+        </div>
+
+        {/* <FeaturedProductsSection />
+        <NewArrivalsSection /> */}
+
+        {/* Toast */}
+        <div
+          className={`toast${toast.show ? " show" : ""}`}
+          role="status"
+          aria-live="polite"
+        >
+          <span className="toast-icon">
+            {toast.type === "cart" ? "🛍️" : toast.type === "wishlist" ? "♥" : "✓"}
+          </span>
+          {toast.msg}
+        </div>
       </div>
     </>
   );

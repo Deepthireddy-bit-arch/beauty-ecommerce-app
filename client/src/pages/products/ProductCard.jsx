@@ -1,119 +1,114 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { addToCartAsync } from '../../redux/reducers/thunks/cartThunks';
-import { addToWishlist, removeFromWishlist, fetchWishlist } from '../../redux/reducers/thunks/wishlistActions';
+import { addToWishlist, removeFromWishlist } from '../../redux/reducers/thunks/wishlistActions';
 import './productcard.css';
 
 function ProductCard({ product, onToast }) {
   const dispatch = useDispatch();
-  const wishlistItems = useSelector((state) => state.wishlist?.items || []);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
-  
-  // Check if product is in wishlist
-  const liked = wishlistItems.some(
-    (item) => item.productId === product._id || item._id === product._id
+  const navigate = useNavigate();
+
+  // ✅ Auth from loginSlice
+  const isAuth = useSelector((s) => s.login?.isAuthenticated);
+
+  // ✅ Correct shape: backend populate gives { product: { _id } }
+  const wishlistItems = useSelector((s) => s.wishlist?.items ?? []);
+  const isLiked = Array.isArray(wishlistItems) && wishlistItems.some(
+    (w) => w?.product?._id === product._id
   );
 
-  const handleAddToCart = async (e) => {
+  const [isAddingToCart,     setIsAddingToCart]     = useState(false);
+  const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
+
+  // ── auth guard ─────────────────────────────────────────────────────────────
+  const requireAuth = (e, cb) => {
     e.stopPropagation();
-    setIsAddingToCart(true);
-    try {
-      const result = await dispatch(addToCartAsync({ 
-        productId: product._id, 
-        quantity: 1 
-      })).unwrap();
-      
-      if (onToast) {
-        onToast(`Added ${product.name || product.title} to cart 🛍️`, 'cart');
-      }
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
-      if (onToast) {
-        onToast(`Failed to add ${product.name || product.title} to cart`, 'error');
-      }
-    } finally {
-      setIsAddingToCart(false);
+    if (!isAuth) {
+      navigate("/login");
+      return;
     }
+    cb();
   };
 
-  const handleToggleWishlist = async (e) => {
-    e.stopPropagation();
-    setIsTogglingWishlist(true);
-    try {
-      if (liked) {
-        await dispatch(removeFromWishlist(product._id)).unwrap();
-        if (onToast) {
-          onToast(`Removed ${product.name || product.title} from wishlist`, 'wishlist');
+  // ── wishlist ───────────────────────────────────────────────────────────────
+  const handleToggleWishlist = (e) => {
+     e.stopPropagation();
+    requireAuth(e, async () => {
+      setIsTogglingWishlist(true);
+      try {
+        if (isLiked) {
+          await dispatch(removeFromWishlist(product._id)).unwrap();
+          onToast?.(`Removed from wishlist`, 'wishlist');
+        } else {
+          await dispatch(addToWishlist(product._id)).unwrap();
+          onToast?.(`Added to wishlist ♥`, 'wishlist');
         }
-      } else {
-        await dispatch(addToWishlist(product._id)).unwrap();
-        if (onToast) {
-          onToast(`Added ${product.name || product.title} to wishlist ♥`, 'wishlist');
-        }
+      } catch (err) {
+        // 400 "already in wishlist" is handled inside the thunk — won't reach here
+        // Only real failures land here
+        onToast?.("Failed to update wishlist", 'error');
+      } finally {
+        setIsTogglingWishlist(false);
       }
-      // Refresh wishlist to get updated state
-      await dispatch(fetchWishlist()).unwrap();
-    } catch (error) {
-      console.error('Failed to toggle wishlist:', error);
-      // Refresh wishlist to sync state
-      await dispatch(fetchWishlist()).unwrap();
-      if (error?.message?.includes('already') || error?.includes?.('already')) {
-        if (onToast) {
-          onToast(`${product.name || product.title} is already in your wishlist ♥`, 'wishlist');
-        }
-      } else {
-        if (onToast) {
-          onToast(`Failed to update wishlist`, 'error');
-        }
-      }
-    } finally {
-      setIsTogglingWishlist(false);
-    }
+    });
   };
+
+  // ── cart ───────────────────────────────────────────────────────────────────
+  const handleAddToCart = (e) => {
+     e.stopPropagation();
+    requireAuth(e, async () => {
+      setIsAddingToCart(true);
+      try {
+        await dispatch(addToCartAsync({ productId: product._id, quantity: 1 })).unwrap();
+        onToast?.(`Added ${product.name || product.title} to cart 🛍️`, 'cart');
+      } catch (err) {
+        onToast?.(`Failed to add to cart`, 'error');
+      } finally {
+        setIsAddingToCart(false);
+      }
+    });
+  };
+  const handleProductClick = () => {
+  navigate(`/product/${product._id}`);
+};
 
   return (
-    <div className="product-card">
+ <div className="product-card" onClick={handleProductClick}  style={{ cursor: 'pointer' }}>
       <div className="product-card-img-wrap">
-        <img 
-          src={product.image || product.images?.[0] || '/placeholder.png'} 
-          alt={product.name || product.title} 
+        <img
+          src={product.image || product.images?.[0] || '/placeholder.png'}
+          alt={product.name || product.title}
           loading="lazy"
         />
-        {product.isBestseller && (
-          <span className="product-badge bestseller">Bestseller</span>
-        )}
-        {product.isNew && (
-          <span className="product-badge new">New</span>
-        )}
-        {product.discount > 0 && (
-          <span className="product-badge discount">{product.discount}% OFF</span>
-        )}
-        
-        {/* Wishlist Button */}
+
+        {product.isBestseller && <span className="product-badge bestseller">Bestseller</span>}
+        {product.isNew       && <span className="product-badge new">New</span>}
+        {product.discount > 0 && <span className="product-badge discount">{product.discount}% OFF</span>}
+
+        {/* ✅ Heart — always visible, fills when liked */}
         <button
-          className={`product-wishlist-btn ${liked ? 'liked' : ''} ${isTogglingWishlist ? 'loading' : ''}`}
+          className={`product-wishlist-btn${isLiked ? ' liked' : ''}${isTogglingWishlist ? ' loading' : ''}`}
           onClick={handleToggleWishlist}
           disabled={isTogglingWishlist}
-          aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
         >
-          <span className="heart-icon">{liked ? '♥' : '♡'}</span>
+          <span className="heart-icon">{isLiked ? '♥' : '♡'}</span>
         </button>
-        
-        {/* Quick Add to Cart */}
+
         <button
-          className={`product-quick-add ${isAddingToCart ? 'loading' : ''}`}
+          className={`product-quick-add${isAddingToCart ? ' loading' : ''}`}
           onClick={handleAddToCart}
           disabled={isAddingToCart}
         >
           {isAddingToCart ? 'Adding...' : 'Quick Add'}
         </button>
       </div>
-      
+
       <div className="product-card-body">
         <div className="product-brand">{product.brand}</div>
         <h3 className="product-title">{product.name || product.title}</h3>
-        
+
         <div className="product-rating">
           <span className="stars">
             {'★'.repeat(Math.round(product.rating || 0))}
@@ -121,7 +116,7 @@ function ProductCard({ product, onToast }) {
           </span>
           <span className="review-count">({product.reviews || 0})</span>
         </div>
-        
+
         <div className="product-price-row">
           <span className="current-price">₹{product.price?.toLocaleString()}</span>
           {product.originalPrice && (
@@ -131,8 +126,8 @@ function ProductCard({ product, onToast }) {
             <span className="discount-badge">{product.discount}% off</span>
           )}
         </div>
-        
-        <button 
+
+        <button
           className="product-add-to-cart"
           onClick={handleAddToCart}
           disabled={isAddingToCart}

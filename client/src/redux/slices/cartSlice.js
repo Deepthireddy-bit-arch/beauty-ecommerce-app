@@ -5,6 +5,7 @@ import {
   addToCartAsync,
   updateQuantityAsync,
   removeItemAsync,
+  clearCartAsync,
 } from "../reducers/thunks/cartThunks";
 
 const initialState = {
@@ -67,6 +68,12 @@ const cartSlice = createSlice({
         state.items = transformCartItems(action.payload);
       })
       .addCase(removeItemAsync.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      .addCase(clearCartAsync.fulfilled, (state) => {
+        state.items = [];
+      })
+      .addCase(clearCartAsync.rejected, (state, action) => {
         state.error = action.payload;
       });
   },

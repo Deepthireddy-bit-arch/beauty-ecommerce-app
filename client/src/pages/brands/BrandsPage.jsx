@@ -167,6 +167,153 @@ function BannerSection() {
     </section>
   );
 }
+// ─── BRAND HIGHLIGHTS SECTION ────────────────────────────────────────────────
+function BrandHighlights() {
+  const brands = useSelector(selectBrands);
+  const filters = useSelector(selectFilters);
+  const dispatch = useDispatch();
+ const navigate = useNavigate();
+  const [page, setPage] = useState(0);
+  const [activeCard, setActiveCard] = useState(null);
+  const autoRef = useRef(null);
+  const trackRef = useRef(null);
+
+  // Responsive: cards per page
+  const getCardsPerPage = () => {
+    const w = window.innerWidth;
+    if (w <= 479) return 2;
+    if (w <= 767) return 3;
+    if (w <= 1023) return 4;
+    if (w <= 1159) return 5;
+    return 6;
+  };
+  const [cardsPerPage, setCardsPerPage] = useState(getCardsPerPage());
+
+  useEffect(() => {
+    const onResize = () => setCardsPerPage(getCardsPerPage());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const totalPages = Math.ceil(brands.length / cardsPerPage);
+
+  const goTo = useCallback((p) => {
+    setPage((p + totalPages) % totalPages);
+  }, [totalPages]);
+
+  const resetTimer = useCallback(() => {
+    clearInterval(autoRef.current);
+    autoRef.current = setInterval(() => goTo(page + 1), 3200);
+  }, [goTo, page]);
+
+  useEffect(() => {
+    if (!brands.length) return;
+    autoRef.current = setInterval(() => setPage((p) => (p + 1) % totalPages), 3200);
+    return () => clearInterval(autoRef.current);
+  }, [brands.length, totalPages]);
+
+  const handleArrow = (dir) => {
+    clearInterval(autoRef.current);
+    setPage((p) => (p + dir + totalPages) % totalPages);
+    autoRef.current = setInterval(() => setPage((p) => (p + 1) % totalPages), 3200);
+  };
+
+  const handleDot = (i) => {
+    clearInterval(autoRef.current);
+    setPage(i);
+    autoRef.current = setInterval(() => setPage((p) => (p + 1) % totalPages), 3200);
+  };
+
+  const getMonogram = (name) =>
+    name.replace(/'/g, "").trim().split(/\s+/).slice(0, 2)
+      .map((w) => w[0].toUpperCase()).join("");
+
+  if (!brands.length) return null;
+
+  const offset = -(page * cardsPerPage * (100 / brands.length));
+
+  return (
+    <div className="bstrip-wrap">
+      <div className="bstrip-header">
+        <div className="bstrip-header-left">
+          <span className="bstrip-title">Shop by Brand</span>
+          <span className="bstrip-brand-count">{brands.length} brands</span>
+        </div>
+        <button className="bstrip-viewall" onClick={() => dispatch(clearAllFilters())}>
+          View all ›
+        </button>
+      </div>
+
+      <div className="bstrip-outer">
+        <button
+          className={`bstrip-arrow left${page === 0 ? " hidden" : ""}`}
+          onClick={() => handleArrow(-1)}
+          aria-label="Previous brands"
+        >‹</button>
+
+        <div className="bstrip-track-wrap">
+          <div
+            className="bstrip-track"
+            ref={trackRef}
+            style={{ transform: `translateX(${offset}%)` }}
+          >
+            {brands.map((b, i) => {
+              const isActive = activeCard === i || filters.brands.includes(b._id);
+              const mono = getMonogram(b.name);
+              return (
+                <button
+                  key={b._id}
+                  className={`bstrip-card${isActive ? " active" : ""}`}
+                  onClick={() => {
+                    // setActiveCard(i);
+                    // dispatch(toggleBrandFilter(b._id));
+                       navigate(`/brands/${b._id}`);
+                  }}
+                  aria-label={`Filter by ${b.name}`}
+                  aria-pressed={isActive}
+                >
+                  <div className="bstrip-img-wrap">
+                    <img
+                      src={resolveImg(b.logo)}
+                      alt={b.name}
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        e.target.nextSibling.style.display = "flex";
+                      }}
+                    />
+                    <div className="bstrip-img-fallback" style={{ display: "none" }}>
+                      {mono}
+                    </div>
+                  </div>
+                  <div className="bstrip-name">{b.name}</div>
+                  {b.sub && <div className="bstrip-sub-label">{b.sub}</div>}
+                  <div className="bstrip-active-bar" />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <button
+          className={`bstrip-arrow right${page >= totalPages - 1 ? " hidden" : ""}`}
+          onClick={() => handleArrow(1)}
+          aria-label="Next brands"
+        >›</button>
+      </div>
+
+      <div className="bstrip-dots">
+        {Array.from({ length: totalPages }).map((_, i) => (
+          <button
+            key={i}
+            className={`bstrip-dot${i === page ? " active" : ""}`}
+            onClick={() => handleDot(i)}
+            aria-label={`Brand page ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function BannerSkeleton() {
   return <div className="banner-skeleton" aria-busy="true" aria-label="Loading banner" />;
@@ -457,9 +604,12 @@ function ProductCardGrid({ item, onToast }) {
       setIsTogglingWishlist(false);
     }
   };
-
+  const handleProductClick = () => {
+    navigate(`/product/${item._id}`);
+  };
   return (
-    <article className="product-card-grid">
+    <article className="product-card-grid"    onClick={handleProductClick}
+      style={{ cursor: 'pointer' }}>
       {item.isBestseller && (
         <div className="badge bestseller-badge" aria-label="Bestseller">BESTSELLER</div>
       )}
@@ -544,6 +694,9 @@ function ProductCardList({ item, onToast }) {
     if (!wishlistItem?.product) return false;
     return wishlistItem.product._id === item._id;
   });
+    const handleProductClick = () => {
+    navigate(`/product/${item._id}`);
+  };
   
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
@@ -593,7 +746,8 @@ function ProductCardList({ item, onToast }) {
   };
 
   return (
-    <article className="product-card-list">
+    <article className="product-card-list"  onClick={handleProductClick}
+      style={{ cursor: 'pointer' }}>
       <div className="list-img-wrap">
         {item.isBestseller && <div className="badge bestseller-badge">BESTSELLER</div>}
         <img
@@ -1064,6 +1218,7 @@ export default function CollectionsPage() {
   return (
     <div className="collections-page">
       <BannerSection />
+       <BrandHighlights />
 
       <BrandPills />
 
@@ -1084,18 +1239,10 @@ export default function CollectionsPage() {
           {totalActive > 0 && <span className="mobile-filter-count">{totalActive}</span>}
         </button>
         <div className="mobile-sort-wrap">
-          <select
-            className="sort-select"
-            value={filters.sortBy}
-            onChange={(e) => dispatch(setSortBy(e.target.value))}
-          >
-            <option value="featured">Featured</option>
-            <option value="price-low">Price: Low → High</option>
-            <option value="price-high">Price: High → Low</option>
-            <option value="rating">Top Rated</option>
-            <option value="discount">Best Discount</option>
-            <option value="newest">New Arrivals</option>
-          </select>
+          <CustomSortDropdown 
+            value={filters.sortBy} 
+            onChange={(value) => dispatch(setSortBy(value))} 
+          />
         </div>
       </div>
 

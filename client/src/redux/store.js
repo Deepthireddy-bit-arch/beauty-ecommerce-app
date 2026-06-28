@@ -83,7 +83,9 @@ const store = configureStore({
     searchReducer: searchReducer,
     offer: offerReducer,
     newArrivals: newArrivalsReducer,
-       bestSellers: bestSellersReducer, 
+    bestSellers: bestSellersReducer,
+     
+
   },
 });
 

@@ -395,7 +395,7 @@ h1,h2,h3,h4,h5 { font-family: 'Cormorant Garamond', serif; line-height: 1.1; }
 
 /* ── Responsive: Tablet (≤ 1024px) ───────────────────── */
 @media (max-width: 1024px) {
-  .nav-inner  { padding: 0 24px; }
+  /* .nav-inner  { padding: 0 24px; } */
   .nav-links  { gap: 24px; }
   .nav-links a { font-size: 12px; }
   .nav-search-btn span { display: none; }   /* hide "Search" label */
@@ -407,7 +407,7 @@ h1,h2,h3,h4,h5 { font-family: 'Cormorant Garamond', serif; line-height: 1.1; }
 @media (max-width: 768px) {
   :root { --nav-h: 60px; }
 
-  .nav-inner { padding: 0 16px; }
+  /* .nav-inner { padding: 0 16px; } */
 
   /* Hide desktop links & right cluster, show hamburger */
   .nav-links         { display: none; }

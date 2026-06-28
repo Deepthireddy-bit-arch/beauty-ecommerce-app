@@ -1,4 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const styles = `
   @keyframes overlayIn {
@@ -48,12 +50,41 @@ const styles = `
   .confirm-row-4 { animation: rowSlideIn 0.3s ease 0.75s both; }
   .confirm-btn-1 { animation: btnFadeUp 0.3s ease 0.8s both; }
   .confirm-btn-2 { animation: btnFadeUp 0.3s ease 0.9s both; }
+
+  /* ── Fluid responsiveness ─────────────────────────────────────────
+     The modal's own sizing (width/padding/font-size) is handled with
+     clamp() inline below, so it scales continuously with the viewport
+     instead of jumping at 2-3 fixed breakpoints. These rules cover the
+     bits that inline styles can't (box-sizing, scroll containment,
+     and row wrapping on very narrow / very tall-content phones). */
+  .confirm-overlay, .confirm-overlay * {
+    box-sizing: border-box;
+  }
+  .confirm-row-1, .confirm-row-2, .confirm-row-3, .confirm-row-4 {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  @media (max-width: 360px) {
+    .confirm-row-1 span:last-child,
+    .confirm-row-2 span:last-child,
+    .confirm-row-3 span:last-child,
+    .confirm-row-4 span:last-child {
+      text-align: right;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .confirm-overlay, .confirm-modal, .confirm-ring, .confirm-check path,
+    .confirm-row-1, .confirm-row-2, .confirm-row-3, .confirm-row-4,
+    .confirm-btn-1, .confirm-btn-2 {
+      animation: none !important;
+    }
+  }
 `;
 
 const OrderConfirmationModal = ({ order, onViewOrders, onContinueShopping }) => {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-  console.log("helo-------");
+  const navigate=useNavigate();
 
   if (!order || !mounted) return null;
 
@@ -68,7 +99,8 @@ const OrderConfirmationModal = ({ order, onViewOrders, onContinueShopping }) => 
           backdropFilter: 'blur(6px)',
           zIndex: 300,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '1rem',
+          padding: 'clamp(0.5rem, 4vw, 1.5rem)',
+          overflowY: 'auto',
         }}
       >
         <div
@@ -76,9 +108,12 @@ const OrderConfirmationModal = ({ order, onViewOrders, onContinueShopping }) => 
           style={{
             background: 'var(--white)',
             borderRadius: 'var(--radius-lg)',
-            padding: '2.4rem 2.2rem',
+            padding: 'clamp(1.25rem, 5vw, 2.4rem) clamp(1rem, 4.5vw, 2.2rem)',
             width: '100%',
-            maxWidth: 520,
+            maxWidth: 'min(520px, 100%)',
+            maxHeight: '90dvh',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
             boxShadow: '0 24px 60px rgba(59,31,168,0.22)',
             textAlign: 'center',
           }}
@@ -87,11 +122,13 @@ const OrderConfirmationModal = ({ order, onViewOrders, onContinueShopping }) => 
           <div
             className="confirm-ring"
             style={{
-              width: 68, height: 68, borderRadius: '50%',
+              width: 'clamp(52px, 14vw, 68px)',
+              height: 'clamp(52px, 14vw, 68px)',
+              borderRadius: '50%',
               background: 'linear-gradient(135deg, var(--purple-pale), var(--purple-ghost))',
               border: '2.5px solid var(--purple-light)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 1.2rem',
+              margin: '0 auto clamp(0.85rem, 3vw, 1.2rem)',
             }}
           >
             <svg
@@ -99,19 +136,28 @@ const OrderConfirmationModal = ({ order, onViewOrders, onContinueShopping }) => 
               width="30" height="30" fill="none"
               stroke="var(--purple-mid)" strokeWidth="2.8"
               viewBox="0 0 24 24"
+              style={{ width: 'clamp(22px, 6vw, 30px)', height: 'clamp(22px, 6vw, 30px)' }}
             >
-              <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
 
           <h2 style={{
             fontFamily: 'Cormorant Garamond, serif',
-            fontSize: '2rem', fontWeight: 600,
-            color: 'var(--ink)', marginBottom: '0.3rem',
+            fontSize: 'clamp(1.35rem, 5.5vw, 2rem)',
+            fontWeight: 600,
+            color: 'var(--ink)',
+            marginBottom: '0.3rem',
+            lineHeight: 1.2,
           }}>
             Order Placed!
           </h2>
-          <p style={{ fontSize: '0.9rem', color: 'var(--ink-muted)', marginBottom: '1.8rem' }}>
+          <p style={{
+            fontSize: 'clamp(0.8rem, 2.6vw, 0.9rem)',
+            color: 'var(--ink-muted)',
+            marginBottom: 'clamp(1.2rem, 4vw, 1.8rem)',
+            lineHeight: 1.45,
+          }}>
             Your order has been confirmed. We'll get it to you soon.
           </p>
 
@@ -119,30 +165,30 @@ const OrderConfirmationModal = ({ order, onViewOrders, onContinueShopping }) => 
           <div style={{
             background: 'var(--purple-ghost)',
             borderRadius: 'var(--radius)',
-            padding: '1.1rem 1.4rem',
-            marginBottom: '1.8rem',
+            padding: 'clamp(0.85rem, 3.5vw, 1.1rem) clamp(0.9rem, 4vw, 1.4rem)',
+            marginBottom: 'clamp(1.2rem, 4vw, 1.8rem)',
             textAlign: 'left',
           }}>
-            <div className="confirm-row-1 d-flex justify-between align-center" style={{ marginBottom: '0.7rem' }}>
-              <span className="text-muted">Order ID</span>
-              <span style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--ink-soft)', fontWeight: 700, letterSpacing: '0.5px' }}>
+            <div className="confirm-row-1 d-flex justify-between align-center" style={{ marginBottom: '0.7rem', gap: '0.5rem' }}>
+              <span className="text-muted" style={{ fontSize: 'clamp(0.78rem, 2.4vw, 0.85rem)' }}>Order ID</span>
+              <span style={{ fontFamily: 'monospace', fontSize: 'clamp(0.72rem, 2.2vw, 0.82rem)', color: 'var(--ink-soft)', fontWeight: 700, letterSpacing: '0.5px', wordBreak: 'break-all' }}>
                 #{order._id?.slice(-10).toUpperCase()}
               </span>
             </div>
-            <div className="confirm-row-2 d-flex justify-between align-center" style={{ marginBottom: '0.7rem' }}>
-              <span className="text-muted">Items</span>
-              <span className="fw-600" style={{ fontSize: '0.92rem' }}>
+            <div className="confirm-row-2 d-flex justify-between align-center" style={{ marginBottom: '0.7rem', gap: '0.5rem' }}>
+              <span className="text-muted" style={{ fontSize: 'clamp(0.78rem, 2.4vw, 0.85rem)' }}>Items</span>
+              <span className="fw-600" style={{ fontSize: 'clamp(0.82rem, 2.6vw, 0.92rem)' }}>
                 {order.orderItems?.length} item{order.orderItems?.length !== 1 ? 's' : ''}
               </span>
             </div>
-            <div className="confirm-row-3 d-flex justify-between align-center" style={{ marginBottom: '0.7rem' }}>
-              <span className="text-muted">Payment</span>
-              <span className="fw-600" style={{ fontSize: '0.92rem' }}>{order.paymentMethod}</span>
+            <div className="confirm-row-3 d-flex justify-between align-center" style={{ marginBottom: '0.7rem', gap: '0.5rem' }}>
+              <span className="text-muted" style={{ fontSize: 'clamp(0.78rem, 2.4vw, 0.85rem)' }}>Payment</span>
+              <span className="fw-600" style={{ fontSize: 'clamp(0.82rem, 2.6vw, 0.92rem)' }}>{order.paymentMethod}</span>
             </div>
             <hr className="divider" style={{ margin: '0.7rem 0' }} />
-            <div className="confirm-row-4 d-flex justify-between align-center">
-              <span style={{ fontWeight: 700, color: 'var(--ink)', fontSize: '0.95rem' }}>Total Paid</span>
-              <span style={{ fontWeight: 700, fontSize: '1.2rem', color: 'var(--purple-deep)' }}>
+            <div className="confirm-row-4 d-flex justify-between align-center" style={{ gap: '0.5rem' }}>
+              <span style={{ fontWeight: 700, color: 'var(--ink)', fontSize: 'clamp(0.85rem, 2.7vw, 0.95rem)' }}>Total Paid</span>
+              <span style={{ fontWeight: 700, fontSize: 'clamp(1rem, 4vw, 1.2rem)', color: 'var(--purple-deep)' }}>
                 ₹{order.totalPrice?.toLocaleString()}
               </span>
             </div>
@@ -150,16 +196,16 @@ const OrderConfirmationModal = ({ order, onViewOrders, onContinueShopping }) => 
 
           {/* Buttons */}
           <div className="confirm-btn-1" style={{ marginBottom: '0.75rem' }}>
-            <button className="btn-primary" onClick={onViewOrders}>
+            <button className="btn-primary" style={{ width: '100%' }} onClick={onViewOrders}>
               View My Orders
             </button>
           </div>
           <div className="confirm-btn-2" style={{ display: 'flex', justifyContent: 'center' }}>
             <button
-              onClick={onContinueShopping}
+              onClick={() => navigate('/products')}
               style={{
                 background: 'none', border: 'none',
-                color: 'var(--ink-muted)', fontSize: '0.88rem',
+                color: 'var(--ink-muted)', fontSize: 'clamp(0.82rem, 2.6vw, 0.88rem)',
                 cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
                 textDecoration: 'underline', textUnderlineOffset: '3px',
                 padding: '0.3rem 0.5rem',

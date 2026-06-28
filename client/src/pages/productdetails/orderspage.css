@@ -30,7 +30,6 @@ body {
   min-height: 100vh;
 }
 
-/* ── Navbar ─────────────────────────────── */
 .app-navbar {
   background: var(--white);
   border-bottom: 1.5px solid var(--border);
@@ -38,11 +37,12 @@ body {
   height: 64px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-between; /* ← Keep this */
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: var(--shadow-sm);
+  width: 100%; /* ← Make sure it takes full width */
 }
 
 .navbar-brand {
@@ -52,11 +52,20 @@ body {
   color: var(--purple-deep);
   text-decoration: none;
   letter-spacing: -0.5px;
+  flex-shrink: 0; /* ← Prevents brand from shrinking */
 }
 
-.navbar-brand span { color: var(--purple-mid); }
+.navbar-brand span { 
+  color: var(--purple-mid); 
+}
 
-.nav-links { display: flex; gap: 0.5rem; align-items: center; }
+.nav-links { 
+  display: flex; 
+  gap: 0.5rem; 
+  align-items: center;
+  margin-left: auto; /* ← THIS pushes buttons to the right end */
+  flex-shrink: 0; /* ← Prevents buttons from shrinking */
+}
 
 .nav-link-btn {
   background: none;
@@ -69,9 +78,42 @@ body {
   border-radius: 8px;
   transition: var(--transition);
   font-weight: 500;
+  white-space: nowrap; /* ← Prevents text from wrapping */
 }
-.nav-link-btn:hover { background: var(--purple-ghost); color: var(--purple-mid); }
-.nav-link-btn.active { background: var(--purple-pale); color: var(--purple-deep); font-weight: 600; }
+
+.nav-link-btn:hover { 
+  background: var(--purple-ghost); 
+  color: var(--purple-mid); 
+}
+
+.nav-link-btn.active { 
+  background: var(--purple-pale); 
+  color: var(--purple-deep); 
+  font-weight: 600; 
+}
+.nav-link-btn {
+  background: none;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  transition: var(--transition);
+  font-weight: 500;
+}
+
+.nav-link-btn:hover { 
+  background: var(--purple-ghost); 
+  color: var(--purple-mid); 
+}
+
+.nav-link-btn.active { 
+  background: var(--purple-pale); 
+  color: var(--purple-deep); 
+  font-weight: 600; 
+}
 
 /* ── Page wrapper ────────────────────────── */
 .page-wrap {

@@ -47,3 +47,33 @@ export const getOrderById = createAsyncThunk(
     }
   }
 );
+// export const cancelOrderAsync = (orderId) => async (dispatch) => {
+//   try {
+//     const { data } = await axiosInstance.put(`/orders/${orderId}/cancel`);
+//     // refresh the list and update selectedOrder
+//     dispatch(getMyOrders());
+//     dispatch(getOrderById(orderId));
+//     toast.success('Order cancelled successfully.');
+//     return data;
+//   } catch (err) {
+//     toast.error(err.response?.data?.message || 'Failed to cancel order.');
+//   }
+// };
+export const cancelOrderAsync = createAsyncThunk(
+  'order/cancelOrder',
+  async (orderId, { rejectWithValue }) => {
+    try {
+      const { data } = await api.put(
+        `${API_ENDPOINTS.orders}/${orderId}/cancel`,
+        {},
+        authHeader()
+      );
+
+      return data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || 'Failed to cancel order'
+      );
+    }
+  }
+);

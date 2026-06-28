@@ -96,17 +96,17 @@ function EmptyCart() {
 function QtyControl({ productId, quantity }) {
   const dispatch = useDispatch();
   return (
-    <div className="qty-control">
+    <div className="qty-control" onClick={(e) => e.stopPropagation()}>
       <button
         className="qty-btn"
-        onClick={() => dispatch(updateQuantityAsync({ productId, quantity: quantity - 1 }))}
+        onClick={(e) => { e.stopPropagation(); dispatch(updateQuantityAsync({ productId, quantity: quantity - 1 })); }}
         disabled={quantity <= 1}
         aria-label="Decrease quantity"
       >−</button>
       <span className="qty-display">{quantity}</span>
       <button
         className="qty-btn"
-        onClick={() => dispatch(updateQuantityAsync({ productId, quantity: quantity + 1 }))}
+        onClick={(e) => { e.stopPropagation(); dispatch(updateQuantityAsync({ productId, quantity: quantity + 1 })); }}
         aria-label="Increase quantity"
       >+</button>
     </div>
@@ -118,12 +118,18 @@ function QtyControl({ productId, quantity }) {
 ───────────────────────────────────────────── */
 function CartItem({ item }) {
   const dispatch  = useDispatch();
+  const navigate = useNavigate();
   const discount  = item.originalPrice > item.price
     ? Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)
     : 0;
 
+  const handleCardClick = () => {
+    const productId = item.productId || item._id || item.id;
+    navigate(`/product/${productId}`);
+  };
+
   return (
-    <div className="cart-item">
+    <div className="cart-item" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
       {/* Image */}
       <div className="cart-item__img-wrap">
         <img
@@ -150,7 +156,7 @@ function CartItem({ item }) {
 
           <button
             className="cart-item__remove"
-            onClick={() => dispatch(removeItemAsync({ productId: item.productId }))}
+            onClick={(e) => { e.stopPropagation(); dispatch(removeItemAsync({ productId: item.productId })); }}
             aria-label="Remove item"
             title="Remove"
           >✕</button>
@@ -210,7 +216,7 @@ function PriceSummary({ totals }) {
 
       <button
         className="price-summary__cta"
-        onClick={() => navigate("/checkout")}
+        onClick={() => navigate("/checkoutpage")}
       >
         Proceed to Checkout <span>→</span>
       </button>

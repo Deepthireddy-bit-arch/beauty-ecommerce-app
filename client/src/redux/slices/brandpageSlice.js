@@ -220,6 +220,8 @@
 // export default brandsSlice.reducer;
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { API_ENDPOINTS } from "../../api/endpoints";
+import api from "../../api/axios";
 
 const BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -241,7 +243,8 @@ export const fetchBrands = createAsyncThunk(
   "brands/fetchBrands",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`${BASE}/brands`);
+      // const { data } = await axios.get(`${BASE}/brands`);
+         const { data } = await api.get(API_ENDPOINTS.GET_ALL);
       return data.data?.brands || data.data || [];
     } catch (e) {
       return rejectWithValue(e.response?.data?.message || e.message);
@@ -254,7 +257,8 @@ export const fetchCategories = createAsyncThunk(
   "brands/fetchCategories",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`${BASE}/categories`);
+      // const { data } = await axios.get(`${BASE}/categories`);
+         const { data } = await api.get(API_ENDPOINTS.categoryGet);
       // API returns: { success: true, categories: ["Makeup", "Skincare", ...] }
       const categoriesArray = data.categories || [];
       // Format categories for the filter UI
@@ -297,7 +301,8 @@ export const fetchSingleBrand = createAsyncThunk(
       if (sortBy) params.set("sortBy", sortBy);
       if (page)   params.set("page",   page);
 
-      const { data } = await axios.get(`${BASE}/brands/${id}?${params.toString()}`);
+      // const { data } = await axios.get(`${BASE}/brands/${id}?${params.toString()}`);
+       const { data } = await api.get(`${API_ENDPOINTS.GET_ALL}/${id}?${params.toString()}`);
       return data; // { success, brand, products, pagination }
     } catch (e) {
       return rejectWithValue(e.response?.data?.message || e.message);
@@ -332,7 +337,8 @@ export const fetchBrandProducts = createAsyncThunk(
       if (filters.sortBy) params.set("sortBy", filters.sortBy);
       if (filters.page)   params.set("page",   filters.page);
 
-      const { data } = await axios.get(`${BASE}/products?${params.toString()}`);
+      // const { data } = await axios.get(`${BASE}/products?${params.toString()}`);
+         const { data } = await api.get(`${API_ENDPOINTS.products}?${params.toString()}`);
       return { products: data.data || data.products, pagination: data.pagination };
     } catch (e) {
       return rejectWithValue(e.response?.data?.message || e.message);

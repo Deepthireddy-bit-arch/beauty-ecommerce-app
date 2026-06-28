@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { createOrder, getMyOrders, getOrderById } from '../reducers/thunks/orderThunks';
+import {  cancelOrderAsync, createOrder, getMyOrders, getOrderById } from '../reducers/thunks/orderThunks';
 
 
 
@@ -52,7 +52,12 @@ const orderSlice = createSlice({
       })
       .addCase(getMyOrders.rejected, (state, action) => {
         state.loading = false; state.error = action.payload;
-      });
+      })
+      .addCase(cancelOrderAsync.fulfilled, (state, action) => {
+        const updated = action.payload;
+        state.myOrders = state.myOrders.map((o) => (o._id === updated._id ? updated : o));
+        if (state.selectedOrder?._id === updated._id) state.selectedOrder = updated;
+      })
 
     // getOrderById
     builder
@@ -65,6 +70,7 @@ const orderSlice = createSlice({
       .addCase(getOrderById.rejected, (state, action) => {
         state.loading = false; state.error = action.payload;
       });
+
   },
 });
 

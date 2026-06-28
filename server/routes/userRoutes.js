@@ -4,6 +4,6 @@ const protect = require("../middleware/authMiddleware");
 const { getProfile, updateProfile } = require("../controllers/userController");
 
 router.get("/profile", protect, getProfile);
-router.put("/profile", protect, updateProfile); //only logged users can edit own profile right
+router.put("/profile/update", protect, updateProfile); //only logged users can edit own profile right
 
 module.exports = router;

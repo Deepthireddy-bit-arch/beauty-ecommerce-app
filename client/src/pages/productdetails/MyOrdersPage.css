@@ -1,0 +1,55 @@
+/* ══════════════════════════════════════════════════════
+   MyOrdersPage.css — ShopHub Beauty Atelier
+   --op-px mirrors --nav-pad-x at EVERY breakpoint so
+   the orders content left-edge always aligns with the
+   navbar logo at 80%, 90%, and 100% zoom.
+   ══════════════════════════════════════════════════════ */
+
+/* ── Variables ──────────────────────────────────────── */
+:root {
+  /* Alias — reads --nav-pad-x live from Navbar.css.
+     Shadowed below at each breakpoint as a fallback
+     in case load order varies.                        */
+  --op-px: var(--nav-pad-x);
+
+  /* Navbar height alias — keep in sync with Navbar.css */
+  --op-nav-h: 72px;
+}
+
+/* ── Gutter ladder — mirrors Navbar.css --nav-pad-x exactly ──
+   Wide → narrow. min-width BEFORE max-width.              */
+
+/* 1920px+ → 80px */
+@media (min-width: 1920px) { :root { --op-px: 80px; } }
+
+/* 1440–1919px and 1280–1439px → 48px (root default, no override needed) */
+
+/* ≤ 1279px → 36px */
+@media (max-width: 1279px) { :root { --op-px: 36px; } }
+
+/* ≤ 1159px → 28px */
+@media (max-width: 1159px) { :root { --op-px: 28px; } }
+
+/* ≤ 1023px → 20px */
+@media (max-width: 1023px) { :root { --op-px: 20px; } }
+
+/* ≤ 767px → 16px */
+@media (max-width: 767px)  { :root { --op-px: 16px; } }
+
+/* ≤ 479px → 12px */
+@media (max-width: 479px)  { :root { --op-px: 12px; } }
+
+/* ── Navbar height breakpoints — keep in sync ────────── */
+@media (max-width: 1023px) { :root { --op-nav-h: 64px; } }
+@media (max-width: 767px)  { :root { --op-nav-h: 60px; } }
+@media (max-width: 400px)  { :root { --op-nav-h: 56px; } }
+
+/* ── Page wrapper ───────────────────────────────────── */
+.orders-page {
+  /* NO max-width / margin: 0 auto — padding only.
+     Left edge tracks navbar logo at every zoom level. */
+  padding: calc(var(--op-nav-h) + 2rem) var(--op-px) 4rem;
+  font-family: "Outfit", -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+  box-sizing: border-box;
+}

@@ -1,4 +1,5 @@
 const Cart = require("../models/Cart");
+const Order = require("../models/Order");
 
 const addToCart = async (req, res) => {
   try {
@@ -109,10 +110,51 @@ const removeCartItem = async (req, res) => {
     });
   }
 };
+const clearCart = async (req, res) => { //clearing cart
+  try {
+    const userId = req.user.id;
 
+    const cart = await Cart.findOneAndUpdate(
+      { user: userId },
+      { items: [] },
+      { new: true, upsert: true } // upsert in case no cart doc exists yet
+    ).populate("items.product");
+
+    res.status(200).json({ success: true, cart });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+const cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    // Ownership check — without this anyone could cancel anyone's order
+    if (order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized to cancel this order" });
+    }
+
+    if (!["Pending", "Processing"].includes(order.orderStatus)) {
+      return res.status(400).json({
+        message: `Order cannot be cancelled once it is ${order.orderStatus}`,
+      });
+    }
+
+    order.orderStatus = "Cancelled";
+    const updated = await order.save();
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// module.exports = {  getMyOrders, getOrderById, updateOrderStatus };
 module.exports = {
   addToCart,
   getCart,
   updateCartQuantity,
   removeCartItem,
+  clearCart,
+  cancelOrder
 };

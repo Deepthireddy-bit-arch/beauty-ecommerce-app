@@ -1,52 +1,154 @@
-import './footer.css';
-const Footer = () => (
-  <footer style={{ background: "var(--charcoal)", borderTop: "1px solid rgba(124,58,237,0.12)" }}>
-    <div style={{ maxWidth: 1360, margin: "0 auto", padding: "76px 48px 36px" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "2.2fr 1fr 1fr 1fr", gap: 56 }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 22 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: "var(--purple)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: "white", fontWeight: 700, fontFamily: "Cormorant Garamond,serif" }}>S</div>
-            <div>
-              <span style={{ fontFamily: "Cormorant Garamond,serif", fontWeight: 600, fontSize: 24, color: "white", letterSpacing: .5 }}>Shop<span style={{ color: "var(--purple)" }}>Hub</span></span>
-              <div style={{ fontSize: 9, letterSpacing: 3, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", fontWeight: 500 }}>Beauty Atelier</div>
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import './Footer.css';
+
+const SOCIAL_ICONS = [
+  { icon: "📸", label: "Instagram" },
+  { icon: "🐦", label: "Twitter"   },
+  { icon: "📌", label: "Pinterest" },
+  { icon: "▶️", label: "YouTube"   },
+];
+
+const LINKS = [
+  {
+    title: "Shop",
+    links: [
+      { label: "New Arrivals",  to: "/products?sort=new"       },
+      { label: "Bestsellers",   to: "/products?sort=bestseller" },
+      { label: "Skincare",      to: "/products?category=skincare" },
+      { label: "Makeup",        to: "/products?category=makeup"   },
+      { label: "Fragrance",     to: "/products?category=fragrance"},
+      { label: "Tools",         to: "/products?category=tools"    },
+    ],
+  },
+  {
+    title: "Help",
+    links: [
+      { label: "Track Order",   to: "/orders"    },
+      { label: "Returns",       to: "/returns"   },
+      { label: "Shipping Info", to: "/shipping"  },
+      { label: "Size Guide",    to: "/size-guide"},
+      { label: "FAQ",           to: "/faq"       },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "About Us",      to: "/about"          },
+      { label: "Careers",       to: "/careers"        },
+      { label: "Press",         to: "/press"          },
+      { label: "Sustainability", to: "/sustainability" },
+      { label: "Affiliates",    to: "/affiliates"     },
+    ],
+  },
+];
+
+const Footer = () => {
+  const [email, setEmail] = useState('');
+  const [sent,  setSent]  = useState(false);
+
+  const handleSub = (e) => {
+    e.preventDefault();
+    if (!email.includes('@')) return;
+    setSent(true);
+  };
+
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  return (
+    <footer className="footer-root">
+      <div className="footer-inner">
+
+        {/* ── Main grid ── */}
+        <div className="footer-grid">
+
+          {/* Brand column */}
+          <div className="footer-brand-col">
+            <div className="footer-brand-logo">
+              <div className="footer-logo-icon">S</div>
+              <div>
+                <div className="footer-logo-name">
+                  Shop<span>Hub</span>
+                </div>
+                <div className="footer-logo-sub">Beauty Atelier</div>
+              </div>
+            </div>
+
+            <p className="footer-tagline">
+              Your ultimate destination for premium beauty &amp; skincare products,
+              curated with love for every skin type.
+            </p>
+
+            {/* Socials */}
+            <div className="footer-socials">
+              {SOCIAL_ICONS.map(({ icon, label }) => (
+                <button key={label} className="footer-social-btn" aria-label={label}>
+                  {icon}
+                </button>
+              ))}
+            </div>
+
+            {/* Inline newsletter */}
+            <div className="footer-newsletter">
+              <div className="footer-nl-label">Stay in the loop</div>
+              {sent ? (
+                <div style={{ fontSize: 13, color: 'var(--purple-2)', fontFamily: 'Outfit, sans-serif' }}>
+                  ✦ You're subscribed!
+                </div>
+              ) : (
+                <form className="footer-nl-form" onSubmit={handleSub}>
+                  <input
+                    className="footer-nl-input"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    aria-label="Email for newsletter"
+                  />
+                  <button type="submit" className="footer-nl-btn">
+                    Join ✦
+                  </button>
+                </form>
+              )}
             </div>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.32)", fontSize: 13.5, lineHeight: 1.9, maxWidth: 260 }}>Your ultimate destination for premium beauty & skincare products, curated with love for every skin type.</p>
-          <div style={{ display: "flex", gap: 10, marginTop: 26 }}>
-            {["📸", "🐦", "📌", "▶️"].map((icon, i) => (
-              <button key={i} style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, cursor: "pointer", transition: "all .2s" }}
-                onMouseEnter={e => { e.currentTarget.style.background = "var(--purple)"; e.currentTarget.style.transform = "translateY(-3px)" }}
-                onMouseLeave={e => { e.currentTarget.style.background = "rgba(124,58,237,0.1)"; e.currentTarget.style.transform = "none" }}>{icon}</button>
-            ))}
-          </div>
-        </div>
-        {[
-          { title: "Shop", links: ["New Arrivals", "Bestsellers", "Skincare", "Makeup", "Fragrance", "Tools"] },
-          { title: "Help", links: ["Track Order", "Returns", "Shipping Info", "Size Guide", "FAQ"] },
-          { title: "Company", links: ["About Us", "Careers", "Press", "Sustainability", "Affiliates"] },
-        ].map(col => (
-          <div key={col.title}>
-            <h5 style={{ fontWeight: 700, fontSize: 9.5, marginBottom: 20, color: "var(--purple)", textTransform: "uppercase", letterSpacing: 2.5 }}>{col.title}</h5>
-            {col.links.map(l => (
-              <a key={l} href="#" style={{ display: "block", color: "rgba(255,255,255,0.3)", textDecoration: "none", fontSize: 13.5, marginBottom: 12, transition: "color .2s" }}
-                onMouseEnter={e => e.target.style.color = "var(--purple-2)"}
-                onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.3)"}>{l}</a>
-            ))}
-          </div>
-        ))}
-      </div>
-      <div style={{ height: 1, background: "linear-gradient(90deg,transparent,rgba(124,58,237,0.25),transparent)", margin: "52px 0 28px" }} />
-      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-        <p style={{ color: "rgba(255,255,255,0.18)", fontSize: 12 }}>© 2025 ShopHub Beauty. All rights reserved.</p>
-        <div style={{ display: "flex", gap: 24 }}>
-          {["Privacy", "Terms", "Cookies"].map(l => (
-            <a key={l} href="#" style={{ color: "rgba(255,255,255,0.18)", fontSize: 12, textDecoration: "none", transition: "color .2s" }}
-              onMouseEnter={e => e.target.style.color = "var(--purple-2)"}
-              onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.18)"}>{l}</a>
+
+          {/* Link columns */}
+          {LINKS.map(col => (
+            <div key={col.title} className="footer-col">
+              <h5 className="footer-col-title">{col.title}</h5>
+              {col.links.map(({ label, to }) => (
+                <Link key={label} to={to} className="footer-col-link">
+                  {label}
+                </Link>
+              ))}
+            </div>
           ))}
         </div>
+
+        {/* ── Divider ── */}
+        <div className="footer-divider" />
+
+        {/* ── Bottom bar ── */}
+        <div className="footer-bottom">
+          <p className="footer-copy">
+            © {new Date().getFullYear()} ShopHub Beauty. All rights reserved.
+          </p>
+
+          <div className="footer-legal">
+            {['Privacy', 'Terms', 'Cookies'].map(l => (
+              <a key={l} href={`/${l.toLowerCase()}`} className="footer-legal-link">{l}</a>
+            ))}
+          </div>
+
+          <button className="footer-top-btn" onClick={scrollTop} aria-label="Back to top">
+            ↑
+          </button>
+        </div>
+
       </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
+
 export default Footer;

@@ -74,9 +74,10 @@ const Navbar = () => {
   const navLinks = [
     { label: "Home",        to: "/" },
     { label: "Shop",        to: "/products" },
-    { label: "Collections", to: "/products?category=all" },
-    { label: "Brands",      to: "/products?brand=all" },
+    { label: "Collections", to: "/collections" },
+    { label: "Brands",      to: "/brands" },
     { label: "About",       to: "/about" },
+    { label: "Contact",       to: "/contact" },
   ];
 
   return (
@@ -199,11 +200,11 @@ const Navbar = () => {
 
           {/* Hamburger — mobile only */}
           <button className="nav-hamburger" onClick={() => setMenuOpen((v) => !v)} aria-label="Toggle menu">
-            {menuOpen ? (
-              <span className="nav-hamburger-icon"><span /><span /></span>
-            ) : (
-              <span className="nav-hamburger-icon"><span /><span /><span /></span>
-            )}
+            <span className={`nav-hamburger-icon${menuOpen ? " is-open" : ""}`}>
+              <span />
+              <span />
+              {!menuOpen && <span />}
+            </span>
           </button>
 
         </div>

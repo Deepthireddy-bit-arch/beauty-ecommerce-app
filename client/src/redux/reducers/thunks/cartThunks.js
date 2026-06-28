@@ -63,3 +63,15 @@ export const removeItemAsync = createAsyncThunk(
     }
   }
 );
+export const clearCartAsync = createAsyncThunk(
+  "cart/clearCart",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await api.delete(`${API_ENDPOINTS.cart}/clear`, authHeader());
+      return data.cart;
+    } catch (err) {
+      const msg = err.response?.data?.message || "Failed to clear cart";
+      return rejectWithValue(msg);
+    }
+  }
+);

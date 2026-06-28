@@ -95,7 +95,7 @@ const resolveImg = (path) => {
                   key={deal._id}
                   ref={i === 0 ? cardRef : null}
                   className="dc-card"
-                  onClick={() => navigate("/products")}
+                onClick={() => navigate(`/product/${deal._id}`)}
                 >
                   <img
                     src={resolveImg(deal.image)}

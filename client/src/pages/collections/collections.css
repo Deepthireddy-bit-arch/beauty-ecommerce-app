@@ -1,5 +1,6 @@
 /* collections.css - White + Purple Theme */
 
+/* ── Root ── */
 :root {
   --purple-50:  #eeedfe;
   --purple-100: #cecbf6;
@@ -16,14 +17,125 @@
   --border-solid:  #e4e1f7;
 
   --sidebar-w: 260px;
-  --navbar-h:  72px;
-  --topbar-h:  56px;
+
+  /* ── Navbar height: mirrors Navbar.css exactly ── */
+  --navbar-h: 72px;
+
+  /* ── Page gutter - EXACT mirror of Navbar.css --nav-pad-x ── */
+  --page-pad-x: 48px;  /* Default matches navbar's default */
+  --page-pad-y: 24px;
+
+  /* ── Topbar height ── */
+  --topbar-h: 56px;
+}
+
+/* Navbar height breakpoints — keep in sync with Navbar.css */
+@media (max-width: 899px)  { :root { --navbar-h: 64px; } }
+@media (max-width: 767px)  { :root { --navbar-h: 60px; } }
+@media (max-width: 400px)  { :root { --navbar-h: 56px; } }
+
+/* ── Gutter scale - EXACT mirror of Navbar.css --nav-pad-x ── */
+/* 1920px+ → 80px (matches navbar) */
+@media (min-width: 1920px) { 
+  :root { 
+    --page-pad-x: 80px; 
+    --page-pad-y: 36px; 
+  } 
+}
+
+/* 1440–1919px → 48px (matches navbar default) */
+/* Already 48px in :root, no override needed */
+
+/* 1280–1439px → 48px (matches navbar default) */
+/* Already 48px in :root, no override needed */
+
+/* ≤ 1279px → 36px (matches navbar) */
+@media (max-width: 1279px) { 
+  :root { 
+    --page-pad-x: 36px; 
+    --page-pad-y: 24px; 
+  } 
+}
+
+/* ≤ 1159px → 28px (matches navbar) */
+@media (max-width: 1159px) { 
+  :root { 
+    --page-pad-x: 28px; 
+    --page-pad-y: 20px; 
+  } 
+}
+
+/* ≤ 1023px → 20px (matches navbar) */
+@media (max-width: 1023px) { 
+  :root { 
+    --page-pad-x: 20px; 
+    --page-pad-y: 20px; 
+    --sidebar-w: 300px; 
+  } 
+}
+
+/* ≤ 767px → 16px (matches navbar) */
+@media (max-width: 767px)  { 
+  :root { 
+    --page-pad-x: 16px; 
+    --page-pad-y: 16px; 
+  } 
+}
+
+/* ≤ 479px → 12px (matches navbar) */
+@media (max-width: 479px)  { 
+  :root { 
+    --page-pad-x: 12px; 
+    --page-pad-y: 14px; 
+  } 
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── MAIN WRAPPER - FULL WIDTH, NO MAX-WIDTH CONSTRAINT ── */
+.collections-page-body {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--page-pad-x);
+}
+
+/* ── CONTENT CONTAINER - CENTERED WITH MAX-WIDTH FOR LARGE SCREENS ── */
+.collections-content {
+  max-width: 1360px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Remove max-width/margin from the individual elements */
+.collections-active-filters,
+.collections-layout {
+  max-width: unset;
+  margin-left: unset;
+  margin-right: unset;
+}
+
+/* Topbar - full width with padding */
+.collections-topbar {
+  position: sticky;
+  top: var(--navbar-h);
+  z-index: 91;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  height: var(--topbar-h);
+  width: 100%;
+}
+
+.collections-topbar-inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 var(--page-pad-x);
+  height: 100%;
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  align-items: center;
+}
+
 body {
-  font-family: "DM Sans", sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -71,12 +183,14 @@ body {
   background: linear-gradient(to right, rgba(38, 33, 92, 0.5) 0%, transparent 70%);
 }
 
+/* Horizontal padding matches --page-pad-x at every breakpoint */
 .banner-content {
   position: relative;
   z-index: 2;
   max-width: 600px;
-  padding: 40px;
+  padding: 40px var(--page-pad-x);
   color: #fff;
+  width: 100%;
 }
 
 .banner-eyebrow {
@@ -93,7 +207,6 @@ body {
 }
 
 .banner-headline {
-  font-family: "Playfair Display", serif;
   font-size: clamp(2rem, 4vw, 3.5rem);
   font-weight: 700;
   line-height: 1.1;
@@ -202,29 +315,18 @@ body {
   height: 100%;
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 var(--page-pad-x);
   border-right: 1px solid var(--border);
   gap: 8px;
   overflow: hidden;
 }
 
-/* Desktop-only "Filters" indicator - the sidebar is always visible inline
-   at this breakpoint, so this is just a label, not a toggle. Mounting of
-   this vs. .mobile-filter-btn is controlled in JS (useIsDesktop), so the
-   two never render at the same time. */
 .topbar-filter-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--purple-800);
-  white-space: nowrap;
+  display: none;
 }
 
 .topbar-filter-label svg { color: var(--purple-600); flex-shrink: 0; }
 
-/* Mobile/tablet "Filters" toggle - opens the off-canvas drawer. */
 .mobile-filter-btn {
   display: flex;
   align-items: center;
@@ -237,7 +339,6 @@ body {
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  font-family: "DM Sans", sans-serif;
   white-space: nowrap;
   position: relative;
   transition: background 0.2s, transform 0.15s;
@@ -268,7 +369,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 var(--page-pad-x);
   gap: 12px;
   position: relative;
   z-index: 1;
@@ -292,11 +393,7 @@ body {
   flex-shrink: 0;
 }
 
-/* ── SORT DROPDOWN (custom, replaces native <select>) ────────────────────────── */
-/* Native <select> menus are drawn by the OS on iOS/iPadOS and by the browser
-   chrome elsewhere, ignoring most of our styling - this is why the sort menu
-   looked inconsistent and out of theme on tablet/mobile. This custom version
-   renders identically everywhere. */
+/* ── SORT DROPDOWN ────────────────────────────────────────── */
 .sort-dropdown {
   position: relative;
 }
@@ -314,7 +411,6 @@ body {
   color: var(--text);
   background: var(--white);
   cursor: pointer;
-  font-family: "DM Sans", sans-serif;
   min-width: 160px;
   min-height: 38px;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -384,10 +480,10 @@ body {
   grid-template-columns: var(--sidebar-w) 1fr;
   align-items: start;
   min-height: calc(100vh - var(--navbar-h) - var(--topbar-h));
+  width: 100%;
 }
 
-/* ── LEFT FILTERS (matches component class) ─────────────────────────────────── */
-/* Higher specificity beats shared .left-filters rules from other pages (e.g. Brands) */
+/* ── LEFT FILTERS ─────────────────────────────────────────────────── */
 .collections-layout > .left-filters {
   width: var(--sidebar-w);
   background: var(--white);
@@ -449,7 +545,6 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  font-family: "DM Sans", sans-serif;
   font-weight: 500;
   padding: 3px 0;
   text-decoration: underline;
@@ -492,7 +587,6 @@ body {
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
-  font-family: "DM Sans", sans-serif;
 }
 
 .filter-section-title {
@@ -593,12 +687,13 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 28px;
+  padding: 12px var(--page-pad-x);
   background: var(--white);
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
 }
 
 .collections-active-filters::-webkit-scrollbar { display: none; }
@@ -630,7 +725,6 @@ body {
   color: var(--purple-800);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: "DM Sans", sans-serif;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -653,7 +747,6 @@ body {
   cursor: pointer;
   font-weight: 600;
   padding: 4px 8px;
-  font-family: "DM Sans", sans-serif;
   white-space: nowrap;
   flex-shrink: 0;
   margin-left: auto;
@@ -667,18 +760,20 @@ body {
 .main {
   width: 100%;
   min-width: 0;
-  padding: 24px 28px;
+  padding: var(--page-pad-y) var(--page-pad-x) calc(var(--page-pad-y) * 1.6);
+  max-width: 1360px;
+  margin: 0 auto;
 }
 
 .section-meta {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  padding-right: 4px;
 }
 
 .section-title {
-  font-family: "Playfair Display", serif;
   font-size: 24px;
   font-weight: 400;
   color: var(--purple-900);
@@ -696,7 +791,7 @@ body {
   gap: 24px;
 }
 
-/* ── CARD (matches component) ───────────────────────────────────────────────── */
+/* ── CARD ───────────────────────────────────────────────── */
 .card {
   background: var(--white);
   border-radius: 16px;
@@ -807,7 +902,6 @@ body {
   font-weight: 500;
   color: var(--purple-800);
   cursor: pointer;
-  font-family: "DM Sans", sans-serif;
   transition: background 0.2s;
 }
 
@@ -834,7 +928,6 @@ body {
 }
 
 .card-title {
-  font-family: "Playfair Display", serif;
   font-size: 17px;
   font-weight: 600;
   color: var(--purple-900);
@@ -877,7 +970,6 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  font-family: "DM Sans", sans-serif;
   transition: gap 0.2s;
 }
 
@@ -964,7 +1056,6 @@ body {
 }
 
 .error-title, .empty-title {
-  font-family: "Playfair Display", serif;
   font-size: 22px;
   color: var(--purple-900);
   margin-bottom: 8px;
@@ -985,7 +1076,6 @@ body {
   font-size: 13.5px;
   font-weight: 500;
   cursor: pointer;
-  font-family: "DM Sans", sans-serif;
   transition: background 0.2s;
 }
 
@@ -1027,11 +1117,9 @@ body {
 
 /* Tablet - 1023px and below */
 @media (max-width: 1023px) {
-  :root { --sidebar-w: 300px; }
-
   .collections-topbar {
     display: flex;
-    padding: 0 20px;
+    padding: 0 var(--page-pad-x);
     justify-content: space-between;
     gap: 12px;
     top: var(--navbar-h);
@@ -1087,15 +1175,12 @@ body {
     backdrop-filter: blur(3px);
   }
 
-  .main { padding: 20px; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
   .topbar-count { display: none; }
 }
 
 /* Mobile - 768px */
 @media (max-width: 768px) {
-  .collections-topbar { padding: 0 16px; }
-  .main { padding: 16px; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
   .card-img-wrap { height: 180px; }
 
@@ -1103,14 +1188,12 @@ body {
   .sort-menu { min-width: 180px; }
 
   .banner-slide { min-height: 280px; }
-  .banner-content { padding: 24px; }
   .banner-headline { font-size: clamp(1.5rem, 3vw, 2.5rem); }
 }
 
 /* Small Mobile - 639px */
 @media (max-width: 639px) {
-  .collections-topbar { padding: 0 14px; gap: 8px; }
-  .main { padding: 14px; }
+  .collections-topbar { gap: 8px; }
   .section-title { font-size: 20px; }
 
   .grid { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -1125,7 +1208,6 @@ body {
   .sort-menu { right: 0; min-width: 165px; }
 
   .collections-layout > .left-filters { width: min(86vw, var(--sidebar-w)); }
-  .collections-active-filters { padding: 10px 14px; }
 
   .toast { right: 14px; bottom: 14px; font-size: 12px; padding: 10px 16px; }
 }
@@ -1137,6 +1219,30 @@ body {
   .card-sub { display: block; }
 
   .collections-layout > .left-filters { width: 88vw; }
+}
+
+/* Standard laptop - 1024px to 1439px */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 24px;
+  }
+}
+
+/* Desktop large screens - 1440px and above */
+@media (min-width: 1440px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px;
+  }
+}
+
+/* Ultra-wide monitors - 1920px and above */
+@media (min-width: 1920px) {
+  .grid {
+    gap: 32px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
 }
 
 /* Reduced motion */

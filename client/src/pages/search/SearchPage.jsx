@@ -1,4 +1,4 @@
-// src/pages/SearchPage.jsx
+
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
@@ -9,9 +9,11 @@ import {
   setFilter,
   resetFilters,
   clearSuggestions,
+  clearSearch,
 } from "../../redux/slices/searchSlice";
 import { addToCartAsync } from "../../redux/reducers/thunks/cartThunks";
 import { showToast } from "../../redux/slices/uiSlice";
+import { addToWishlist, fetchWishlist, removeFromWishlist } from "../../redux/reducers/thunks/wishlistActions";
 
 /* ── helpers ── */
 const BASE_URL   = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -42,6 +44,13 @@ export default function SearchPage() {
   const dispatch      = useDispatch();
   const navigate      = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  // ✅ Toast state
+  const [toast, setToast] = useState({ msg: "", show: false, type: "default" });
+  const showToastFn = useCallback((msg, type = "default") => {
+    setToast({ msg, show: true, type });
+    setTimeout(() => setToast((t) => ({ ...t, show: false })), 2400);
+  }, []);
 
   const {
     products,
@@ -63,16 +72,32 @@ export default function SearchPage() {
   const inputRef     = useRef(null);
 
   /* ── Initial load from URL ── */
+useEffect(() => {
+  const q        = searchParams.get("q")        || "";
+  const category = searchParams.get("category") || "";
+  const brand    = searchParams.get("brand")    || "";
+
+  setLocalQ(q);
+  dispatch(setSearchQuery(q));
+  if (category) dispatch(setFilter({ key: "category", value: category }));
+  if (brand)    dispatch(setFilter({ key: "brand",    value: brand    }));
+
+  // ✅ Always search — no query means "show all products"
+  dispatch(searchProducts({
+    q,
+    page: 1,
+    limit: 12,
+    sort: "relevant",
+    ...(category && { category }),
+    ...(brand    && { brand }),
+  }));
+}, []); // eslint-disable-line // eslint-disable-line
+  
+  const isAuth = useSelector((s) => s.login?.isAuthenticated);
+  
   useEffect(() => {
-    const q        = searchParams.get("q")        || "";
-    const category = searchParams.get("category") || "";
-    const brand    = searchParams.get("brand")    || "";
-    setLocalQ(q);
-    dispatch(setSearchQuery(q));
-    if (category) dispatch(setFilter({ key: "category", value: category }));
-    if (brand)    dispatch(setFilter({ key: "brand",    value: brand    }));
-    doSearch(q, { category, brand }, 1);
-  }, []); // eslint-disable-line
+    if (isAuth) dispatch(fetchWishlist());
+  }, [dispatch, isAuth]);
 
   /* ── Debounced suggestions ── */
   useEffect(() => {
@@ -85,28 +110,34 @@ export default function SearchPage() {
   }, [localQ, dispatch]);
 
   /* ── Run search ── */
-  const doSearch = useCallback(
-    (q, extraFilters = {}, pg = 1) => {
-      const params = {
-        q,
-        page: pg,
-        limit: 12,
-        sort:     extraFilters.sort     ?? filters.sort,
-        category: extraFilters.category ?? filters.category,
-        brand:    extraFilters.brand    ?? filters.brand,
-        minPrice: extraFilters.minPrice ?? filters.minPrice,
-        maxPrice: extraFilters.maxPrice ?? filters.maxPrice,
-      };
-      Object.keys(params).forEach((k) => !params[k] && delete params[k]);
-      dispatch(searchProducts(params));
-      const sp = new URLSearchParams();
-      if (q)               sp.set("q", q);
-      if (params.category) sp.set("category", params.category);
-      if (params.brand)    sp.set("brand",    params.brand);
-      setSearchParams(sp);
-    },
-    [dispatch, filters, setSearchParams]
-  );
+const doSearch = useCallback(
+  (q, extraFilters = {}, pg = 1) => {
+    const params = {
+      q,
+      page: pg,
+      limit: 12,
+      sort:     extraFilters.sort     ?? filters.sort,
+      category: extraFilters.category ?? filters.category,
+      brand:    extraFilters.brand    ?? filters.brand,
+      minPrice: extraFilters.minPrice ?? filters.minPrice,
+      maxPrice: extraFilters.maxPrice ?? filters.maxPrice,
+    };
+
+    // ── Only delete non-q falsy keys — keep q even when empty ──
+    Object.keys(params).forEach((k) => {
+      if (k !== "q" && !params[k]) delete params[k];
+    });
+
+    dispatch(searchProducts(params));
+
+    const sp = new URLSearchParams();
+    if (q)               sp.set("q", q);
+    if (params.category) sp.set("category", params.category);
+    if (params.brand)    sp.set("brand",    params.brand);
+    setSearchParams(sp);
+  },
+  [dispatch, filters, setSearchParams]
+);
 
   const handleSubmit = (e) => {
     e?.preventDefault();
@@ -155,7 +186,7 @@ export default function SearchPage() {
 
       <div className="sp-page" style={{ paddingTop: 72 }}>
 
-        {/* ── SEARCH HERO (matches brands page top bar aesthetic) ── */}
+        {/* ── SEARCH HERO ── */}
         <div className="sp-hero">
           <div className="sp-hero-inner">
             <form className="sp-search-form" onSubmit={handleSubmit}>
@@ -178,7 +209,22 @@ export default function SearchPage() {
                 />
                 {localQ && (
                   <button type="button" className="sp-clear-btn"
-                    onClick={() => { setLocalQ(""); dispatch(setSearchQuery("")); dispatch(clearSuggestions()); inputRef.current?.focus(); }}>
+onClick={() => {
+  setLocalQ("");
+  dispatch(setSearchQuery(""));
+  dispatch(clearSuggestions());
+  dispatch(resetFilters());
+  setSearchParams({});
+  inputRef.current?.focus();
+
+  // ✅ Re-fetch all products instead of clearing to empty
+  dispatch(searchProducts({
+    q: "",
+    page: 1,
+    limit: 12,
+    sort: "relevant",
+  }));
+}}>
                     ×
                   </button>
                 )}
@@ -214,7 +260,7 @@ export default function SearchPage() {
           </div>
         </div>
 
-        {/* ── ACTIVE FILTER TAGS (matches brands page ActiveFilterTags) ── */}
+        {/* ── ACTIVE FILTER TAGS ── */}
         {activeFilterCount > 0 && (
           <div className="sp-active-filters">
             <span className="sp-active-filters-title">Filters Applied</span>
@@ -244,7 +290,7 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* ── PAGE BODY (matches brands page-body layout) ── */}
+        {/* ── PAGE BODY ── */}
         <div className="sp-page-body">
 
           {/* Mobile filter toggle */}
@@ -342,11 +388,11 @@ export default function SearchPage() {
           {/* Products Panel */}
           <div className="sp-products-panel">
 
-            {/* Results bar (matches brands ResultsBar) */}
+            {/* Results bar */}
             {!loading && (products.length > 0 || query) && (
               <div className="sp-results-bar">
                 <span className="sp-results-count">
-                  {pagination?.total?.toLocaleString() || products.length} Products
+                {(pagination?.total || products.length).toLocaleString()} Products
                   {query && <> for <strong>"{query}"</strong></>}
                 </span>
                 <div className="sp-sort-wrap">
@@ -380,29 +426,34 @@ export default function SearchPage() {
             )}
 
             {/* Initial / empty */}
-            {!loading && !error && products.length === 0 && !query && !localQ && (
-              <div className="sp-empty-state">
-                <div className="sp-empty-icon">✦</div>
-                <h3>Start searching</h3>
-                <p>Find your next favourite beauty product above</p>
-              </div>
-            )}
+           {!loading && !error && products.length === 0 && (query || localQ) && (
+  <div className="sp-empty-state">
+    <div className="sp-empty-icon">✦</div>
+    <h3>No products found</h3>
+    <p>Try a different search term or clear your filters.</p>
+    <button className="sp-retry-btn" onClick={handleReset}>Clear Filters</button>
+  </div>
+)}
+{!loading && !error && products.length === 0 && !query && !localQ && (
+  <div className="sp-empty-state">
+    <div className="sp-empty-icon">✦</div>
+    <h3>No products available</h3>
+    <p>Check back later for new arrivals.</p>
+  </div>
+)}
 
-            {!loading && !error && products.length === 0 && (query || localQ) && (
-              <div className="sp-empty-state">
-                <div className="sp-empty-icon">✦</div>
-                <h3>No products match your filters</h3>
-                <p>Try adjusting your search or removing some filters.</p>
-                <button className="sp-retry-btn" onClick={handleReset}>Clear Filters</button>
-              </div>
-            )}
+           
 
             {/* Product grid */}
             {!loading && products.length > 0 && (
               <>
                 <div className="sp-products-grid">
                   {products.map((p) => (
-                    <SearchProductCard key={p._id} p={p} />
+                    <SearchProductCard 
+                      key={p._id} 
+                      p={p}  
+                      onToast={showToastFn}  // ✅ Pass the toast function
+                    />
                   ))}
                 </div>
 
@@ -418,6 +469,14 @@ export default function SearchPage() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* ✅ TOAST - Add this at the bottom of the component */}
+      <div className={`sp-toast${toast.show ? " show" : ""}`}>
+        <span className="sp-toast-icon">
+          {toast.type === "cart" ? "🛍️" : toast.type === "wishlist" ? "♥" : "✓"}
+        </span>
+        {toast.msg}
       </div>
     </>
   );
@@ -438,10 +497,15 @@ function FilterSection({ title, children }) {
   );
 }
 
-function SearchProductCard({ p }) {
+function SearchProductCard({ p, onToast }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // ── selectors ──────────────────────────────────────────────────────────────
+  const isAuth       = useSelector((s) => s.login?.isAuthenticated);
+  const wishlistItems = useSelector((s) => s.wishlist?.items ?? []);
+
+  // ── derived ────────────────────────────────────────────────────────────────
   const id       = p._id || p.id;
   const price    = p.price || p.salePrice || 0;
   const name     = p.name || "Product";
@@ -451,21 +515,80 @@ function SearchProductCard({ p }) {
   const category = p.category || "";
   const badge    = p.badge || (p.isBestseller ? "BESTSELLER" : p.isNew ? "NEW" : "");
 
-  const addCart = (e) => {
+  const isLiked = Array.isArray(wishlistItems) &&
+    wishlistItems.some((w) => w?.product?._id === id);
+
+  const [cartLoading,    setCartLoading]    = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  // ── auth guard ─────────────────────────────────────────────────────────────
+  const requireAuth = (e, cb) => {
     e.stopPropagation();
-    dispatch(addToCartAsync({ id, name, price, image: resolveImg(image), category }));
-    dispatch(showToast(`✦ ${name} added to cart!`));
+    if (!isAuth) { navigate("/login"); return; }
+    cb();
+  };
+
+  // ── cart ───────────────────────────────────────────────────────────────────
+  const handleAddToCart = (e) => {
+    requireAuth(e, async () => {
+      setCartLoading(true);
+      try {
+        await dispatch(addToCartAsync({ productId: id, quantity: 1 })).unwrap();
+        // ✅ Use onToast only (don't use showToast from uiSlice)
+        onToast(`✦ ${name} added to cart!`, 'cart');
+      } catch {
+        onToast("Failed to add to cart", 'error');
+      } finally {
+        setCartLoading(false);
+      }
+    });
+  };
+
+  // ── wishlist ───────────────────────────────────────────────────────────────
+  const handleToggleWishlist = (e) => {
+    requireAuth(e, async () => {
+      setWishlistLoading(true);
+      try {
+        if (isLiked) {
+          await dispatch(removeFromWishlist(id)).unwrap();
+          onToast("Removed from wishlist", 'wishlist');
+        } else {
+          await dispatch(addToWishlist(id)).unwrap();
+          onToast("Added to wishlist ♥", 'wishlist');
+        }
+      } catch {
+        onToast("Failed to update wishlist", 'error');
+      } finally {
+        setWishlistLoading(false);
+      }
+    });
   };
 
   return (
     <div className="sp-product-card" onClick={() => navigate(`/product/${id}`)}>
       {badge && <div className="sp-bestseller-badge">{badge}</div>}
 
+      <button
+        className={`sp-wishlist-btn${isLiked ? " liked" : ""}${wishlistLoading ? " loading" : ""}`}
+        onClick={handleToggleWishlist}
+        disabled={wishlistLoading}
+        aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
+      >
+        {isLiked ? "♥" : "♡"}
+      </button>
+
       <div className="sp-product-img-wrap">
         {image
           ? <img src={resolveImg(image)} alt={name} loading="lazy" />
           : <span style={{ fontSize: 48, color: "#d8b4fe" }}>✨</span>}
-        <button className="sp-quick-add" onClick={addCart}>+ Quick Add</button>
+
+        <button
+          className={`sp-quick-add${cartLoading ? " loading" : ""}`}
+          onClick={handleAddToCart}
+          disabled={cartLoading}
+        >
+          {cartLoading ? "Adding..." : "+ Quick Add"}
+        </button>
       </div>
 
       <div className="sp-product-body">
@@ -476,7 +599,9 @@ function SearchProductCard({ p }) {
           {p.originalPrice && p.originalPrice > price && (
             <>
               <span className="sp-product-mrp">₹{p.originalPrice.toLocaleString()}</span>
-              <span className="sp-product-discount">{Math.round((1 - price / p.originalPrice) * 100)}% Off</span>
+              <span className="sp-product-discount">
+                {Math.round((1 - price / p.originalPrice) * 100)}% Off
+              </span>
             </>
           )}
         </div>
@@ -519,7 +644,6 @@ function Pagination({ current, total, onChange }) {
   );
 }
 
-
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
 
@@ -534,14 +658,60 @@ const CSS = `
 .sp-hero {
   background: #fff;
   border-bottom: 1px solid #ececf0;
-  padding: 20px 0;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  padding-left: var(--nav-pad-x, 48px);
+  padding-right: var(--nav-pad-x, 48px);
 }
 .sp-hero-inner {
+  
+  width: 100%;
+}
+.sp-wishlist-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #e8e4f0;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.sp-wishlist-btn:hover {
+  color: #e11d48;
+  border-color: #fecdd3;
+  transform: scale(1.12);
+}
+
+.sp-wishlist-btn.liked {
+  color: #7c3aed;
+  border-color: #c4b5fd;
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.sp-wishlist-btn.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.sp-product-img-wrap { position: relative; }
+.sp-search-form {
   max-width: 780px;
   margin: 0 auto;
-  padding: 0 20px;
+  width: 100%;
 }
-.sp-search-form { width: 100%; }
 .sp-search-wrap {
   display: flex;
   align-items: center;
@@ -599,7 +769,6 @@ const CSS = `
 }
 .sp-search-btn:hover { background: #6d28d9; }
 
-/* Suggestions */
 .sp-suggestions {
   position: absolute;
   top: calc(100% + 6px);
@@ -626,16 +795,17 @@ const CSS = `
 .sp-sug-label { display: block; font-size: 13px; font-weight: 600; color: #1a1a2e; }
 .sp-sug-meta  { display: block; font-size: 11px; color: #999; margin-top: 1px; }
 .sp-sug-img   { width: 36px; height: 36px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
-
-/* ── Active Filters (matches brands ActiveFilterTags) ── */
 .sp-active-filters {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 12px 24px;
   background: #fff;
   border-bottom: 1px solid #ececf0;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: var(--nav-pad-x, 48px);
+  padding-right: var(--nav-pad-x, 48px);
 }
 .sp-active-filters-title {
   font-size: 12px;
@@ -673,18 +843,19 @@ const CSS = `
 .sp-active-tag:hover { background: #e8d5ff; }
 .sp-active-tag span { font-size: 14px; line-height: 1; color: #a78bfa; }
 
-/* ── Page Body (matches brands page-body) ── */
 .sp-page-body {
   display: flex;
   gap: 0;
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 24px 20px;
-  align-items: flex-start;
+  align-items: flex-start;       /* ← this is correct, keeps sticky working */
   position: relative;
+  
+  padding-top: 24px;
+  padding-bottom: 40px;
+  padding-left: var(--nav-pad-x, 48px);
+  padding-right: var(--nav-pad-x, 48px);
+  box-sizing: border-box;
 }
 
-/* Mobile filter toggle */
 .sp-mobile-filter-toggle {
   display: none;
   position: absolute;
@@ -702,21 +873,32 @@ const CSS = `
   z-index: 10;
 }
 
-/* ── Left Filters Sidebar ── */
 .sp-sidebar-wrap {
   width: 240px;
   flex-shrink: 0;
   margin-right: 24px;
+  /* ── sticky container — must NOT be overflow:hidden ── */
+  align-self: flex-start;
+  position: sticky;
+  top: calc(var(--navbar-h, 72px) + 16px);
+  max-height: calc(100vh - var(--navbar-h, 72px) - 32px);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+  .sp-sidebar-wrap::-webkit-scrollbar {
+  display: none;
+}
+
 .sp-left-filters {
   background: #fff;
   border-radius: 12px;
   border: 1px solid #ececf0;
   padding: 0;
-  position: sticky;
-  top: 88px;
   overflow: hidden;
+  /* ── remove old sticky — now on the wrap ── */
 }
+
 .sp-filter-header {
   display: flex;
   justify-content: space-between;
@@ -740,7 +922,6 @@ const CSS = `
   padding: 0;
 }
 
-/* Filter Section (matches brands FilterSection) */
 .sp-filter-section {
   border-bottom: 1px solid #f0eaff;
 }
@@ -778,7 +959,6 @@ const CSS = `
   padding: 0 18px 14px;
 }
 
-/* Filter rows (matches brands FilterCheckbox) */
 .sp-filter-row {
   display: flex;
   align-items: center;
@@ -807,7 +987,6 @@ const CSS = `
   cursor: pointer;
 }
 
-/* Price inputs */
 .sp-price-inputs {
   display: flex;
   align-items: center;
@@ -861,10 +1040,13 @@ const CSS = `
   cursor: pointer;
 }
 
-/* ── Products Panel ── */
-.sp-products-panel { flex: 1; min-width: 0; }
 
-/* Results bar (matches brands ResultsBar) */
+.sp-products-panel {
+  flex: 1;
+  min-width: 0;
+  /* products panel scrolls naturally with the page */
+}
+
 .sp-results-bar {
   display: flex;
   align-items: center;
@@ -906,7 +1088,6 @@ const CSS = `
 }
 .sp-sort-select:focus { border-color: #7c3aed; }
 
-/* Product Grid (matches brands products-grid) */
 .sp-products-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -915,7 +1096,6 @@ const CSS = `
 @media (max-width: 1200px) { .sp-products-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 860px)  { .sp-products-grid { grid-template-columns: repeat(2, 1fr); } }
 
-/* Product Card (matches brands ProductCard exactly) */
 .sp-product-card {
   background: #fff;
   border-radius: 12px;
@@ -1035,7 +1215,6 @@ const CSS = `
 .star.filled { color: #7c3aed; }
 .sp-product-reviews { font-size: 11px; color: #999; }
 
-/* Skeleton (matches brands ProductSkeleton) */
 .sp-product-skeleton {
   background: #fff;
   border-radius: 12px;
@@ -1065,7 +1244,6 @@ const CSS = `
   100% { background-position: -200% 0; }
 }
 
-/* Empty state (matches brands empty-state) */
 .sp-empty-state {
   grid-column: 1 / -1;
   display: flex;
@@ -1105,7 +1283,6 @@ const CSS = `
 }
 .sp-retry-btn:hover { background: #6d28d9; }
 
-/* Pagination (matches brands Pagination) */
 .sp-pagination {
   display: flex;
   justify-content: center;
@@ -1128,6 +1305,54 @@ const CSS = `
 .sp-page-btn:hover { border-color: #7c3aed; color: #7c3aed; }
 .sp-page-btn.active { background: #7c3aed; color: #fff; border-color: #7c3aed; }
 .sp-page-btn:disabled { opacity: 0.35; cursor: default; }
+
+/* ─── TOAST ────────────────────────────────────────────────────── */
+.sp-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #1a1a2e;
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sp-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.sp-toast-icon {
+  font-size: 20px;
+}
+
+@media (max-width: 640px) {
+  .sp-toast {
+    font-size: 13px;
+    padding: 12px 20px;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    transform: translateY(80px);
+    width: auto;
+  }
+  .sp-toast.show {
+    transform: translateY(0);
+  }
+}
 
 /* ── Mobile Responsive ── */
 @media (max-width: 767px) {
