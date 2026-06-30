@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
-import { Toaster } from "react-hot-toast";          // ✅ import Toaster
+import { Toaster } from "react-hot-toast";
 import store from "./redux/store";
 
 import LoginPage from "./pages/LoginPage";
@@ -23,6 +23,8 @@ import MyOrdersPage from "./pages/productdetails/Myorderspage";
 import OrderDetailPage from "./pages/productdetails/orderDetail";
 import AboutPage from "./pages/about/AboutPage";
 import ContactPage from "./pages/contact/ContactPage";
+import NotFoundPage from "./pages/notfound/NotFoundPage";
+import ScrollToTop from "./components/ScrollToTop";
 
 
 
@@ -35,7 +37,7 @@ function App() {
       <Toaster position="top-right" />
 
       <BrowserRouter>
-
+        <ScrollToTop />
 
 
         <Routes>
@@ -56,7 +58,7 @@ function App() {
             <Route path="/orders" element={<MyOrdersPage />} />
             <Route path="/orders/:id" element={<OrderDetailPage />} />
             <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
+            <Route path="/contact" element={<ContactPage />} />
 
           </Route>
 
@@ -64,6 +66,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/checkoutpage" element={<StepperPage />} />
+          <Route path="*" element={<NotFoundPage />} />
 
         </Routes>
 

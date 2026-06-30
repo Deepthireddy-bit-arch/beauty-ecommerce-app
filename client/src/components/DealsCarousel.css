@@ -1,0 +1,208 @@
+/* DealsCarousel.css */
+
+.dc-section {
+  width: 100%;
+  overflow: hidden;          /* hard guard: nothing here can create page scroll */
+  background: #fff;
+  padding: 56px 0;
+ 
+}
+
+.dc-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 0 var(--nav-pad-x);
+  box-sizing: border-box;
+}
+
+.dc-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.dc-eyebrow {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid, #6b6b7e);
+  font-weight: 600;
+}
+
+.dc-heading {
+
+  font-size: 42px;
+  font-weight: 400;
+  color: var(--ink, #1e1b2b);
+  margin: 6px 0 0;
+}
+.dc-heading em {
+  font-style: normal;
+  color: var(--purple, #7c3aed);
+}
+
+.dc-viewall {
+  background: none;
+  border: none;
+  color: var(--purple, #7c3aed);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.dc-carousel-wrap {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dc-overflow {
+  overflow: hidden;
+  width: 100%;
+}
+
+.dc-track {
+  display: flex;
+  gap: 20px;
+  transition: transform 0.4s ease;
+  box-sizing: border-box;
+}
+
+.dc-card {
+  position: relative;
+  flex: 0 0 calc((100% - 40px) / 3);  /* 3 cards, 2 gaps of 20px */
+  max-width: calc((100% - 40px) / 3);
+  height: 360px;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.dc-card-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.dc-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.05) 55%, transparent 100%);
+}
+
+.dc-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--purple, #7c3aed);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 100px;
+}
+
+.dc-card-body {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  color: #fff;
+}
+
+.dc-card-brand {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+
+.dc-card-name {
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.dc-card-btn {
+  background: #fff;
+  color: var(--purple, #7c3aed);
+  border: none;
+  border-radius: 100px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Nav arrows — sit just inside the wrap, never escape viewport */
+.dc-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #e5e5e8;
+  background: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dc-nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.dc-nav--left  { left: -20px; }
+.dc-nav--right { right: -20px; }
+
+.dc-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+.dc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: #d8d6e3;
+  cursor: pointer;
+  padding: 0;
+}
+.dc-dot--active {
+  background: var(--purple, #7c3aed);
+  width: 22px;
+  border-radius: 4px;
+}
+
+/* ── Responsive: drop to 2 cards, then 1 ── */
+@media (max-width: 899px) {
+  .dc-card {
+    flex: 0 0 calc((100% - 20px) / 2);
+    max-width: calc((100% - 20px) / 2);
+    height: 300px;
+  }
+  .dc-heading { font-size: 32px; }
+}
+
+@media (max-width: 599px) {
+  .dc-card {
+    flex: 0 0 100%;
+    max-width: 100%;
+    height: 280px;
+  }
+  .dc-nav { display: none; } /* swipe instead on mobile, or keep if you want them */
+  .dc-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+}

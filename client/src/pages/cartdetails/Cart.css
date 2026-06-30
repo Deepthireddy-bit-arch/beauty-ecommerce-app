@@ -94,7 +94,7 @@
   min-height: 100vh;
   background: var(--cp-bg);
   padding-top: var(--nav-h);
-  font-family: "Outfit", -apple-system, BlinkMacSystemFont, sans-serif;
+ 
   color: var(--cp-ink);
   padding-bottom: 80px;
 }
@@ -137,7 +137,7 @@
 }
 .cart-topbar__back:hover { background: var(--cp-purple-200); }
 .cart-topbar__title {
-  font-family: "Cormorant Garamond", serif;
+
   font-size: 22px;
   font-weight: 700;
   color: var(--cp-ink);
@@ -148,7 +148,7 @@
 .cart-topbar__badge {
   background: var(--cp-purple);
   color: #fff;
-  font-family: "Outfit", sans-serif;
+
   font-size: 11px;
   font-weight: 700;
   padding: 2px 8px;
@@ -389,7 +389,7 @@
   display: flex; align-items: center; justify-content: center;
   transition: background var(--cp-transition);
   flex-shrink: 0;
-  font-family: inherit;
+
 }
 .qty-btn:hover:not(:disabled) { background: var(--cp-purple-200); }
 .qty-btn:disabled { opacity: .35; cursor: not-allowed; }
@@ -468,7 +468,7 @@
   padding: 15px 24px;
   font-size: 15px;
   font-weight: 700;
-  font-family: "Outfit", sans-serif;
+
   cursor: pointer;
   display: flex; 
   align-items: center; 
@@ -526,7 +526,7 @@
 .empty-cart__img   { width: 200px; height: auto; margin-bottom: 20px; opacity: .9; }
 .empty-cart__emoji { font-size: 64px; margin-bottom: 16px; }
 .empty-cart__title {
-  font-family: "Cormorant Garamond", serif;
+
   font-size: 26px; font-weight: 700; color: var(--cp-ink); margin: 0 0 8px;
 }
 .empty-cart__sub  { font-size: 14px; color: var(--cp-mid); margin: 0 0 28px; }
@@ -633,7 +633,7 @@
   padding: 13px 28px;
   font-size: 14px; 
   font-weight: 700; 
-  font-family: "Outfit", sans-serif;
+
   cursor: pointer; 
   box-shadow: 0 4px 16px rgba(124,58,237,0.28);
   white-space: nowrap; 

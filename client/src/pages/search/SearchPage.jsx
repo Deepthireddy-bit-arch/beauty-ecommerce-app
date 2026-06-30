@@ -645,13 +645,13 @@ function Pagination({ current, total, onChange }) {
 }
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
 
 /* ── Base ── */
 .sp-page {
   min-height: 100vh;
   background: #f7f7f9;
-  font-family: 'Outfit', sans-serif;
+ 
 }
 
 /* ── Search Hero ── */
@@ -734,7 +734,7 @@ const CSS = `
   flex: 1;
   border: none;
   outline: none;
-  font-family: 'Outfit', sans-serif;
+ 
   font-size: 14px;
   color: #1a1a2e;
   padding: 13px 8px;
@@ -759,7 +759,7 @@ const CSS = `
   border: none;
   border-radius: 8px;
   padding: 10px 24px;
-  font-family: 'Outfit', sans-serif;
+ 
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
@@ -865,7 +865,7 @@ const CSS = `
   border: 1.5px solid #e0d7f5;
   border-radius: 8px;
   padding: 8px 16px;
-  font-family: 'Outfit', sans-serif;
+ 
   font-size: 13px;
   font-weight: 600;
   color: #7c3aed;
@@ -935,7 +935,7 @@ const CSS = `
   border: none;
   cursor: pointer;
   padding: 13px 18px;
-  font-family: 'Outfit', sans-serif;
+ 
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.8px;
@@ -998,7 +998,7 @@ const CSS = `
   border: 1.5px solid #e0d7f5;
   border-radius: 7px;
   padding: 7px 9px;
-  font-family: 'Outfit', sans-serif;
+ 
   font-size: 12px;
   color: #1a1a2e;
   outline: none;
@@ -1034,7 +1034,7 @@ const CSS = `
   border: none;
   border-radius: 8px;
   padding: 11px;
-  font-family: 'Outfit', sans-serif;
+ 
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
@@ -1080,7 +1080,7 @@ const CSS = `
   background: #fff;
   color: #1a1a2e;
   padding: 7px 12px;
-  font-family: 'Outfit', sans-serif;
+ 
   font-size: 12px;
   font-weight: 600;
   outline: none;
@@ -1151,7 +1151,7 @@ const CSS = `
   border: none;
   border-radius: 20px;
   padding: 7px 18px;
-  font-family: 'Outfit', sans-serif;
+ 
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
@@ -1172,7 +1172,7 @@ const CSS = `
   margin-bottom: 4px;
 }
 .sp-product-name {
-  font-family: 'Cormorant Garamond', serif;
+
   font-size: 16px;
   font-weight: 600;
   color: #1a1a2e;
@@ -1258,7 +1258,7 @@ const CSS = `
 }
 .sp-empty-icon { font-size: 48px; color: #d8b4fe; margin-bottom: 16px; }
 .sp-empty-state h3 {
-  font-family: 'Cormorant Garamond', serif;
+
   font-size: 22px;
   font-weight: 600;
   color: #1a1a2e;
@@ -1275,7 +1275,7 @@ const CSS = `
   border: none;
   border-radius: 8px;
   padding: 10px 24px;
-  font-family: 'Outfit', sans-serif;
+ 
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -1316,7 +1316,7 @@ const CSS = `
   color: #fff;
   padding: 14px 28px;
   border-radius: 12px;
-  font-family: 'Outfit', sans-serif;
+ 
   font-size: 14px;
   font-weight: 500;
   opacity: 0;

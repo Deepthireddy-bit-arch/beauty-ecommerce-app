@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchDeals } from "../redux/reducers/thunks/dealsThunks";
+import './DealsCarousel.css';
 const DealsCarousel = () => {
   const [index, setIndex] = useState(0);
   const [cardWidth, setCardWidth] = useState(0);

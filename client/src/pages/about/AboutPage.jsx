@@ -431,63 +431,7 @@ const FOOTER_LINKS = {
   "Contact Us":   ["60 Fifth Avenue, New York, NY 10011", "1(800) 246-1898", "hello@beautyatelier.com"],
 };
 
-function FooterSection({ loading }) {
-  const [email, setEmail] = useState("");
-  if (loading) return null;
-  return (
-    <footer className="ap-footer">
-      <div className="ap-inner">
-        <div className="ap-footer__top">
-          {/* Brand */}
-          <div>
-            <p className="ap-footer__brand-name">Beauty<span>Atelier</span></p>
-            <p className="ap-footer__brand-tag">Natural Beauty Store</p>
-            <p className="ap-footer__brand-desc">
-              Handcrafted beauty rooted in nature. Every product is made with love, transparency, and ingredients you can trust.
-            </p>
-            <div className="ap-footer__socials">
-              {["𝕏","f","▶","📷","in"].map(s => (
-                <a key={s} href="#" className="ap-footer__social-btn" aria-label="Social link">{s}</a>
-              ))}
-            </div>
-          </div>
-          {/* Link columns */}
-          {Object.entries(FOOTER_LINKS).map(([col, links]) => (
-            <div key={col}>
-              <p className="ap-footer__col-title">{col}</p>
-              <ul className="ap-footer__col-links">
-                {links.map(l => <li key={l}><a href="#" className="ap-footer__col-link">{l}</a></li>)}
-              </ul>
-            </div>
-          ))}
-          {/* Subscribe */}
-          <div>
-            <p className="ap-footer__col-title">Subscribe Now</p>
-            <div className="ap-footer__sub-form">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="ap-footer__sub-input"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                aria-label="Email address"
-              />
-              <button className="ap-footer__sub-btn" type="button">Join</button>
-            </div>
-          </div>
-        </div>
-        <div className="ap-footer__bottom">
-          <p className="ap-footer__copy">© 2025 Beauty Atelier. All rights reserved.</p>
-          <div className="ap-footer__legal">
-            <a href="#" className="ap-footer__legal-link">Privacy Policy</a>
-            <a href="#" className="ap-footer__legal-link">Terms of Service</a>
-            <a href="#" className="ap-footer__legal-link">Cookie Settings</a>
-          </div>
-        </div>
-      </div>
-    </footer>
-  );
-}
+
 
 /* ══════════════════════════════════════════════════════
    ROOT — AboutPage
@@ -595,7 +539,7 @@ export default function AboutPage() {
       <StatsSection loading={false} />
       <PressSection loading={false} />
       <HelpSection loading={false} />
-      <FooterSection loading={false} />
+     
     </div>
   );
 }

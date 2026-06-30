@@ -106,10 +106,10 @@ const WishlistPage = () => {
                 <span className="wishlist-count-badge">
                   {normalizedItems.length} Saved
                 </span>
-                <button className="btn btn-add-all" onClick={handleAddAll}>
+                {/* <button className="btn btn-add-all" onClick={handleAddAll}>
                   <i className="bi bi-cart3 me-2" />
                   Add All to Cart
-                </button>
+                </button> */}
               </div>
             )}
           </div>
@@ -159,8 +159,8 @@ const WishlistPage = () => {
 
       </div>
 
-      <FeaturedProductsSection />
-      <BestSellersSection />
+      {/* <FeaturedProductsSection />
+      <BestSellersSection /> */}
     </div>
   );
 };

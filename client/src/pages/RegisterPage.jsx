@@ -31,7 +31,7 @@ const extra = `
     box-shadow: none !important;
     padding-left: 0 !important;
     background: transparent !important;
-    font-family: 'Poppins', sans-serif;
+    
     font-size: 0.875rem;
     color: #374151;
   }
@@ -78,17 +78,25 @@ const extra = `
     transition: background .3s;
   }
 
-  /* purple gradient button */
+/* purple gradient button */
   .btn-purple {
     background: linear-gradient(90deg, #7c3aed 0%, #9333ea 100%);
     border: none;
-    font-family: 'Poppins', sans-serif;
     font-weight: 600;
     letter-spacing: 0.05em;
-    transition: opacity .2s, transform .15s;
+    transition: filter .2s ease, transform .15s ease, box-shadow .2s ease;
   }
-  .btn-purple:hover:not(:disabled) { opacity: 0.88; color: #fff; }
-  .btn-purple:active:not(:disabled) { transform: scale(.99); }
+ .btn-purple:hover:not(:disabled) {
+  background: linear-gradient(90deg, #7c3aed 0%, #9333ea 100%);
+  filter: brightness(1.08);
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35);
+  border-color: transparent;
+  transform: translateY(-1px);
+}
+  .btn-purple:active:not(:disabled) {
+    transform: translateY(0) scale(.99);
+    filter: brightness(0.95);
+  }
   .btn-purple:disabled { opacity: 0.6; }
 
   .link-purple { color: #7c3aed !important; font-weight: 600; }

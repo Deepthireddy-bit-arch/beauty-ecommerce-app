@@ -35,11 +35,11 @@
   background: var(--purple);
   display: flex; align-items: center; justify-content: center;
   font-size: 18px; color: white; font-weight: 700;
-  font-family: 'Cormorant Garamond', serif;
+
   flex-shrink: 0;
 }
 .footer-logo-name {
-  font-family: 'Cormorant Garamond', serif;
+
   font-weight: 600; font-size: 24px;
   color: white; letter-spacing: .5px;
 }
@@ -48,14 +48,14 @@
   font-size: 9px; letter-spacing: 3px;
   color: rgba(255,255,255,0.3);
   text-transform: uppercase; font-weight: 500;
-  font-family: 'Outfit', sans-serif;
+ 
   margin-top: 2px;
 }
 .footer-tagline {
   color: rgba(255,255,255,0.32);
   font-size: 13.5px; line-height: 1.9;
   max-width: 260px;
-  font-family: 'Outfit', sans-serif;
+ 
 }
 
 /* ── Socials ──────────────────────────────────────────── */
@@ -82,7 +82,7 @@
   font-size: 10px; font-weight: 700;
   letter-spacing: 2px; text-transform: uppercase;
   color: rgba(255,255,255,0.35);
-  font-family: 'Outfit', sans-serif;
+ 
   margin-bottom: 10px;
 }
 .footer-nl-form {
@@ -99,7 +99,7 @@
   background: transparent;
   border: none; outline: none;
   color: white; font-size: 13px;
-  font-family: 'Outfit', sans-serif;
+ 
 }
 .footer-nl-input::placeholder { color: rgba(255,255,255,0.25); }
 .footer-nl-btn {
@@ -107,7 +107,7 @@
   background: var(--purple); color: white;
   border: none; font-size: 11px; font-weight: 700;
   letter-spacing: .5px; cursor: pointer;
-  font-family: 'Outfit', sans-serif;
+ 
   border-radius: 0 100px 100px 0;
   transition: background .2s;
   white-space: nowrap;
@@ -121,7 +121,7 @@
   margin-bottom: 20px;
   color: var(--purple);
   text-transform: uppercase; letter-spacing: 2.5px;
-  font-family: 'Outfit', sans-serif;
+ 
 }
 .footer-col-link {
   display: block;
@@ -129,7 +129,7 @@
   text-decoration: none;
   font-size: 13.5px; margin-bottom: 12px;
   transition: color .2s;
-  font-family: 'Outfit', sans-serif;
+ 
 }
 .footer-col-link:hover { color: var(--purple-2); }
 
@@ -148,13 +148,13 @@
 }
 .footer-copy {
   color: rgba(255,255,255,0.18);
-  font-size: 12px; font-family: 'Outfit', sans-serif;
+  font-size: 12px;
 }
 .footer-legal { display: flex; gap: 24px; }
 .footer-legal-link {
   color: rgba(255,255,255,0.18);
   font-size: 12px; text-decoration: none;
-  transition: color .2s; font-family: 'Outfit', sans-serif;
+  transition: color .2s;
 }
 .footer-legal-link:hover { color: var(--purple-2); }
 

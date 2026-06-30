@@ -129,7 +129,7 @@ html {
 }
 
 body {
-  font-family: 'Outfit', sans-serif;
+
   background: #ffffff;
   color: var(--ink);
   overflow-x: hidden
@@ -140,7 +140,7 @@ h2,
 h3,
 h4,
 h5 {
-  font-family: 'Cormorant Garamond', serif;
+
   line-height: 1.1
 }
 
@@ -307,11 +307,11 @@ h5 {
 }
 
 .serif {
-  font-family: 'Cormorant Garamond', serif
+  font-family: var(--sans)
 }
 
 .sans {
-  font-family: 'Outfit', sans-serif
+  font-family: var(--sans)
 }
 
 .shimmer-purple {
@@ -333,7 +333,7 @@ h5 {
 .stroke-text {
   -webkit-text-stroke: 1.5px var(--purple);
   color: transparent;
-  font-family: 'Cormorant Garamond', serif
+  font-family: var(--sans)
 }
 
 .ornament-divider {
@@ -366,7 +366,7 @@ h5 {
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  font-family: 'Outfit', sans-serif
+  font-family: var(--sans)
 }
 
 .btn-purple {
@@ -375,7 +375,7 @@ h5 {
   border: none;
   border-radius: 100px;
   padding: 13px 32px;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--sans);
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
@@ -396,7 +396,7 @@ h5 {
   border: 1.5px solid var(--ink);
   border-radius: 100px;
   padding: 12px 30px;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--sans);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
@@ -417,7 +417,7 @@ h5 {
   border: 1.5px solid rgba(255, 255, 255, .3);
   border-radius: 100px;
   padding: 12px 30px;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--sans);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;

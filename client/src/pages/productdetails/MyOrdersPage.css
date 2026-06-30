@@ -49,7 +49,7 @@
   /* NO max-width / margin: 0 auto — padding only.
      Left edge tracks navbar logo at every zoom level. */
   padding: calc(var(--op-nav-h) + 2rem) var(--op-px) 4rem;
-  font-family: "Outfit", -apple-system, BlinkMacSystemFont, sans-serif;
+ 
   min-height: 100vh;
   box-sizing: border-box;
 }

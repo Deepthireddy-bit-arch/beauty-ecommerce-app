@@ -18,6 +18,7 @@ import FeaturedProductsSection from "../../components/FeaturedProductsSection";
 import NewArrivalsSection from "../../components/NewArrivalsSection";
 import { fetchWishlist } from "../../redux/reducers/thunks/wishlistActions";
 import CollectionCard from "./CollectionsCard";
+import BannerCarousel from "../../components/BannerCarousel";
 
 
 // ─── TOAST HOOK ───────────────────────────────────────────────────────────────
@@ -403,88 +404,8 @@ const defaultFilters = {
   onSaleOnly: false,
 };
 
-// ─── BANNER SECTION ───────────────────────────────────────────────────────────
-function BannerSection() {
-  const dispatch = useDispatch();
-  const banners = useSelector(selectBanners);
-  const active = useSelector(selectActiveBanner);
-  const [paused, setPaused] = useState(false);
 
-  useEffect(() => {
-    dispatch(fetchBrandBanners());
-  }, [dispatch]);
 
-  useEffect(() => {
-    if (!banners.length || paused) return;
-    const t = setInterval(() => {
-      dispatch(setActiveBanner((active + 1) % banners.length));
-    }, 4500);
-    return () => clearInterval(t);
-  }, [active, banners.length, dispatch, paused]);
-
-  if (!banners.length) return <BannerSkeleton />;
-
-  return (
-    <section
-      className="banner-section"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      aria-label="Featured collections"
-    >
-      <div
-        className="banner-track"
-        style={{ transform: `translateX(-${active * 100}%)` }}
-      >
-        {banners.map((ban, i) => {
-          const theme = SLIDE_THEMES[i % SLIDE_THEMES.length];
-          return (
-            <div key={ban._id} className="banner-slide" aria-hidden={i !== active}>
-              <div className="banner-bg">
-                <img
-                  src={resolveImg(ban.image)}
-                  alt={ban.title}
-                  loading={i === 0 ? "eager" : "lazy"}
-                />
-                <div className="banner-overlay" />
-              </div>
-              <div className="banner-content">
-                <span className="banner-eyebrow">{theme.eyebrow}</span>
-                <h1 className="banner-headline">{ban.title}</h1>
-                {ban.sub && <p className="banner-sub">{ban.sub}</p>}
-                {ban.offer && <div className="banner-badge">{ban.offer}</div>}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="banner-dots" role="tablist">
-        {banners.map((_, i) => (
-          <button
-            key={i}
-            role="tab"
-            aria-selected={i === active}
-            className={`dot${i === active ? " active" : ""}`}
-            onClick={() => dispatch(setActiveBanner(i))}
-            aria-label={`Go to slide ${i + 1}`}
-          />
-        ))}
-      </div>
-
-      <div className="banner-progress-wrap">
-        <div
-          key={active}
-          className={`banner-progress${paused ? " paused" : ""}`}
-          style={{ animationDuration: "4500ms" }}
-        />
-      </div>
-    </section>
-  );
-}
-
-function BannerSkeleton() {
-  return <div className="banner-skeleton" aria-busy="true" aria-label="Loading banner" />;
-}
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function CollectionsPage() {
@@ -560,6 +481,12 @@ export default function CollectionsPage() {
       onSaleOnly: localFilters.onSaleOnly,
       sortBy,
     }));
+  };
+  const BannerSection = () => {
+    const dispatch = useDispatch();
+    const banners = useSelector(selectBanners);
+    useEffect(() => { dispatch(fetchBrandBanners()); }, [dispatch]);
+    return <BannerCarousel banners={banners} />;
   };
 
 

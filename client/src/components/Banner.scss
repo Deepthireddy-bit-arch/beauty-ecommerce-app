@@ -14,12 +14,11 @@
 
 .banner-slide {
   min-width: 100%;
-  height: 500px;
+  height: 500px;        // ← single fixed height, same on all screens
   position: relative;
   display: flex;
   align-items: center;
 }
-
 .banner-bg {
   position: absolute;
   inset: 0;
@@ -52,50 +51,93 @@
 
 .banner-eyebrow {
   margin-bottom: 12px;
-  font-size: 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+
 }
 
 .banner-headline {
-  font-size: 52px;
-  font-weight: 700;
+
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
   margin-bottom: 16px;
+  color: #fff;
 }
 
 .banner-sub {
-  font-size: 18px;
-  line-height: 1.7;
+
+  font-size: 15px;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 440px;
 }
 
 .banner-offer-badge {
   margin-top: 20px;
   display: inline-block;
-  background: #fff;
-  color: #000;
-  padding: 10px 18px;
-  border-radius: 999px;
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 18px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+
+  backdrop-filter: blur(8px);
 }
 
 .banner-cta-row {
   display: flex;
-  gap: 16px;
-  margin-top: 30px;
+  gap: 14px;
+  margin-top: 28px;
+  flex-wrap: wrap;
 }
 
 .banner-btn-primary,
 .banner-btn-ghost {
   border: none;
   cursor: pointer;
-  padding: 14px 28px;
-  border-radius: 12px;
-  font-weight: 600;
+  padding: 13px 28px;
+  border-radius: 100px;       // ← pill shape to match design system
+  font-weight: 700;
+  font-size: 13px;
+
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: transform 0.25s, opacity 0.25s;
+}
+
+.banner-btn-primary:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
 }
 
 .banner-btn-ghost {
-  background: transparent;
-  border: 1px solid #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
   color: #fff;
+  backdrop-filter: blur(10px);
 }
+
+.banner-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-2px);
+}
+
+
+
+
+
+
+
+
 
 .banner-arrow {
   position: absolute;
@@ -145,62 +187,114 @@
    Skeleton
 =========================== */
 
+
+/* ===========================
+   Skeleton
+=========================== */
+
 .banner-skeleton {
   height: 500px;
   border-radius: 16px;
-  background: #ececec;
+  background: linear-gradient(90deg, #efeaf7 0%, #e3dbf2 100%);
   overflow: hidden;
   position: relative;
 }
 
 .skeleton-overlay {
-  padding: 70px;
+  padding: 70px 64px;
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
 }
 
 .skeleton-line,
-.skeleton-btn {
+.skeleton-btn,
+.skeleton-badge,
+.skeleton-dot {
   background: linear-gradient(
     90deg,
-    #f1f1f1 25%,
-    #fafafa 50%,
-    #f1f1f1 75%
+    rgba(255, 255, 255, 0.25) 25%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0.25) 75%
   );
   background-size: 400% 100%;
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 1.6s infinite;
   border-radius: 8px;
 }
 
 .skeleton-line {
-  height: 18px;
-  margin-bottom: 15px;
+  height: 14px;
+  margin-bottom: 14px;
 }
 
-.w-120 {
-  width: 120px;
+.skeleton-line.h-lg {
+  height: 34px;
+  margin-bottom: 10px;
 }
 
-.w-350 {
-  width: 350px;
-  height: 40px;
+.w-120 { width: 120px; margin-bottom: 22px; }
+.w-350 { width: 350px; }
+.w-300 { width: 300px; }
+.w-250 { width: 250px; }
+.w-220 { width: 220px; margin-bottom: 22px; }
+
+.skeleton-badge {
+  width: 130px;
+  height: 28px;
+  border-radius: 100px;
+  margin-bottom: 28px;
 }
 
-.w-250 {
-  width: 250px;
+.skeleton-btn-row {
+  display: flex;
+  gap: 14px;
 }
 
 .skeleton-btn {
-  width: 150px;
-  height: 48px;
-  margin-top: 20px;
+  width: 140px;
+  height: 46px;
+  border-radius: 100px;
+}
+
+.skeleton-btn--ghost {
+  width: 160px;
+}
+
+.skeleton-dots {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
+
+.skeleton-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: 100%;
-  }
-  100% {
-    background-position: -100%;
-  }
+  0% { background-position: 100%; }
+  100% { background-position: -100%; }
+}
+
+/* Responsive — mirrors real banner breakpoints */
+@media (max-width: 992px) {
+  .skeleton-overlay { padding: 70px 40px; }
+}
+
+@media (max-width: 768px) {
+  .skeleton-overlay { padding: 50px 40px; }
+  .w-300, .w-220 { display: none; } // matches .banner-sub hidden on mobile
+  .skeleton-line.h-lg { height: 28px; }
+}
+
+@media (max-width: 480px) {
+  .skeleton-badge { width: 100px; height: 24px; }
+  .skeleton-btn { width: 110px; height: 40px; }
+  .skeleton-btn--ghost { width: 130px; }
 }
 
 /* ===========================
@@ -233,9 +327,7 @@
 =========================== */
 
 @media (max-width: 992px) {
-  .banner-slide {
-    height: 420px;
-  }
+
 
   .banner-content {
     padding: 0 40px;
@@ -246,47 +338,22 @@
   }
 }
 
+// Remove responsive height overrides — keep text responsive only
 @media (max-width: 768px) {
-  .banner-slide {
-    height: 360px;
-  }
-
-  .banner-content {
-    padding: 0 24px;
-  }
-
   .banner-headline {
-    font-size: 30px;
+    font-size: clamp(1.8rem, 6vw, 2.6rem);  // clamp handles it, no hard override needed
   }
-
   .banner-sub {
-    font-size: 14px;
-  }
-
-  .banner-cta-row {
-    flex-direction: column;
-  }
-
-  .banner-arrow {
-    display: none;
+    display: none;                            // matches hero carousel mobile behaviour
   }
 }
-
 @media (max-width: 480px) {
-  .banner-slide {
-    height: 300px;
-  }
-
-  .banner-headline {
-    font-size: 24px;
-  }
-
   .banner-eyebrow {
-    font-size: 12px;
+    font-size: 9px;
+    letter-spacing: 2px;
   }
-
   .banner-offer-badge {
-    font-size: 12px;
-    padding: 8px 12px;
+    font-size: 10px;
+    padding: 5px 14px;
   }
 }

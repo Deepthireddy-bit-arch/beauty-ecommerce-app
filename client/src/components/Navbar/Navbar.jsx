@@ -4,28 +4,38 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchSuggestions, clearSuggestions } from "../../redux/slices/searchSlice";
 import { loginReset } from "../../redux/slices/loginSlice";
 import "./navbar.css";
+import { fetchCart } from "../../redux/reducers/thunks/cartThunks";
+import { fetchWishlist } from "../../redux/reducers/thunks/wishlistActions";
 
 const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { suggestions } = useSelector((state) => state.searchReducer);
   const user = useSelector((s) => s.login?.user ?? null);
-  const cartCount = useSelector((s) =>
-    s.cart.items.reduce((a, i) => a + i.qty, 0)
-  );
+  // const cartCount = useSelector((s) =>
+  //   s.cart.items.reduce((a, i) => a + i.qty, 0)
+  // );
+  const cartCount = useSelector((s) => s.cart.items.length);
   const wishCount = useSelector((s) => s.wishlist.items.length);
 
-  const [scrolled, setScrolled]         = useState(false);
-  const [searchOpen, setSearchOpen]     = useState(false);
-  const [searchQuery, setSearchQuery]   = useState("");
+  const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [menuOpen, setMenuOpen]         = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", fn);
     return () => window.removeEventListener("scroll", fn);
   }, []);
+ 
+  useEffect(() => {
+  if (user) {
+    dispatch(fetchCart());
+    dispatch(fetchWishlist());
+  }
+}, [user, dispatch]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -72,12 +82,12 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { label: "Home",        to: "/" },
-    { label: "Shop",        to: "/products" },
+    { label: "Home", to: "/" },
+    { label: "Shop", to: "/products" },
     { label: "Collections", to: "/collections" },
-    { label: "Brands",      to: "/brands" },
-    { label: "About",       to: "/about" },
-    { label: "Contact",       to: "/contact" },
+    { label: "Brands", to: "/brands" },
+    { label: "About", to: "/about" },
+    { label: "Contact", to: "/contact" },
   ];
 
   return (
@@ -160,7 +170,7 @@ const Navbar = () => {
             <button className="nav-icon-btn nav-wish-btn" onClick={() => requireAuth("/wishlist")}>
               ♡
               {user && wishCount > 0 && (
-                <span className="nav-badge nav-badge--blush">{wishCount}</span>
+                <span className="nav-badge nav-badge--purple">{wishCount}</span>
               )}
             </button>
 
@@ -192,7 +202,7 @@ const Navbar = () => {
               </div>
             ) : (
               <>
-                <Link to="/login"    className="nav-signin">Sign In</Link>
+                <Link to="/login" className="nav-signin">Sign In</Link>
                 <Link to="/register" className="nav-join">Join Free</Link>
               </>
             )}
@@ -243,13 +253,13 @@ const Navbar = () => {
           {user ? (
             <>
               <Link to="/profile" className="nav-mobile-link" onClick={() => setMenuOpen(false)}>👤 My Profile</Link>
-              <Link to="/orders"  className="nav-mobile-link" onClick={() => setMenuOpen(false)}>📦 My Orders</Link>
+              <Link to="/orders" className="nav-mobile-link" onClick={() => setMenuOpen(false)}>📦 My Orders</Link>
               <button className="nav-mobile-logout" onClick={handleLogout}>🚪 Logout</button>
             </>
           ) : (
             <div className="nav-mobile-auth-btns">
-              <Link to="/login"    className="nav-signin" onClick={() => setMenuOpen(false)}>Sign In</Link>
-              <Link to="/register" className="nav-join"   onClick={() => setMenuOpen(false)}>Join Free</Link>
+              <Link to="/login" className="nav-signin" onClick={() => setMenuOpen(false)}>Sign In</Link>
+              <Link to="/register" className="nav-join" onClick={() => setMenuOpen(false)}>Join Free</Link>
             </div>
           )}
         </div>

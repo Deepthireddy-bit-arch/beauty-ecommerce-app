@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Footer.css';
 
 const SOCIAL_ICONS = [
@@ -13,32 +13,29 @@ const LINKS = [
   {
     title: "Shop",
     links: [
-      { label: "New Arrivals",  to: "/products?sort=new"       },
-      { label: "Bestsellers",   to: "/products?sort=bestseller" },
-      { label: "Skincare",      to: "/products?category=skincare" },
-      { label: "Makeup",        to: "/products?category=makeup"   },
-      { label: "Fragrance",     to: "/products?category=fragrance"},
-      { label: "Tools",         to: "/products?category=tools"    },
+      { label: "Nails",  to: "/products?category=nails"              },
+      { label: "Fragrances",   to: "/products?category=Fragrances"       },
+      { label: "Skincare",      to: "/products?category=skincare"     },
+      { label: "Makeup",        to: "/products?category=makeup"       },
+      { label: "Brands",        to: "/brands"                         },
+      { label: "Collections",   to: "/collections"                    },
     ],
   },
   {
     title: "Help",
     links: [
-      { label: "Track Order",   to: "/orders"    },
-      { label: "Returns",       to: "/returns"   },
-      { label: "Shipping Info", to: "/shipping"  },
-      { label: "Size Guide",    to: "/size-guide"},
-      { label: "FAQ",           to: "/faq"       },
+      { label: "Track Order",   to: "/orders"   },
+      { label: "My Cart",       to: "/cart"     },
+      { label: "Wishlist",      to: "/wishlist" },
+     
+      { label: "Contact Us",    to: "/contact"  },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About Us",      to: "/about"          },
-      { label: "Careers",       to: "/careers"        },
-      { label: "Press",         to: "/press"          },
-      { label: "Sustainability", to: "/sustainability" },
-      { label: "Affiliates",    to: "/affiliates"     },
+      { label: "About Us",      to: "/about"    },
+      { label: "Search",        to: "/search"   },
     ],
   },
 ];
@@ -87,30 +84,6 @@ const Footer = () => {
                 </button>
               ))}
             </div>
-
-            {/* Inline newsletter */}
-            <div className="footer-newsletter">
-              <div className="footer-nl-label">Stay in the loop</div>
-              {sent ? (
-                <div style={{ fontSize: 13, color: 'var(--purple-2)', fontFamily: 'Outfit, sans-serif' }}>
-                  ✦ You're subscribed!
-                </div>
-              ) : (
-                <form className="footer-nl-form" onSubmit={handleSub}>
-                  <input
-                    className="footer-nl-input"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    aria-label="Email for newsletter"
-                  />
-                  <button type="submit" className="footer-nl-btn">
-                    Join ✦
-                  </button>
-                </form>
-              )}
-            </div>
           </div>
 
           {/* Link columns */}
@@ -125,9 +98,6 @@ const Footer = () => {
             </div>
           ))}
         </div>
-
-        {/* ── Divider ── */}
-        <div className="footer-divider" />
 
         {/* ── Bottom bar ── */}
         <div className="footer-bottom">

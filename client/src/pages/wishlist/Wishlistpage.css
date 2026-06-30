@@ -66,12 +66,9 @@
 /* ≤ 479px → 12px */
 @media (max-width: 479px)  { :root { --wl-pad-x: 12px; } }
 
-/* ── Fonts ───────────────────────────────────────────── */
-@import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:wght@400;500&display=swap");
 
-* {
-  font-family: "DM Sans", sans-serif;
-}
+
+
 
 /* ── Page ── */
 .wishlist-page {
@@ -116,7 +113,7 @@
 }
 
 .wishlist-title {
-  font-family: "Sora", sans-serif;
+ 
   font-size: 2rem;
   font-weight: 700;
   color: var(--white);
@@ -323,7 +320,7 @@
 .product-name {
   color: var(--gray-700);
   font-size: 0.95rem;
-  font-family: "Sora", sans-serif;
+ 
   font-weight: 600;
   margin-bottom: 6px;
   display: -webkit-box;
@@ -350,7 +347,7 @@
 .product-price {
   color: var(--purple-700);
   font-size: 1.1rem;
-  font-family: "Sora", sans-serif;
+ 
   font-weight: 700;
 }
 
@@ -576,7 +573,7 @@
 }
 
 .wl-empty-title {
-  font-family: "Sora", sans-serif;
+ 
   font-size: 24px;
   font-weight: 600;
   color: var(--purple-900);

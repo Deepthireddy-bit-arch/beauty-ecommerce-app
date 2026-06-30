@@ -436,7 +436,7 @@ const fallbackInvoice = (order) => {
   const win = window.open('', '_blank');
   if (!win) { toast.error('Allow pop-ups to download invoice.'); return; }
   win.document.write(`<!DOCTYPE html><html><head><title>Invoice</title>
-  <style>body{font-family:Arial,sans-serif;padding:40px;max-width:720px;margin:0 auto}
+  <style>body{padding:40px;max-width:720px;margin:0 auto}
   .hdr{background:#6c3ce1;color:#fff;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;margin:-40px -40px 30px}
   .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
   .mc label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#9b92b8;margin-bottom:3px}
@@ -919,7 +919,7 @@ const DetailGlobalStyles = () => (
     .od-page {
       /* No max-width - uses padding only like navbar */
       padding: 0 var(--od-px) 4rem;
-      font-family: inherit;
+    
       background: #f8f7fc;
       min-height: 100vh;
     }
@@ -975,7 +975,7 @@ const DetailGlobalStyles = () => (
       font-size: 0.84rem;
       cursor: pointer;
       transition: background 0.15s;
-      font-family: inherit;
+    
     }
     .od-back-btn:hover {
       background: #ede9fe;
@@ -1116,7 +1116,7 @@ const DetailGlobalStyles = () => (
       font-size: 0.84rem;
       cursor: pointer;
       transition: all 0.18s;
-      font-family: inherit;
+    
     }
     .od-outline-btn:hover {
       border-color: #7c3aed;
@@ -1134,7 +1134,7 @@ const DetailGlobalStyles = () => (
       font-size: 0.84rem;
       cursor: pointer;
       transition: all 0.18s;
-      font-family: inherit;
+    
     }
     .od-danger-outline-btn:hover:not(:disabled) {
       background: #fff1f1;
@@ -1159,7 +1159,7 @@ const DetailGlobalStyles = () => (
       font-size: 0.84rem;
       cursor: pointer;
       transition: background 0.15s;
-      font-family: inherit;
+    
     }
     .od-ghost-btn:hover:not(:disabled) {
       background: #ede9fe;
@@ -1183,7 +1183,7 @@ const DetailGlobalStyles = () => (
       font-size: 0.84rem;
       cursor: pointer;
       transition: background 0.18s;
-      font-family: inherit;
+    
     }
     .od-danger-btn:hover:not(:disabled) {
       background: #b91c1c;
@@ -1207,7 +1207,7 @@ const DetailGlobalStyles = () => (
       font-size: 0.84rem;
       cursor: pointer;
       transition: background 0.18s;
-      font-family: inherit;
+    
     }
     .od-primary-btn:hover:not(:disabled) {
       background: #5b21b6;

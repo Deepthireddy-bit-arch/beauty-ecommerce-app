@@ -181,7 +181,7 @@ function BestSellersSection() {
         .bs-section {
           background: #f8f6fe;
           padding: 48px 0 40px;
-          font-family: 'Segoe UI', system-ui, sans-serif;
+          
         }
 
         /* ── Gutter ladder — mirrors Navbar.css --nav-pad-x ── */

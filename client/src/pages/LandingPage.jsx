@@ -96,13 +96,13 @@ const GLOBAL_CSS = `
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  font-family: 'Outfit', sans-serif;
+
   background: var(--white);
   color: var(--ink);
   overflow-x: hidden;
 }
 h1,h2,h3,h4,h5 {
-  font-family: 'Cormorant Garamond', serif;
+  
   line-height: 1.1;
 }
 ::selection { background: var(--purple-2); color: white; }
@@ -135,8 +135,7 @@ h1,h2,h3,h4,h5 {
 .anim-fadeUp { animation: fadeUp 0.75s cubic-bezier(0.16,1,0.3,1) both; }
 .anim-fadeIn { animation: fadeIn 0.6s ease both; }
 .float       { animation: float 5s ease-in-out infinite; }
-.serif       { font-family: 'Cormorant Garamond', serif; }
-.sans        { font-family: 'Outfit', sans-serif; }
+
 
 .shimmer-purple {
   background: linear-gradient(90deg,var(--purple) 0%,var(--purple-2) 40%,var(--purple) 60%,var(--purple-2) 100%);
@@ -166,7 +165,7 @@ h1,h2,h3,h4,h5 {
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  font-family: 'Outfit', sans-serif;
+  
 }
 
 .btn-purple {
@@ -175,7 +174,7 @@ h1,h2,h3,h4,h5 {
   border: none;
   border-radius: 100px;
   padding: 13px 32px;
-  font-family: 'Outfit', sans-serif;
+  
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
@@ -194,7 +193,7 @@ h1,h2,h3,h4,h5 {
   border: 1.5px solid var(--ink);
   border-radius: 100px;
   padding: 12px 30px;
-  font-family: 'Outfit', sans-serif;
+  
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
@@ -213,7 +212,7 @@ h1,h2,h3,h4,h5 {
   border: 1.5px solid rgba(255,255,255,.3);
   border-radius: 100px;
   padding: 12px 30px;
-  font-family: 'Outfit', sans-serif;
+  
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
@@ -318,7 +317,7 @@ h1,h2,h3,h4,h5 {
   line-height: 1.05;
   letter-spacing: -0.02em;
   margin-bottom: 18px;
-  font-family: 'Cormorant Garamond', serif;
+
 }
 .lp-hero__sub {
   font-size: clamp(13px, 1.5vw, 15px);
@@ -326,7 +325,7 @@ h1,h2,h3,h4,h5 {
   line-height: 1.8;
   max-width: 480px;
   margin-bottom: 32px;
-  font-family: 'Outfit', sans-serif;
+ 
 }
 .lp-hero__dots {
   position: absolute;
@@ -399,7 +398,7 @@ h1,h2,h3,h4,h5 {
   color: var(--mid);
   font-size: 15px;
   margin-top: 10px;
-  font-family: 'Outfit', sans-serif;
+
 }
 .lp-sec-head--light h2 { color: white; }
 .lp-sec-head--light p  { color: rgba(255,255,255,0.45); }
@@ -421,7 +420,7 @@ h1,h2,h3,h4,h5 {
   cursor: pointer;
   transition: all .25s ease;
   text-decoration: none;
-  font-family: 'Outfit', sans-serif;
+ 
 }
 .lp-viewall:hover {
   background: var(--purple);
@@ -582,7 +581,7 @@ h1,h2,h3,h4,h5 {
   font-weight: 600;
   cursor: pointer;
   font-size: 12px;
-  font-family: 'Outfit', sans-serif;
+
   transition: background .2s;
 }
 .lp-tbc__card-btn:hover { background: var(--purple-2); }
@@ -708,7 +707,7 @@ h1,h2,h3,h4,h5 {
 .lp-stats__num {
   font-size: 46px;
   font-weight: 700;
-  font-family: 'Cormorant Garamond', serif;
+
   color: var(--charcoal);
   margin-bottom: 8px;
   letter-spacing: -1px;
@@ -752,7 +751,7 @@ h1,h2,h3,h4,h5 {
   transition: all .25s ease;
   text-transform: uppercase;
   font-size: 12px;
-  font-family: 'Outfit', sans-serif;
+ 
 }
 .lp-cat-btn--active {
   border-color: var(--purple);
@@ -846,14 +845,14 @@ h1,h2,h3,h4,h5 {
   font-size: 17px;
   font-weight: 600;
   color: var(--ink);
-  font-family: 'Cormorant Garamond', serif;
+ 
   margin-bottom: 10px;
   line-height: 1.3;
 }
 .lp-pcard__stars { display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
 .lp-pcard__rev   { font-size: 11px; color: var(--mid); }
 .lp-pcard__foot  { display: flex; align-items: center; justify-content: space-between; }
-.lp-pcard__price { font-size: 24px; font-weight: 600; color: var(--ink); font-family: 'Cormorant Garamond', serif; }
+.lp-pcard__price { font-size: 24px; font-weight: 600; color: var(--ink);  }
 
 /* product skeleton */
 .lp-pcard__sk {
@@ -917,7 +916,7 @@ h1,h2,h3,h4,h5 {
   font-size: clamp(1.8rem, 3vw, 2.8rem);
   font-weight: 700;
   color: white;
-  font-family: 'Cormorant Garamond', serif;
+  
 }
 .lp-catbanner__cta {
   display: inline-flex;
@@ -997,7 +996,7 @@ h1,h2,h3,h4,h5 {
   font-size: 24px;
   margin-bottom: 20px;
 }
-.lp-features__title { font-size: 18px; font-weight: 600; color: white; margin-bottom: 10px; font-family: 'Cormorant Garamond', serif; }
+.lp-features__title { font-size: 18px; font-weight: 600; color: white; margin-bottom: 10px;  }
 .lp-features__desc  { color: rgba(255,255,255,0.42); line-height: 1.85; font-size: 13px; }
 
 @media (max-width: 1023px) {
@@ -1042,7 +1041,7 @@ h1,h2,h3,h4,h5 {
   color: var(--purple);
   opacity: .12;
   line-height: .8;
-  font-family: Georgia, serif;
+ 
   position: absolute;
   top: 24px; right: 28px;
 }
@@ -1052,7 +1051,7 @@ h1,h2,h3,h4,h5 {
   margin-bottom: 20px;
   font-size: 14.5px;
   font-style: italic;
-  font-family: 'Cormorant Garamond', serif;
+ 
 }
 .lp-review__author {
   display: flex;
@@ -1088,7 +1087,7 @@ h1,h2,h3,h4,h5 {
   position: absolute;
   font-size: 120px;
   opacity: .04;
-  font-family: 'Cormorant Garamond', serif;
+ 
   color: var(--purple);
   line-height: 1;
   pointer-events: none;
@@ -1128,7 +1127,7 @@ h1,h2,h3,h4,h5 {
   outline: none;
   color: var(--ink);
   font-size: 14px;
-  font-family: 'Outfit', sans-serif;
+
   min-width: 0;
 }
 .lp-nl__success {
@@ -1195,7 +1194,7 @@ h1,h2,h3,h4,h5 {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-family: 'Outfit', sans-serif;
+
 }
 .lp-toast__dot {
   width: 8px; height: 8px;
@@ -1217,9 +1216,9 @@ h1,h2,h3,h4,h5 {
 const CAT_ICONS = { All: "✦", Skincare: "💧", Lips: "💄", Eyes: "👁", Face: "🌸" };
 
 const HERO_SLIDES = [
-  { type: "video", media: hero1, label: "New Season", title: "Glow\nNaturally", subtitle: "Luxury skincare and beauty essentials crafted for radiant, effortless confidence.", button: "Shop Now" },
+ 
   { type: "video", media: beautyVideo, label: "Trending Now", title: "Beauty\nRedefined", subtitle: "Experience premium beauty products designed for every skin tone and style.", button: "Explore Collection" },
-
+ { type: "video", media: hero1, label: "New Season", title: "Glow\nNaturally", subtitle: "Luxury skincare and beauty essentials crafted for radiant, effortless confidence.", button: "Shop Now" },
   { type: "video", media: hero3, label: "Skincare Edit", title: "Skincare That\nLoves You", subtitle: "Hydrate, nourish, and glow with dermatologist-approved formulas.", button: "View Products" },
 ];
 
@@ -2251,8 +2250,7 @@ export default function LandingPage() {
       {/* 16 — Newsletter */}
       <Newsletter />
 
-      {/* 17 — Footer */}
-      <Footer />
+      
 
       {/* Global overlays */}
       <CartDrawer />

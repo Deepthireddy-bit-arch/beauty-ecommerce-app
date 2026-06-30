@@ -1,11 +1,4 @@
-/* ══════════════════════════════════════════════════════
-   AboutPage.css — Beauty Atelier
-   Inherits: --purple, --purple-2, --purple-pale, --ink,
-             --mid, --border, --navbar-h, --page-px
-             from Navbar.css (single source of truth)
-   ══════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 /* ── Page shell ─────────────────────────────────────── */
 .ap-root {
@@ -14,7 +7,7 @@
   min-height: 100vh;
   padding-top: var(--navbar-h, 72px);
   overflow-x: hidden;
-  font-family: 'Outfit', sans-serif;
+  
 }
 
 /* ── Shared inner gutter (aligns with navbar) ────────── */
@@ -90,11 +83,11 @@
   letter-spacing: 4px;
   text-transform: uppercase;
   color: #c4b5fd;
-  font-family: 'Outfit', sans-serif;
+  
   margin-bottom: 16px;
 }
 .ap-hero__title {
-  font-family: 'Cormorant Garamond', serif;
+
   font-size: clamp(2.8rem, 6.5vw, 5.2rem);
   font-weight: 600;
   color: #fff;
@@ -107,7 +100,7 @@
   color: #c4b5fd;
 }
 .ap-hero__sub {
-  font-family: 'Outfit', sans-serif;
+  
   font-size: 15px;
   color: rgba(255,255,255,0.65);
   max-width: 520px;
@@ -137,11 +130,11 @@
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--purple, #7c3aed);
-  font-family: 'Outfit', sans-serif;
+  
   margin-bottom: 22px;
 }
 .ap-philosophy__statement {
-  font-family: 'Cormorant Garamond', serif;
+ 
   font-size: clamp(2rem, 3.6vw, 3.1rem);
   font-weight: 400;
   line-height: 1.35;
@@ -180,7 +173,7 @@
 }
 /* quote col */
 .ap-story__quote {
-  font-family: 'Cormorant Garamond', serif;
+ 
   font-size: clamp(1.45rem, 2.4vw, 2.05rem);
   font-weight: 400;
   font-style: italic;
@@ -196,7 +189,7 @@
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--purple, #7c3aed);
-  font-family: 'Outfit', sans-serif;
+  
   padding-left: 28px;
 }
 /* image col */
@@ -229,26 +222,26 @@
 .ap-story__badge-num {
   font-size: 34px;
   font-weight: 700;
-  font-family: 'Cormorant Garamond', serif;
+ 
   color: var(--purple, #7c3aed);
   line-height: 1;
 }
 .ap-story__badge-label {
   font-size: 11px;
   color: var(--mid, #6b6b7e);
-  font-family: 'Outfit', sans-serif;
+  
   margin-top: 5px;
 }
 /* right body col */
 .ap-story__body-title {
-  font-family: 'Cormorant Garamond', serif;
+
   font-size: clamp(1.35rem, 2vw, 1.85rem);
   font-weight: 600;
   color: var(--ink, #1e1b2b);
   margin-bottom: 20px;
 }
 .ap-story__body-text {
-  font-family: 'Outfit', sans-serif;
+  
   font-size: 14.5px;
   line-height: 1.9;
   color: rgba(30,27,43,0.58);
@@ -274,7 +267,7 @@
   border-bottom: 1px solid rgba(124,58,237,0.08);
 }
 .ap-pullquote__text {
-  font-family: 'Cormorant Garamond', serif;
+ 
   font-size: clamp(1.65rem, 3.1vw, 2.7rem);
   font-weight: 400;
   line-height: 1.42;
@@ -329,11 +322,11 @@
   letter-spacing: 3px;
   text-transform: uppercase;
   color: rgba(255,255,255,0.48);
-  font-family: 'Outfit', sans-serif;
+  
   margin-bottom: 12px;
 }
 .ap-founder__card-name {
-  font-family: 'Cormorant Garamond', serif;
+  
   font-size: clamp(1.85rem, 3vw, 2.7rem);
   font-weight: 600;
   color: #fff;
@@ -342,18 +335,18 @@
 .ap-founder__card-role {
   font-size: 12px;
   color: rgba(255,255,255,0.52);
-  font-family: 'Outfit', sans-serif;
+  
   margin-bottom: 28px;
 }
 .ap-founder__card-bio {
-  font-family: 'Outfit', sans-serif;
+  
   font-size: 14px;
   line-height: 1.9;
   color: rgba(255,255,255,0.7);
   margin-bottom: 36px;
 }
 .ap-founder__card-sig {
-  font-family: 'Cormorant Garamond', serif;
+ 
   font-size: 30px;
   font-style: italic;
   color: rgba(255,255,255,0.5);
@@ -407,11 +400,11 @@
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--purple, #7c3aed);
-  font-family: 'Outfit', sans-serif;
+  
   margin-bottom: 18px;
 }
 .ap-values__left-text {
-  font-family: 'Outfit', sans-serif;
+  
   font-size: 15px;
   line-height: 1.9;
   color: rgba(30,27,43,0.58);
@@ -445,7 +438,7 @@
   font-weight: 700;
   letter-spacing: 0.8px;
   color: var(--ink, #1e1b2b);
-  font-family: 'Outfit', sans-serif;
+  
   text-transform: uppercase;
   line-height: 1.4;
 }
@@ -483,7 +476,7 @@
   position: absolute;
   bottom: 52px;
   left: var(--page-px, 48px);
-  font-family: 'Cormorant Garamond', serif;
+  
   font-size: clamp(1.45rem, 2.6vw, 2.3rem);
   font-weight: 400;
   color: #fff;
@@ -522,7 +515,7 @@
 }
 .ap-stats__item:hover { border-top-color: var(--purple, #7c3aed); }
 .ap-stats__num {
-  font-family: 'Cormorant Garamond', serif;
+
   font-size: 44px;
   font-weight: 700;
   color: var(--ink, #1e1b2b);
@@ -534,13 +527,13 @@
   font-size: 13px;
   font-weight: 700;
   color: var(--ink, #1e1b2b);
-  font-family: 'Outfit', sans-serif;
+  
   margin-bottom: 5px;
 }
 .ap-stats__sub {
   font-size: 11px;
   color: var(--mid, #6b6b7e);
-  font-family: 'Outfit', sans-serif;
+  
 }
 
 @media (max-width: 1023px) {
@@ -566,7 +559,7 @@
   letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--mid, #6b6b7e);
-  font-family: 'Outfit', sans-serif;
+  
   margin-bottom: 44px;
 }
 .ap-press__logos {
@@ -577,7 +570,7 @@
   gap: 36px 56px;
 }
 .ap-press__logo-item {
-  font-family: 'Cormorant Garamond', serif;
+
   font-size: 19px;
   font-weight: 700;
   color: rgba(30,27,43,0.2);
@@ -608,7 +601,7 @@
   align-items: start;
 }
 .ap-help__cta-title {
-  font-family: 'Cormorant Garamond', serif;
+  
   font-size: clamp(1.85rem, 3vw, 2.9rem);
   font-weight: 600;
   color: var(--ink, #1e1b2b);
@@ -629,7 +622,7 @@
   letter-spacing: 0.8px;
   text-transform: uppercase;
   cursor: pointer;
-  font-family: 'Outfit', sans-serif;
+  
   transition: background 0.2s, transform 0.2s;
   text-decoration: none;
 }
@@ -638,7 +631,7 @@
   font-size: 13px;
   font-weight: 700;
   color: var(--ink, #1e1b2b);
-  font-family: 'Outfit', sans-serif;
+  
   margin-bottom: 10px;
   letter-spacing: 0.3px;
 }
@@ -646,7 +639,7 @@
   font-size: 13px;
   line-height: 1.85;
   color: rgba(30,27,43,0.52);
-  font-family: 'Outfit', sans-serif;
+  
   margin-bottom: 14px;
 }
 .ap-help__topic-link {
@@ -655,7 +648,7 @@
   color: var(--purple, #7c3aed);
   text-decoration: none;
   letter-spacing: 0.5px;
-  font-family: 'Outfit', sans-serif;
+  
   transition: opacity 0.2s;
 }
 .ap-help__topic-link:hover { opacity: 0.68; }
@@ -682,7 +675,7 @@
   font-size: 22px;
   font-weight: 700;
   color: #fff;
-  font-family: 'Outfit', sans-serif;
+  
   letter-spacing: 0.3px;
   margin-bottom: 4px;
 }
@@ -692,14 +685,14 @@
   letter-spacing: 3px;
   text-transform: uppercase;
   color: rgba(255,255,255,0.3);
-  font-family: 'Outfit', sans-serif;
+  
   margin-bottom: 20px;
 }
 .ap-footer__brand-desc {
   font-size: 13px;
   line-height: 1.85;
   color: rgba(255,255,255,0.45);
-  font-family: 'Outfit', sans-serif;
+  
   margin-bottom: 28px;
   max-width: 280px;
 }
@@ -730,7 +723,7 @@
   letter-spacing: 2px;
   text-transform: uppercase;
   color: rgba(255,255,255,0.85);
-  font-family: 'Outfit', sans-serif;
+  
   margin-bottom: 20px;
 }
 .ap-footer__col-links {
@@ -744,7 +737,7 @@
   font-size: 13px;
   color: rgba(255,255,255,0.45);
   text-decoration: none;
-  font-family: 'Outfit', sans-serif;
+  
   transition: color 0.2s;
 }
 .ap-footer__col-link:hover { color: var(--purple, #7c3aed); }
@@ -762,7 +755,7 @@
   background: rgba(255,255,255,0.06);
   color: #fff;
   font-size: 12px;
-  font-family: 'Outfit', sans-serif;
+  
   outline: none;
   min-width: 0;
   transition: border-color 0.2s;
@@ -780,7 +773,7 @@
   letter-spacing: 0.5px;
   text-transform: uppercase;
   cursor: pointer;
-  font-family: 'Outfit', sans-serif;
+  
   transition: background 0.2s;
   white-space: nowrap;
 }
@@ -797,7 +790,7 @@
 .ap-footer__copy {
   font-size: 11px;
   color: rgba(255,255,255,0.25);
-  font-family: 'Outfit', sans-serif;
+  
 }
 .ap-footer__legal {
   display: flex;
@@ -807,7 +800,7 @@
   font-size: 11px;
   color: rgba(255,255,255,0.25);
   text-decoration: none;
-  font-family: 'Outfit', sans-serif;
+  
   transition: color 0.2s;
 }
 .ap-footer__legal-link:hover { color: rgba(255,255,255,0.6); }
@@ -848,7 +841,7 @@
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--mid, #6b6b7e);
-  font-family: 'Outfit', sans-serif;
+ 
 }
 
 /* ── Reduced motion ──────────────────────────────────── */
