@@ -547,7 +547,7 @@ const NewArrivalsSection = () => {
               <h2 className="na-heading">New <em>Arrivals</em></h2>
               <p className="na-subtext">Fresh picks added this week</p>
             </div>
-            <a href="/new-arrivals" className="na-viewall">
+            <a href="/collections" className="na-viewall">
               View All
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -609,7 +609,7 @@ const NewArrivalsSection = () => {
                         </svg>
                         {new Date(item.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
-                      <a href="#" className="na-cta">
+                      <a href="/collections" className="na-cta">
                         Shop Now
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M5 12h14M12 5l7 7-7 7"/>

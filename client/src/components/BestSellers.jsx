@@ -18,8 +18,6 @@ const GRADIENT_PAIRS = [
 function ProductCard({ product, index }) {
   const navigate = useNavigate();
   const [from, to] = GRADIENT_PAIRS[index % GRADIENT_PAIRS.length];
-  
-  // Get image from images array or image field
   const productImage = product.images?.[0] || product.image || null;
 
   const handleClick = () => {
@@ -28,18 +26,10 @@ function ProductCard({ product, index }) {
 
   return (
     <div
+      className="bs-card"
       onClick={handleClick}
       style={{
-        flexShrink: 0,
-        width: 200,
-        borderRadius: 16,
-        overflow: "hidden",
         background: `linear-gradient(160deg, ${from} 0%, ${to} 100%)`,
-        boxShadow: "0 2px 16px rgba(120,100,200,0.10)",
-        display: "flex",
-        flexDirection: "column",
-        cursor: "pointer",
-        transition: "transform 0.18s, box-shadow 0.18s",
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = "translateY(-4px)";
@@ -50,16 +40,7 @@ function ProductCard({ product, index }) {
         e.currentTarget.style.boxShadow = "0 2px 16px rgba(120,100,200,0.10)";
       }}
     >
-      {/* Image area */}
-      <div
-        style={{
-          height: 200,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-        }}
-      >
+      <div className="bs-card-img-area">
         {productImage ? (
           <img
             src={productImage}
@@ -71,7 +52,7 @@ function ProductCard({ product, index }) {
             }}
           />
         ) : null}
-        <div 
+        <div
           className="fallback-icon"
           style={{
             display: productImage ? "none" : "flex",
@@ -89,46 +70,14 @@ function ProductCard({ product, index }) {
         >
           🛍️
         </div>
-        
+
         {product.tag && (
-          <span style={{
-            position: "absolute", top: 10, right: 10,
-            background: "rgba(255,255,255,0.75)",
-            color: "#6b3fa0",
-            fontSize: 10, fontWeight: 700,
-            borderRadius: 20, padding: "2px 10px",
-            letterSpacing: "0.04em", textTransform: "uppercase"
-          }}>
-            {product.tag}
-          </span>
+          <span className="bs-card-tag">{product.tag}</span>
         )}
       </div>
 
-      {/* Brand banner */}
-      <div style={{
-        background: "rgba(80,50,140,0.82)",
-        color: "#fff",
-        fontWeight: 700,
-        fontSize: 13,
-        textAlign: "center",
-        padding: "8px 0",
-        letterSpacing: "0.06em",
-      }}>
-        {product.brand}
-      </div>
-
-      {/* Name */}
-      <div style={{
-        background: "#fff",
-        color: "#2d1a4a",
-        fontSize: 12,
-        textAlign: "center",
-        padding: "10px 12px 14px",
-        fontWeight: 500,
-        lineHeight: 1.4,
-      }}>
-        {product.name}
-      </div>
+      <div className="bs-card-brand">{product.brand}</div>
+      <div className="bs-card-name">{product.name}</div>
     </div>
   );
 }
@@ -273,14 +222,15 @@ function BestSellersSection() {
         }
 
         /* ── Track ── */
-        .bs-track {
-          display: flex;
-          gap: 16px;
-          overflow-x: hidden;
-          padding: 8px 0 16px;
-          scrollbar-width: none;
-          cursor: grab;
-        }
+    .bs-track {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 0 16px;
+  scrollbar-width: none;
+  cursor: grab;
+}
 
         .bs-track::-webkit-scrollbar {
           display: none;
@@ -404,6 +354,103 @@ function BestSellersSection() {
             padding: 2px 0 8px;
           }
         }
+          /* ── Card sizing ladder ── */
+:root {
+  --bs-card-w: 200px;
+  --bs-card-img-h: 200px;
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --bs-card-w: 168px;
+    --bs-card-img-h: 168px;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --bs-card-w: 140px;
+    --bs-card-img-h: 140px;
+  }
+}
+
+@media (max-width: 479px) {
+  :root {
+    --bs-card-w: 118px;
+    --bs-card-img-h: 118px;
+  }
+}
+
+@media (max-width: 360px) {
+  :root {
+    --bs-card-w: 104px;
+    --bs-card-img-h: 104px;
+  }
+}
+
+.bs-card {
+  flex-shrink: 0;
+  width: var(--bs-card-w);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(120,100,200,0.10);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+
+.bs-card-img-area {
+  height: var(--bs-card-img-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.bs-card-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.75);
+  color: #6b3fa0;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 2px 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.bs-card-brand {
+  background: rgba(80,50,140,0.82);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  text-align: center;
+  padding: 8px 0;
+  letter-spacing: 0.06em;
+}
+
+.bs-card-name {
+  background: #fff;
+  color: #2d1a4a;
+  font-size: 12px;
+  text-align: center;
+  padding: 10px 12px 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+@media (max-width: 479px) {
+  .bs-card-brand { font-size: 11px; padding: 6px 0; }
+  .bs-card-name { font-size: 11px; padding: 8px 10px 10px; }
+}
+
+@media (max-width: 360px) {
+  .bs-card-brand { font-size: 10px; padding: 5px 0; }
+  .bs-card-name { font-size: 10px; padding: 6px 8px 8px; }
+}
       `}</style>
 
       <section className="bs-section">
@@ -431,6 +478,11 @@ function BestSellersSection() {
               ref={trackRef}
               onMouseEnter={() => setAutoScroll(false)}
               onMouseLeave={() => setAutoScroll(true)}
+              onTouchStart={() => setAutoScroll(false)}
+              onTouchEnd={() => {
+                // small delay so momentum scroll finishes before auto-scroll resumes
+                setTimeout(() => setAutoScroll(true), 1500);
+              }}
               className="bs-track"
             >
               {doubled.map((product, i) => (
