@@ -16,7 +16,9 @@ import { showToast } from "../../redux/slices/uiSlice";
 import { addToWishlist, fetchWishlist, removeFromWishlist } from "../../redux/reducers/thunks/wishlistActions";
 
 /* ── helpers ── */
-const BASE_URL   = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+// const BASE_URL   = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+const BASE_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api`;
 const MEDIA_URL  = BASE_URL.replace("/api", "");
 const resolveImg = (p) => (!p ? "" : p.startsWith("http") ? p : `${MEDIA_URL}${p}`);
 

@@ -32,7 +32,9 @@ import BannerCarousel from "../../components/BannerCarousel";
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 function resolveImg(path) {
-  const base = import.meta.env.VITE_API_URL || "";
+  // const base = import.meta.env.VITE_API_URL || "";
+
+const base = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api`;
   if (!path) return "";
   if (path.startsWith("http")) return path;
   return `${base}${path}`;

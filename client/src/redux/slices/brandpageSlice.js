@@ -223,8 +223,8 @@ import axios from "axios";
 import { API_ENDPOINTS } from "../../api/endpoints";
 import api from "../../api/axios";
 
-const BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
+// const BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const BASE = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api`;
 // ─── THUNKS ──────────────────────────────────────────────────────────────────
 
 export const fetchBrandBanners = createAsyncThunk(
