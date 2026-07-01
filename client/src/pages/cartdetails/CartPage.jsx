@@ -247,7 +247,7 @@ function StickyFooter({ totals }) {
           <p className="sticky-footer__saving">You save ₹{totals.discount.toLocaleString()}</p>
         )}
       </div>
-      <button className="sticky-footer__btn" onClick={() => navigate("/checkout")}>
+      <button className="sticky-footer__btn" onClick={() => navigate("/checkoutpage")}>
         Checkout →
       </button>
     </div>
