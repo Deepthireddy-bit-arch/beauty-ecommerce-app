@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './Footer.css';
+import './footer.css';
 
 const SOCIAL_ICONS = [
   { icon: "📸", label: "Instagram" },
