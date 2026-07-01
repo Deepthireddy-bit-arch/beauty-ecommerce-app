@@ -1,4 +1,4 @@
-const CategoryBanner = require("../models/CategoryBanner");
+const CategoryBanner = require("../models/Categorybanner");
 
 // GET all banners
 const getCategoryBanners = async (req, res) => {
